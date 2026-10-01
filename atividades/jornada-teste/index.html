@@ -22,8 +22,8 @@ main{max-width:1100px;margin:auto;padding:22px}.hero,.card{background:var(--card
 .typebox{width:100%;padding:18px;border:3px solid #bdd5ee;border-radius:18px;font-size:26px;outline:none;text-align:center}.typebox:focus{border-color:#60a5fa}
 .progress{height:14px;background:#e5edf5;border-radius:99px;overflow:hidden;margin:14px 0}.bar{height:100%;background:#3b82f6;width:0}.hud{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0}.pill{padding:8px 12px;background:#f0f6fc;border-radius:99px;font-weight:800}
 .feedback{text-align:center;min-height:34px;font-weight:900;font-size:19px}.ok{color:var(--good)}.no{color:var(--bad)}
-.memory-cover{font-size:28px;text-align:center;color:#7b8da0}.arcade{position:relative;height:min(330px,46vh);overflow:hidden;background:linear-gradient(#bfe7ff 0 70%,#dff4cf 70%);border-radius:20px;border:2px solid #cfe1ef}
-.wordfall{position:absolute;padding:8px 12px;background:#fff;border-radius:12px;font-weight:900;box-shadow:0 4px 12px #0002}.arcade-input{margin-top:12px}
+.memory-cover{font-size:28px;text-align:center;color:#7b8da0}.arcade{position:relative;height:min(280px,40vh);overflow:hidden;background:linear-gradient(#bfe7ff 0 70%,#dff4cf 70%);border-radius:18px;border:2px solid #cfe1ef}
+.wordfall{position:absolute;padding:7px 11px;background:#fff;border-radius:11px;font-weight:900;box-shadow:0 4px 12px #0002}.arcade-input{margin-top:9px;padding:14px;font-size:22px}.arcade-card .hud{margin:2px 0 9px}.arcade-card .pill,.arcade-card .btn{padding:8px 11px}
 .result{text-align:center;padding:28px}.result h2{font-size:34px;margin:0 0 8px}.result .big{font-size:55px}
 .notice{padding:12px 14px;background:#fff8dc;border-radius:14px;color:#765b00;margin:10px 0}.adaptive{padding:10px 14px;background:#eaf7ff;border-radius:14px;color:#195b82;margin:10px 0}
 @media(max-width:800px){.worlds{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.extra{grid-template-columns:1fr}}@media(max-width:520px){.worlds{grid-template-columns:1fr}}
@@ -54,7 +54,7 @@ main{max-width:1100px;margin:auto;padding:22px}.hero,.card{background:var(--card
 </section>
 
 <section id="arcadeScreen" class="screen play">
- <div class="card" style="padding:20px"><div class="hud"><button class="btn soft" onclick="exitArcade()">← Voltar às missões</button><span class="pill">⚡ Tempestade de Palavras</span><span class="pill" id="arcScore">0 palavras</span><span class="pill" id="arcAcc">100%</span><span class="pill" id="arcTime">60s</span></div>
+ <div class="card arcade-card" style="padding:14px"><div class="hud"><button class="btn soft" onclick="exitArcade()">← Voltar às missões</button><span class="pill">⚡ Tempestade de Palavras</span><span class="pill" id="arcScore">0 palavras</span><span class="pill" id="arcAcc">100%</span><span class="pill" id="arcTime">60s</span></div>
  <div id="arcade" class="arcade"></div><input id="arcInput" class="typebox arcade-input" autocomplete="off" spellcheck="false" placeholder="Digite uma palavra da tela..."></div>
 </section>
 
