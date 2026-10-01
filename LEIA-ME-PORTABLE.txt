@@ -1,0 +1,15 @@
+LabPC Portable V3.3.1
+
+Base: Portable V3.1.2, já aprovado.
+Atualizações:
+- Missão Mouse V1.2 incluída.
+- Programação em Par V2.4 incluída.
+- Navegação ajustada para funcionar por caminhos relativos em file://.
+- Sem servidor, WebSocket, Painel do Professor ou telemetria de rede.
+- Todas as atividades ficam disponíveis diretamente na Central Portable.
+- Programação em Par mantém um botão local “Professor: reiniciar atividade” para troca de turma.
+
+Uso:
+1. Extraia todo o ZIP para uma pasta.
+2. Abra index.html.
+3. Não mova apenas um arquivo isoladamente; mantenha a estrutura de pastas.

@@ -1,0 +1,9 @@
+LabPC Web V1.0
+LabPC — Lab Pensamento Computacional
+Idealização e desenvolvimento: Prof. Elison Borges
+© 2026 Elison Borges
+
+Edição preparada para hospedagem estática no GitHub Pages.
+Derivada da LabPC Portable V3.4.5 aprovada. Rede e Portable permanecem intactas.
+O progresso das atividades que usam armazenamento local permanece no navegador/dispositivo.
+O arquivo index.html deve ficar na raiz da origem publicada.
