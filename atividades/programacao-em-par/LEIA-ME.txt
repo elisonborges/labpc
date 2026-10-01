@@ -1,0 +1,10 @@
+LabPC — Programação em Par V2.4
+Integração Etapa 1:
+- atividade na Central, Unidade 2 — EU PROGRAMO;
+- bloqueio/liberação pelo Painel;
+- presença e progresso 0/20 no Painel;
+- retorno à Central;
+- ping;
+- reset remoto específico pelo professor.
+O reset apaga somente labpc_pair_v2 no terminal selecionado.
+Telemetria pedagógica detalhada fica para etapa posterior.

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Missão Computador — Protótipo v1.0</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<style>
+#portable-home-btn{position:fixed;top:14px;left:14px;z-index:99999;border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;background:#fff;color:#174a7e;box-shadow:0 3px 12px #0002}
+</style>
+<button id="portable-home-btn" onclick="location.href='../../index.html'" title="Voltar à Central Portable">⌂ HOME</button>
+
+<main id="app">
+<section id="abertura" class="tela ativa">
+  <div class="marca">Lab<span>PC</span></div>
+  <div class="hero">
+    <div class="nexo nexo-grande" aria-label="Nexo provisório">🤖</div>
+    <div><div class="kicker">MISSÃO</div><h1>COMPUTADOR</h1>
+    <p class="sub">Explore. Descubra. Aprenda.</p>
+    <div class="fala">Olá! Eu sou o Nexo. Vamos investigar o computador?</div>
+    <button class="btn verde" data-go="central">▶ COMEÇAR</button></div>
+  </div>
+  <footer>Pequenos passos, grandes descobertas.</footer>
+</section>
+
+<section id="central" class="tela">
+<header class="topbar"><button class="icon" data-go="abertura">⌂</button><div><b>MISSÃO COMPUTADOR</b><small>Escolha uma missão</small></div><button class="icon som">🔊</button></header>
+<div class="intro"><div class="nexo">🤖</div><div><h2>Vamos investigar?</h2><p>A sequência é uma sugestão. As 8 missões estão disponíveis para teste.</p></div></div>
+<div id="cards" class="cards"></div>
+<div class="acoes">
+<button class="btn branco" id="reset">↻ Reiniciar progresso e registros</button>
+<button class="btn branco" id="exportarTelemetria">⬇ Exportar registros de teste (JSON)</button>
+</div>
+<div class="telemetria-aviso">🔒 Protótipo independente: os registros ficam somente neste navegador e não solicitam identificação do aluno.</div>
+</section>
+
+<section id="missao1" class="tela">
+<header class="topbar"><button class="icon" id="sairM1">←</button><div><b>MISSÃO 1 DE 8</b><small>Conheça o computador</small></div><button class="icon som">🔊</button></header>
+<div id="dots" class="dots"></div>
+<div class="nexobar nexobar-topo"><div class="nexo">🤖</div><div id="fala" class="fala pequena"></div><button id="btnDica" class="btn amarelo">💡 DICA</button></div>
+<section class="atividade">
+  <div id="conteudo"></div>
+</section>
+</section>
+
+<section id="placeholder" class="tela">
+<header class="topbar"><button class="icon" data-go="central">←</button><div><b id="phTitulo">MISSÃO</b><small>Em desenvolvimento</small></div><button class="icon som">🔊</button></header>
+<section class="atividade"><div class="centro"><div id="phEmoji" class="bigemoji">🧩</div><h2 id="phNome">Em desenvolvimento</h2><p>Esta missão será implementada nas próximas etapas do protótipo.</p><button class="btn azul" data-go="central">VOLTAR ÀS MISSÕES</button></div></section>
+</section>
+
+<div id="modal" class="modal"><div class="modalbox"><div class="nexo">🤖</div><h2>Quer voltar para as missões?</h2><p>Seu progresso ficará salvo.</p><div><button class="btn branco" id="ficar">CONTINUAR</button><button class="btn azul" id="voltar">VOLTAR</button></div></div></div>
+</main>
+<script src="js/app.js"></script>
+<script src="../../shared/labpc.js"></script>
+
+</body></html>

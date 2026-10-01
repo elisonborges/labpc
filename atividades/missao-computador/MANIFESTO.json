@@ -1,0 +1,35 @@
+{
+  "project": "LabPC — Missão Computador",
+  "version": "1.0",
+  "status": "estavel - prototipo independente",
+  "item": "4.8",
+  "offline": true,
+  "missions": 8,
+  "files": [
+    {
+      "path": "AUTORIA-E-LICENCA.txt",
+      "bytes": 553,
+      "sha256": "1acf20029af8d68c3852b2249f8eb882c251b76a643bf13b9dfaf07f748beddc"
+    },
+    {
+      "path": "LEIA-ME.txt",
+      "bytes": 3569,
+      "sha256": "e1743e36e886821204c9915923f1656e60abbb997b1c019739721677a97bc508"
+    },
+    {
+      "path": "css/estilo.css",
+      "bytes": 10866,
+      "sha256": "2fe7113d3fdc15229f3c1633207f426d1750f492fda911c4287aa6c2df340515"
+    },
+    {
+      "path": "index.html",
+      "bytes": 2993,
+      "sha256": "0899e6c46b610184e1b9f3b4ffb9a018240283c6d5f0cc5c59d05c51461d9695"
+    },
+    {
+      "path": "js/app.js",
+      "bytes": 56458,
+      "sha256": "951e1f50ab3d15911d9e60cd402536150802fc79d5af4b7e56f09ab1b218f6e9"
+    }
+  ]
+}

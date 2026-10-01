@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Missão Mouse — LabPC</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <strong>LabPC</strong>
+    <span>Missão Mouse</span>
+  </div>
+  <div style="display:flex;gap:8px"><button id="labpcCentralBtn" class="ghost" onclick="location.href='../../index.html'">⌂ Central LabPC</button><button id="homeBtn" class="ghost">⌂ Missões</button></div>
+</header>
+
+<main>
+<section id="home" class="screen active">
+  <div class="hero">
+    <div class="nexo">🤖</div>
+    <div><h1>Missão Mouse</h1><p>Treine movimentos, cliques, arrastes e descobertas com o Nexo.</p></div>
+  </div>
+  <div id="missionGrid" class="grid"></div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <p id="progressText" class="small"></p>
+</section>
+
+<section id="play" class="screen">
+  <div class="topline">
+    <div><b id="missionTitle"></b><div id="levelTitle" class="small"></div></div>
+    <div id="levelDots"></div>
+  </div>
+  <div id="instruction" class="instruction"></div>
+  <div id="stage" class="stage"></div>
+  <div id="feedback" class="feedback"></div>
+  <div class="actions">
+    <button id="helpBtn" class="ghost">💡 Ajuda</button>
+    <button id="retryBtn" class="ghost">↻ Recomeçar nível</button>
+  </div>
+</section>
+</main>
+
+<footer>LabPC — Lab Pensamento Computacional • Prof. Elison Borges • 2026</footer>
+<script src="app.js"></script>
+
+</body>
+</html>

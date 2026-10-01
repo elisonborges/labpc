@@ -1,0 +1,101 @@
+LABPC — MISSÃO COMPUTADOR
+VERSÃO ESTÁVEL 1.0 — PROTÓTIPO INDEPENDENTE
+Item 4.8 — Pacote Final
+
+Idealização e desenvolvimento: Prof. Elison Borges
+© 2026 Elison Borges
+
+============================================================
+1. FINALIDADE
+============================================================
+A Missão Computador é uma atividade do LabPC para o 2º Ano do Ensino
+Fundamental. Trabalha reconhecimento de componentes, funções e a
+diferenciação inicial entre hardware e software.
+
+Habilidade principal: EF02CO04.
+Habilidade complementar: EF02CO05.
+
+============================================================
+2. MISSÕES
+============================================================
+1. Conheça o computador
+2. Quem é quem?
+3. Para que serve?
+4. Monte o computador
+5. Posso tocar?
+6. E o programa?
+7. Hardware ou Software?
+8. Desafio do Explorador
+
+A sequência é recomendada, mas não obrigatória. O professor pode
+reorganizar, repetir, antecipar ou pular missões conforme o contexto.
+
+============================================================
+3. PRINCÍPIOS PEDAGÓGICOS
+============================================================
+- Sem ranking ou competição entre alunos.
+- Sem nota automática.
+- Sem cronômetro como critério de aprendizagem.
+- Erro como oportunidade de nova tentativa.
+- DICA/Nexo com ajuda progressiva.
+- Linguagem curta e adequada ao 2º Ano.
+- Telemetria como evidência, nunca como diagnóstico.
+- A decisão pedagógica permanece com o professor.
+
+============================================================
+4. FUNCIONAMENTO
+============================================================
+Abra index.html em Chrome ou Edge.
+
+O pacote é independente, offline e não exige servidor ou internet.
+O progresso e a telemetria são armazenados no navegador local.
+
+ATENÇÃO:
+limpar os dados do navegador pode apagar o progresso salvo.
+
+============================================================
+5. PERSISTÊNCIA E TELEMETRIA
+============================================================
+A versão 1.0 registra localmente:
+- sessões;
+- tentativas;
+- acertos e erros;
+- uso de DICA;
+- conclusão;
+- tempo descritivo;
+- tipo de entrada quando detectável.
+
+Não solicita nome, e-mail ou identificação do aluno.
+Os dados não são enviados pela internet.
+
+A Central possui uma exportação JSON destinada a testes técnicos.
+Ela ainda não é o relatório pedagógico do Painel do Professor.
+
+============================================================
+6. RESET
+============================================================
+O comando de reinício limpa somente progresso e registros locais da
+Missão Computador neste navegador.
+
+============================================================
+7. TESTE RÁPIDO RECOMENDADO
+============================================================
+- Abrir as oito missões.
+- Fazer ao menos uma resposta certa e uma errada.
+- Usar DICA.
+- Testar a Missão 4 por arrastar e por seleção/clique.
+- Concluir a Missão 8.
+- Recarregar a página e conferir o progresso.
+- Exportar o JSON.
+- Testar o reset.
+
+============================================================
+8. STATUS
+============================================================
+Interface-base: aprovada.
+Missões 1–8: aprovadas.
+Persistência local e telemetria: aprovadas.
+Pacote estável independente: versão 1.0.
+
+A integração ao LabPC principal e a preparação da edição Portable
+pertencem à etapa posterior e não fazem parte deste pacote independente.

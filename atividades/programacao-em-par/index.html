@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LabPC — Trilha Programação em Par V2.4 • LabPC</title>
+<style>
+:root{--nav:#082b5c;--blue:#2563eb;--purple:#7652d6;--green:#0f966d;--orange:#d97706;--bg:#edf4ff;--ink:#173052;--muted:#65758b;--line:#d9e5f4;--card:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,#082b5c,#1769bd);color:#fff;padding:18px 4%;display:flex;align-items:center;gap:15px}.logo{font-size:42px}h1{margin:2px 0;font-size:clamp(25px,4vw,39px)}header p{margin:0}.wrap{max-width:1120px;margin:auto;padding:16px}
+.topbar{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fff;padding:12px 15px;border-radius:15px;box-shadow:0 6px 18px #1232;position:sticky;top:8px;z-index:4}.roles{font-weight:900;font-size:19px;background:#eaf3ff;border:2px solid #9fc1ff;padding:9px 14px;border-radius:12px;box-shadow:0 3px 10px #1232}.teacher{background:#fff7e6;color:#754300;border:2px solid #f2cf88}
+button{border:0;border-radius:11px;padding:11px 15px;font-weight:900;cursor:pointer;background:var(--blue);color:white;font-size:15px}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#697386}.green{background:var(--green)}.orange{background:var(--orange)}
+.card{background:#fff;border-radius:18px;padding:18px;margin:15px 0;box-shadow:0 8px 23px #1232}.nexo{background:#f0f6ff;border-left:5px solid var(--blue);padding:13px;border-radius:12px;font-weight:700}.ped{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.verb{padding:7px 10px;border-radius:99px;background:#e8f0ff;font-weight:900}.question{font-size:20px;font-weight:900;margin:14px 0}
+.worlds{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}.world{padding:16px;border:2px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;min-height:140px}.world.lock{opacity:.55;cursor:not-allowed}.world h3{margin:5px 0}.levels{display:flex;gap:5px;margin-top:10px}.dot{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:#e4eaf3;font-size:12px}.dot.done{background:#dff7ec;color:#08724e}.dot.current{outline:3px solid #9fc1ff}
+.stage{border:2px solid var(--line);border-radius:15px;background:#f8fbff;padding:10px;margin:8px 0}.workspace{display:grid;grid-template-columns:minmax(230px,330px) 1fr;gap:14px;align-items:start}.grid{display:grid;gap:3px;width:min(320px,100%);aspect-ratio:1;margin:4px auto}.cell{background:#eaf1fb;border:1px solid #d4e1f1;border-radius:8px;display:grid;place-items:center;font-size:clamp(20px,5vw,34px);position:relative}.cell.path:after{content:"•";position:absolute;color:#7da1d7;font-size:25px}.cell.robot:after{content:"🤖";position:absolute}.cell.star:before{content:"⭐";position:absolute}.cell.wall:before{content:"🧱";position:absolute}
+.commands,.program{display:flex;gap:7px;flex-wrap:wrap;min-height:48px;padding:8px;border-radius:12px}.program-empty{width:100%;padding:13px;border:3px dashed #e09a20;border-radius:10px;background:#fff3cf;text-align:center;font-size:17px;font-weight:900;color:#754300;animation:pulse 1.5s infinite}@keyframes pulse{50%{transform:scale(1.015)}}.commands{background:#eef5ff}.program{background:#fff7e8;border:2px dashed #e7bd6b}.cmd{min-width:46px;background:#fff;color:var(--ink);border:2px solid #aac4ea;padding:9px}.cmd.active{outline:4px solid #ffd95a}.choice{display:block;width:100%;text-align:left;margin:7px 0;background:#fff;color:var(--ink);border:2px solid var(--line)}
+.feedback{display:none;padding:10px;border-radius:11px;font-weight:800;margin-top:8px}.result-panel{margin-top:10px;padding:10px;border:2px solid var(--line);border-radius:13px;background:#fff}.result-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.restart{background:#8b5cf6}.ok{display:block;background:#e2f8ee;color:#08714e}.hint{display:block;background:#fff4db;color:#835000}.nav{display:flex;justify-content:space-between;gap:10px;margin-top:14px}.hidden{display:none!important}.help{background:#f5f0ff;border-left:5px solid var(--purple);padding:12px;border-radius:11px;margin:10px 0}
+.conquest{position:fixed;inset:0;background:#082b5ddd;z-index:30;display:grid;place-items:center;padding:20px}.conquest-card{max-width:620px;background:white;border-radius:24px;padding:28px;text-align:center;box-shadow:0 20px 60px #0006}.conquest-card .trophy{font-size:72px}.conquest-card h2{font-size:32px;margin:8px 0}.progress{height:12px;background:#dfe8f4;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#13a77b,#286de7)}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}.worlds{grid-template-columns:1fr 1fr}.topbar{position:static;align-items:flex-start;flex-direction:column}}@media(max-width:520px){.worlds{grid-template-columns:1fr}}
+</style></head>
+<body><header><div class="logo">👥🤖</div><div><b>LABPC • TRILHA DO CONHECIMENTO</b><h1>Programação em Par</h1><p>Pensar, conversar, programar, testar e melhorar juntos.</p></div></header>
+<main class="wrap">
+<div class="topbar"><div class="roles" id="roles">🖱️ Piloto: A &nbsp;|&nbsp; 🧭 Navegador: B</div><div><button class="secondary" onclick="showMap()">🗺️ Mapa</button> <button class="secondary" onclick="location.href='../../index.html'">🏠 Central LabPC</button> <button class="teacher" onclick="teacherReset()">🔄 Professor: reiniciar atividade</button></div></div>
+<section id="map" class="card"><h2>🗺️ Trilha da dupla</h2><div class="nexo">🤖 Nexo: “Não importa quem termina primeiro. Cada mundo vai pedir um pouco mais de investigação.”</div><p id="summary"></p><div class="progress"><div class="bar" id="bar"></div></div><div class="worlds" id="worlds"></div><div id="finalCard"></div></section>
+<section id="play" class="card hidden"><div id="content"></div><div class="nav"><button class="secondary" onclick="showMap()">← Mapa</button><button id="nextBtn" class="green hidden" onclick="nextLevel()">Próximo nível →</button></div></section>
+</main>
+<script>
+const KEY='labpc_pair_v2';
+const worlds=[
+{icon:'👥',name:'Somos uma Dupla'},{icon:'🔮',name:'Pense Antes de Executar'},{icon:'🐞',name:'Caçadores de Bugs'},{icon:'🧠',name:'Muitas Soluções'},{icon:'🚀',name:'Central de Programadores'}];
+const levels=[
+['Quem faz o quê?','O navegador também programa','Pense antes de clicar','Troque e resolva'],
+['Para onde o Nexo vai?','Leia o programa inteiro','Cuidado com o caminho','Existe outro caminho?'],
+['Algo saiu diferente','Encontre o bug','Está faltando um passo','O comando está no lugar errado'],
+['Dois caminhos','Crie sua solução','Desvio obrigatório','O bug escondido'],
+['Receba a missão','Programa misterioso','Teste sua hipótese','Quase sem ajuda']
+];
+let S=JSON.parse(localStorage.getItem(KEY)||'null')||{done:[],pilot:'A',nav:'B',final:false};
+if(!S.w2Pattern){S.w2Pattern=[true,false,false].sort(()=>Math.random()-.5);localStorage.setItem(KEY,JSON.stringify(S))}
+let current={w:0,l:0}, program=[], prediction=null, attempts=0, help=0, startFacing=1;
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function unlockedWorld(w){return w===0||[0,1,2,3].every(l=>S.done.includes((w-1)+'-'+l))}
+function completed(w,l){return S.done.includes(w+'-'+l)}
+function renderMap(){
+ document.getElementById('roles').innerHTML=`🖱️ Piloto: ${S.pilot} &nbsp;|&nbsp; 🧭 Navegador: ${S.nav}`;
+ let n=S.done.length; document.getElementById('summary').innerHTML=`<b>${n} de 20 níveis concluídos</b>${S.final?' • 🏆 Desafio Final concluído':''}`;
+ document.getElementById('bar').style.width=(Math.min(20,n)/20*100)+'%';
+ document.getElementById('worlds').innerHTML=worlds.map((w,i)=>`<div class="world ${unlockedWorld(i)?'':'lock'}" onclick="${unlockedWorld(i)?`openWorld(${i})`:''}"><div style="font-size:32px">${w.icon}</div><h3>Mundo ${i+1}</h3><b>${w.name}</b><div class="levels">${[0,1,2,3].map(l=>`<span class="dot ${completed(i,l)?'done':''}">${completed(i,l)?'✓':(l+1)}</span>`).join('')}</div></div>`).join('');
+ let all=S.done.length>=20; document.getElementById('finalCard').innerHTML=all?`<div class="stage"><h2>🏆 Desafio Final desbloqueado</h2><button onclick="openFinal()">Abrir Desafio dos Dois Programadores</button></div>`:`<div class="help">🔒 O Desafio Final abre depois dos cinco mundos.</div>`;
+}
+function showMap(){document.getElementById('play').classList.add('hidden');document.getElementById('map').classList.remove('hidden');renderMap()}
+function openWorld(w){let l=[0,1,2,3].find(x=>!completed(w,x)); if(l===undefined)l=3; openLevel(w,l)}
+function openLevel(w,l){current={w,l};program=[];prediction=null;attempts=0;help=0;document.getElementById('map').classList.add('hidden');document.getElementById('play').classList.remove('hidden');document.getElementById('nextBtn').classList.add('hidden');renderLevel()}
+const configs=[
+{g:3,start:[2,0],goal:[2,2],walls:[],preset:['F','F'],type:'role'},
+{g:3,start:[2,0],goal:[2,2],walls:[],preset:['F'],type:'role'},
+{g:3,start:[2,0],goal:[0,2],walls:[],preset:['F','L','F'],type:'predict'},
+{g:3,start:[2,0],goal:[0,2],walls:[[1,1]],preset:[],type:'build'},
+{g:4,start:[3,0],goal:[3,3],walls:[],preset:['F','F','F'],type:'predict'},
+{g:4,start:[3,0],goal:[1,2],walls:[],preset:['F','L','F','R','F','L','F'],type:'predict'},
+{g:4,start:[3,0],goal:[1,3],walls:[[2,1]],preset:['F','F','F','L','F','F'],type:'predict'},
+{g:3,start:[2,0],goal:[1,1],walls:[],preset:[],type:'multi'},
+{g:4,start:[3,0],goal:[3,3],walls:[],preset:['F','F'],type:'observe'},
+{g:4,start:[3,0],goal:[3,3],walls:[],preset:['F','L','F','R','F','F'],type:'debug'},
+{g:4,start:[3,0],goal:[2,3],walls:[],preset:['F','F','F'],type:'missing'},
+{g:4,start:[3,0],goal:[2,2],walls:[],preset:['F','L','F'],type:'debug'},
+{g:3,start:[2,0],goal:[1,1],walls:[],preset:[],type:'multi'},
+{g:4,start:[3,0],goal:[1,3],walls:[[2,2]],preset:[],type:'build'},
+{g:5,start:[4,0],goal:[0,4],walls:[[3,1],[2,2],[1,3]],preset:[],type:'build'},
+{g:4,start:[3,0],goal:[1,3],walls:[[2,1]],preset:['F','F','L','F','R','F','L','F'],type:'debug'},
+{g:4,start:[3,0],goal:[0,3],walls:[[2,1]],preset:[],type:'build'},
+{g:5,start:[4,0],goal:[1,4],walls:[[3,1],[2,2]],preset:['F','F','L','F','R','F','L','F','R','F'],type:'debug'},
+{g:5,start:[4,0],goal:[0,4],walls:[[3,2],[2,2]],preset:['F','F','L','F','F','R','F','F','L','F','F'],type:'hypothesis'},
+{g:5,start:[4,0],goal:[0,4],walls:[[3,1],[2,3]],preset:[],type:'build'}];
+const dirs={F:[0,0,'⬆️ AVANÇAR'],L:[0,0,'↶ VIRAR À ESQUERDA'],R:[0,0,'↷ VIRAR À DIREITA']};
+function idx(){return current.w*4+current.l}
+function verbsFor(type){if(type==='predict')return ['👀 OBSERVE','💬 CONVERSE','🔮 PREVEJA','▶️ EXECUTE','🔍 COMPARE'];if(['debug','missing','hypothesis','observe'].includes(type))return ['▶️ EXECUTE','👀 OBSERVE','🐞 INVESTIGUE','🔧 CORRIJA','🔁 TESTE NOVAMENTE'];return ['👀 OBSERVE','💬 CONVERSE','🧠 PLANEJE','🧩 PROGRAME','▶️ EXECUTE']}
+function intro(i,c){
+ let texts=[
+'Descubram os dois papéis. O <b>PILOTO</b> controla o computador; o <b>NAVEGADOR</b> observa, pergunta e sugere.',
+'O navegador também programa: ele ajuda a dupla a pensar antes da ação.',
+'Antes de clicar, conversem sobre o que o programa fará.',
+'Chegou a hora de trocar os papéis e resolver juntos.',
+'Façam uma previsão antes de executar. Prever não é adivinhar: é usar as instruções para imaginar o resultado.',
+'Leiam o programa inteiro. Depois expliquem um ao outro onde o Nexo deverá terminar. <b>Não suponham que o programa está correto:</b> primeiro façam uma previsão, depois executem, comparem e, se necessário, corrijam.',
+'Existe um obstáculo. Observem o mapa e o programa antes de testar. O Nexo executará exatamente as instruções recebidas, mesmo que o caminho encontre um problema.',
+'Duas sequências diferentes podem resolver o mesmo problema. Lembrem: <b>VIRAR</b> só muda a direção; depois é preciso <b>AVANÇAR</b>.',
+'Compare o <b>OBJETIVO</b> com o <b>RESULTADO</b>. Primeiro perceba a diferença; depois pense na causa.',
+'Execute primeiro. Depois investigue qual comando pode estar mudando o resultado.',
+'As instruções podem estar corretas e ainda assim o programa estar incompleto. Descubram o que falta.',
+'Às vezes o comando existe, mas está no lugar inadequado. Testem, observem e reorganizem.',
+'Procurem duas maneiras válidas de chegar ao mesmo destino.',
+'Agora vocês criam a sequência. O navegador propõe e acompanha; o piloto monta e executa.',
+'O mapa ficou maior. Planejem antes de montar o programa.',
+'Entre programas que parecem parecidos, investiguem qual realmente precisa de depuração.',
+'Vocês recebem apenas objetivo, mapa e comandos. Criem uma solução juntos.',
+'Este programa veio com um problema misterioso. Descubram se é comando, ordem, falta ou caminho bloqueado.',
+'Façam uma hipótese e mudem <b>UMA COISA POR VEZ</b>. Assim vocês conseguem observar o efeito da mudança.',
+'Nexo vai falar menos. Usem o ciclo que aprenderam: <b>OBSERVE → PLANEJE → EXECUTE → REVISE</b>.'
+ ];return texts[i]}
+function renderLevel(){
+ let i=idx(),c=configs[i],title=levels[current.w][current.l];
+ document.getElementById('content').innerHTML=`<div><b>MUNDO ${current.w+1} • NÍVEL ${current.l+1}</b><h2>${worlds[current.w].icon} ${title}</h2></div>
+ <div class="nexo">🤖 ${intro(i,c)}</div><div class="ped">${verbsFor(c.type).map(x=>`<span class="verb">${x}</span>`).join('')}</div>
+ <div class="question">${question(i,c)}</div><div id="interaction"></div>`;
+ if(c.type==='role') renderRole(i,c); else renderGame(c);
+}
+function question(i,c){
+ if(i===0)return 'Quem deve controlar o mouse e o teclado nesta primeira etapa?';
+ if(i===1)return 'Se o piloto estiver prestes a testar e você perceber algo, como o navegador pode ajudar?';
+ if(i===7||i===12)return 'Vocês conseguem encontrar mais de uma solução válida?';
+ if(['debug','missing','observe','hypothesis'].includes(c.type))return 'O resultado será o esperado? Se não for, o que vocês mudariam depois de observar?';
+ return c.type==='predict'?'Onde vocês acham que o Nexo terminará?':'Qual sequência vocês criariam para chegar à estrela?';
+}
+function renderRole(i,c){
+ let inter=document.getElementById('interaction');
+ if(i===0)inter.innerHTML=`<button class="choice" onclick="roleAns(false)">🧭 Navegador</button><button class="choice" onclick="roleAns(true)">🖱️ Piloto</button><div id="fb" class="feedback"></div><div id="help"></div>`;
+ else inter.innerHTML=`<button class="choice" onclick="roleAns(true)">💬 Dizer o que observou e fazer uma sugestão ao piloto.</button><button class="choice" onclick="roleAns(false)">🖱️ Pegar o mouse do piloto e fazer sozinho.</button><button class="choice" onclick="roleAns(false)">🤐 Não participar.</button><div id="fb" class="feedback"></div><div id="help"></div>`;
+}
+function roleAns(ok){let f=document.getElementById('fb');if(ok){f.textContent='✅ Isso! Os dois programam, mas cada papel colabora de uma forma.';f.className='feedback ok';complete()}else{f.textContent='🔎 Conversem novamente sobre o papel de piloto e navegador.';f.className='feedback hint'}}
+function renderGame(c){
+ startFacing=Math.floor(Math.random()*4);
+ program=[...c.preset];
+ // Mundo 2, níveis 1–3: uma situação correta e duas problemáticas,
+ // distribuídas aleatoriamente por sessão. O programa é recalculado
+ // conforme a direção inicial sorteada.
+ if(current.w===1 && current.l<=2){
+   let correct=solveRoute(c,startFacing);
+   program=S.w2Pattern[current.l] ? correct : makeWrongProgram(c,startFacing,correct);
+ }
+ let inter=document.getElementById('interaction');
+ inter.innerHTML=`<div class="workspace"><div class="stage"><div id="grid"></div><div id="facingNote" style="text-align:center;font-weight:900;font-size:16px"></div></div><div><b>📦 COMANDOS</b><div class="commands">${Object.entries(dirs).map(([k,v])=>`<button class="cmd" onclick="addCmd('${k}')">${v[2]}</button>`).join('')}</div><b>🧩 MEU PROGRAMA</b><div class="program" id="program"></div><div class="help"><b>LEMBRETE:</b> <b>VIRAR</b> muda apenas a direção do Nexo. Para sair do lugar, use <b>AVANÇAR</b>.</div><div style="margin-top:8px"><button onclick="execute()">▶ EXECUTAR</button> <button class="secondary" onclick="undo()">↩ Remover último</button> <button class="orange" onclick="hint()">💡 Ajuda</button></div><div class="result-panel"><b>📣 RESULTADO DA TENTATIVA</b><div id="fb" class="feedback"></div><div id="help"></div><div class="result-actions"><button class="restart hidden" id="restartBtn" onclick="restartNexo()">↩️ Nexo ao início</button><button class="secondary" onclick="showMap()">← Voltar ao mapa</button><button id="sideNextBtn" class="green hidden" onclick="nextLevel()">Próxima missão →</button></div></div></div></div>`;
+ drawGrid(c,c.start,[]);
+ document.getElementById('facingNote').innerHTML=`🤖 começa olhando para <b>${facingName(startFacing)}</b> ${facingArrow(startFacing)}`;
+ drawProgram();
+}
+
+function facingArrow(f){return ['⬆️','➡️','⬇️','⬅️'][f]}
+function facingName(f){return ['CIMA','DIREITA','BAIXO','ESQUERDA'][f]}
+function simulateProgram(c,facing,prog){
+ let pos=[...c.start], step=[[-1,0],[0,1],[1,0],[0,-1]], blocked=false;
+ for(const k of prog){
+   if(k==='L'){facing=(facing+3)%4;continue}
+   if(k==='R'){facing=(facing+1)%4;continue}
+   let d=step[facing],np=[pos[0]+d[0],pos[1]+d[1]];
+   if(np[0]<0||np[1]<0||np[0]>=c.g||np[1]>=c.g||c.walls.some(w=>w[0]===np[0]&&w[1]===np[1])){blocked=true;break}
+   pos=np;
+ }
+ return {pos,blocked,facing,win:pos[0]===c.goal[0]&&pos[1]===c.goal[1]};
+}
+function solveRoute(c,startF){
+ const q=[{r:c.start[0],col:c.start[1],f:startF,p:[]}], seen=new Set([`${c.start[0]},${c.start[1]},${startF}`]);
+ while(q.length){
+  const s=q.shift(); if(s.r===c.goal[0]&&s.col===c.goal[1])return s.p;
+  for(const k of ['F','L','R']){
+   let r=s.r,col=s.col,f=s.f;
+   if(k==='L')f=(f+3)%4; else if(k==='R')f=(f+1)%4; else{
+    const st=[[-1,0],[0,1],[1,0],[0,-1]][f];r+=st[0];col+=st[1];
+    if(r<0||col<0||r>=c.g||col>=c.g||c.walls.some(w=>w[0]===r&&w[1]===col))continue;
+   }
+   const key=`${r},${col},${f}`; if(!seen.has(key)){seen.add(key);q.push({r,col,f,p:[...s.p,k]})}
+  }
+ }
+ return [];
+}
+function makeWrongProgram(c,startF,correct){
+ const candidates=[];
+ if(correct.length>1)candidates.push(correct.slice(0,-1));
+ candidates.push([...correct,'F']);
+ for(let i=0;i<correct.length;i++){
+   for(const k of ['F','L','R']){
+     if(k!==correct[i]){let a=[...correct];a[i]=k;candidates.push(a)}
+   }
+ }
+ for(const a of candidates.sort(()=>Math.random()-.5)){
+   if(!simulateProgram(c,startF,a).win)return a;
+ }
+ return ['F'];
+}
+function drawGrid(c,pos,path){
+ let cells='';for(let r=0;r<c.g;r++)for(let col=0;col<c.g;col++){let cls='cell';if(path.some(p=>p[0]===r&&p[1]===col))cls+=' path';if(c.walls.some(p=>p[0]===r&&p[1]===col))cls+=' wall';if(c.goal[0]===r&&c.goal[1]===col)cls+=' star';if(pos[0]===r&&pos[1]===col)cls+=' robot';cells+=`<div class="${cls}"></div>`}document.getElementById('grid').className='grid';document.getElementById('grid').style.gridTemplateColumns=`repeat(${c.g},1fr)`;document.getElementById('grid').innerHTML=cells}
+function drawProgram(active=-1){document.getElementById('program').innerHTML=program.length?program.map((k,j)=>`<button class="cmd ${j===active?'active':''}" onclick="removeAt(${j})">${dirs[k][2]}</button>`).join(''):'<div class="program-empty">👆 CLIQUE NOS COMANDOS ACIMA PARA MONTAR SEU PROGRAMA</div>'}
+function addCmd(k){if(program.length<12){program.push(k);drawProgram()}}
+function undo(){program.pop();drawProgram()}function removeAt(j){program.splice(j,1);drawProgram()}
+function restartNexo(){let c=configs[idx()];drawGrid(c,c.start,[]);drawProgram();let note=document.getElementById('facingNote');if(note)note.innerHTML=`🤖 começa olhando para <b>${facingName(startFacing)}</b> ${facingArrow(startFacing)}`;let f=document.getElementById('fb');if(f){f.textContent='↩️ Nexo voltou ao início. Revisem o programa e tentem novamente.';f.className='feedback hint'}let b=document.getElementById('restartBtn');if(b)b.classList.add('hidden')}
+function validDiag(c,pos,np,k){if(!['UL','UR','DL','DR'].includes(k))return true;let dr=np[0]-pos[0],dc=np[1]-pos[1];return !c.walls.some(w=>(w[0]===pos[0]+dr&&w[1]===pos[1])||(w[0]===pos[0]&&w[1]===pos[1]+dc))}
+async function execute(){
+ let c=configs[idx()],pos=[...c.start],path=[[...pos]],facing=startFacing; // direção inicial sorteada
+ attempts++;
+ const step=[[-1,0],[0,1],[1,0],[0,-1]];
+ for(let j=0;j<program.length;j++){
+  drawProgram(j);await new Promise(r=>setTimeout(r,260));let k=program[j];
+  if(k==='L'){facing=(facing+3)%4;continue}
+  if(k==='R'){facing=(facing+1)%4;continue}
+  if(k==='F'){
+   let d=step[facing],np=[pos[0]+d[0],pos[1]+d[1]];
+   let blocked=np[0]<0||np[1]<0||np[0]>=c.g||np[1]>=c.g||c.walls.some(w=>w[0]===np[0]&&w[1]===np[1]);
+   if(blocked)break;pos=np;path.push([...pos]);drawGrid(c,pos,path)
+  }
+ }
+ drawProgram();let win=pos[0]===c.goal[0]&&pos[1]===c.goal[1],f=document.getElementById('fb');
+ if(win){f.textContent=attempts===1?'✅ O Nexo chegou! Expliquem um ao outro por que a sequência funcionou.':'✅ Depois de observar e revisar, o Nexo chegou ao objetivo!';f.className='feedback ok';complete()}
+ else{f.textContent='🔎 O Nexo não chegou ao objetivo. Lembrem: VIRAR muda a direção, mas só AVANÇAR faz o Nexo sair do lugar.';f.className='feedback hint';let b=document.getElementById('restartBtn');if(b)b.classList.remove('hidden')}
+}
+function hint(){help++;let msgs=['🤖 Onde estou? Onde preciso chegar? Observe primeiro essas duas posições.','🤖 Procurem o primeiro movimento que aproxima o Nexo do objetivo sem encontrar um obstáculo.','🤖 Se o caminho reto estiver bloqueado, experimentem planejar um desvio.','🤖 Foquem primeiro no próximo movimento possível. Depois pensem no restante.'];document.getElementById('help').innerHTML=`<div class="help">${msgs[Math.min(help-1,3)]}</div>`}
+function complete(){let k=current.w+'-'+current.l;if(!S.done.includes(k)){S.done.push(k);save()}if(current.l===3) swapRoles();let n=document.getElementById('nextBtn');if(n)n.classList.remove('hidden');let sn=document.getElementById('sideNextBtn');if(sn)sn.classList.remove('hidden');let rb=document.getElementById('restartBtn');if(rb)rb.classList.add('hidden')}
+function swapRoles(){[S.pilot,S.nav]=[S.nav,S.pilot];save();let f=document.getElementById('fb');f.innerHTML+=(f.innerHTML?' ':'')+'🔄 Ao terminar este mundo, troquem os papéis. O próximo mundo começa com os novos papéis.';document.getElementById('roles').innerHTML=`🖱️ Piloto: ${S.pilot} &nbsp;|&nbsp; 🧭 Navegador: ${S.nav}`}
+function nextLevel(){if(current.l<3)openLevel(current.w,current.l+1);else showMap()}
+function openFinal(){
+ document.getElementById('map').classList.add('hidden');document.getElementById('play').classList.remove('hidden');document.getElementById('nextBtn').classList.add('hidden');
+ current={w:4,l:3};let c={g:6,start:[5,0],goal:[0,5],walls:[[4,1],[3,3],[2,2],[1,4]],preset:[],type:'build'};configs[19]=c;
+ document.getElementById('content').innerHTML=`<b>🏆 DESAFIO FINAL</b><h2>Dupla de Programadores</h2><div class="nexo">🤖 “Agora usem tudo: <b>OBSERVEM, CONVERSEM, PLANEJEM, PROGRAMEM, EXECUTEM e REVISEM</b>. Existem diferentes soluções possíveis.”</div><div class="question">Levem o Nexo até a estrela. Se a primeira ideia não funcionar, investiguem juntos e tentem novamente.</div><div id="interaction"></div>`;
+ program=[];attempts=0;help=0;renderGame(c);
+ let oldComplete=window.complete;
+ window.complete=function(){
+   S.final=true;save();
+   let f=document.getElementById('fb');f.textContent='🏆 CONQUISTA DESBLOQUEADA — Dupla de Programadores!';f.className='feedback ok';
+   if(!document.getElementById('conquest')){
+    let d=document.createElement('div');d.id='conquest';d.className='conquest';
+    d.innerHTML=`<div class="conquest-card"><div class="trophy">🏆</div><h2>Trilha concluída!</h2><p><b>CONQUISTA: DUPLA DE PROGRAMADORES</b></p><p>Vocês observaram, conversaram, programaram, testaram e melhoraram soluções juntos.</p><button onclick="document.getElementById('conquest').remove();showMap()">Ver minha trilha concluída</button></div>`;
+    document.body.appendChild(d);
+   }
+   window.complete=oldComplete;
+ }
+}
+function teacherReset(){if(confirm('PROFESSOR: reiniciar toda a atividade para a próxima turma?\\n\\nIsso apagará somente o progresso desta Trilha neste computador.')){localStorage.removeItem(KEY);S={done:[],pilot:'A',nav:'B',final:false,w2Pattern:[true,false,false].sort(()=>Math.random()-.5)};save();showMap();alert('Atividade reiniciada. Pronta para a próxima turma.')}}renderMap();
+</script></body></html>

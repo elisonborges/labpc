@@ -1,0 +1,11 @@
+LABPC — LAB PENSAMENTO COMPUTACIONAL
+MISSÃO COMPUTADOR — v1.0 ESTÁVEL
+
+Idealização e desenvolvimento: Prof. Elison Borges
+© 2026 Elison Borges
+
+Este arquivo registra a autoria do projeto no pacote técnico.
+O uso, distribuição e implantação institucional devem preservar
+a identificação de autoria acima.
+
+a Missão Computador e o personagem Nexo não representam produto,

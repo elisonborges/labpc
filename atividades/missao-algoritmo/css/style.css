@@ -1,0 +1,74 @@
+
+:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#172033;background:#f2f6fb}*{box-sizing:border-box}body{margin:0}
+header{position:sticky;top:0;z-index:9;background:white;padding:14px 22px;display:flex;justify-content:space-between;box-shadow:0 2px 12px #0001}
+main{max-width:1120px;margin:auto;padding:20px}.panel,.hero,.missionCard{background:white;border-radius:20px;padding:20px;box-shadow:0 7px 22px #0001;margin-bottom:16px}
+.hero{text-align:center}.hero .bot{font-size:64px}.missions{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}.missionCard{cursor:pointer;border:0;text-align:left;font-size:16px}.missionCard:hover{transform:translateY(-2px)}
+.missionCard .ico{font-size:34px}.dots{display:flex;gap:6px;margin-top:10px}.dot{width:11px;height:11px;border-radius:50%;background:#d8dfeb}.dot.done{background:#24b47e}
+.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.toolbar .next{margin-left:auto;background:#243b72;color:white}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:750;cursor:pointer;background:#e9eef7;color:#172033}button.primary{background:#243b72;color:white}button.good{background:#dff7e9}button.warn{background:#fff0c2}
+.identity{border-radius:18px;padding:18px;margin-bottom:14px;background:#eef4ff}.identity h1{margin:0 0 5px}.task{font-size:19px;font-weight:800;background:#f5f8fd;border-left:6px solid #5275cf;padding:14px;border-radius:12px;margin:12px 0}.concept{background:#fff6d8;border-radius:14px;padding:15px;margin:14px 0;font-size:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.card{border:2px solid #d9e1ed;background:#fff;border-radius:15px;padding:15px;min-height:70px;cursor:pointer}.card.sel{border-color:#5275cf;background:#eef4ff}.sequence{display:flex;flex-wrap:wrap;gap:8px;min-height:70px;padding:10px;border:2px dashed #bcc7d8;border-radius:14px}.seq{background:#eef3fa;border-radius:12px;padding:11px;cursor:pointer}.seq:before{content:attr(data-n);font-weight:900;margin-right:7px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.result{background:#f6f8fc;border-radius:14px;padding:14px;min-height:52px}
+.work{display:grid;grid-template-columns:minmax(320px,450px) minmax(210px,1fr);gap:18px}.grid{display:grid;gap:4px;background:#cad3e2;padding:4px;border-radius:15px;aspect-ratio:1}.cell{background:white;border-radius:7px;display:grid;place-items:center;font-size:28px;position:relative;cursor:pointer}.wall{background:#687486}.plan{outline:4px solid #8db6ff;outline-offset:-5px}.pred{box-shadow:inset 0 0 0 5px #ffd264}.path:after{content:"";position:absolute;width:18%;height:18%;border-radius:50%;background:#8fa0ba;right:7%;bottom:7%}
+.side{background:#f7f9fc;border-radius:15px;padding:14px}.commands{display:grid;gap:8px}.program{min-height:60px;border:2px dashed #bdc7d8;border-radius:14px;padding:9px;display:flex;gap:7px;flex-wrap:wrap}.cmd{padding:8px 10px;border-radius:10px;background:#edf2f9}.cmd.active{outline:3px solid #ffbf3c}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}.compare>div{background:#f7f9fc;padding:14px;border-radius:14px}.scene{font-size:34px;text-align:center;padding:20px;background:#f7f9fc;border-radius:16px;letter-spacing:10px}
+.celebrate{text-align:center;background:white;border:5px solid #ffd86a;border-radius:26px;padding:32px;box-shadow:0 14px 40px #0002}.celebrate .icons{font-size:45px}.celebrate h1{font-size:44px;margin:6px}.big{font-size:18px;padding:15px 22px}.teacher{border-top:1px solid #ddd;margin-top:24px;padding-top:14px}.small{font-size:13px;color:#657086}.pill{display:inline-block;background:#edf2fa;padding:5px 9px;border-radius:999px;margin:3px}
+@media(max-width:760px){main{padding:11px}.work,.compare{grid-template-columns:1fr}.toolbar .next{width:100%;margin-left:0}.celebrate{padding:20px 12px}.celebrate h1{font-size:34px}}
+
+/* v1.4 — interface mais compacta para reduzir rolagem */
+main{padding-top:12px;padding-bottom:12px}.panel,.hero,.missionCard{padding:14px;margin-bottom:10px;border-radius:16px}
+.identity{padding:12px 15px;margin-bottom:8px}.identity h1{font-size:23px}.identity p{margin:5px 0}
+.task{font-size:17px;padding:10px 12px;margin:8px 0}.concept{padding:10px 12px;margin:8px 0;font-size:16px}
+.actions{margin:9px 0}.work{gap:12px;grid-template-columns:minmax(280px,390px) minmax(190px,1fr)}
+.grid{max-width:390px}.side{padding:10px}.side h3{margin:3px 0 8px}.commands{gap:6px}
+.program{min-height:48px;padding:7px}.result{padding:10px;min-height:42px}.scene{font-size:28px;padding:12px}
+.toolbar{margin-bottom:7px}.celebrate{padding:24px}.hero .bot{font-size:50px}
+@media(max-height:800px) and (min-width:761px){.grid{max-width:340px}.work{grid-template-columns:340px 1fr}.task{font-size:16px}.concept{font-size:15px}}
+
+/* v1.5 — densidade visual para uso em 100% de zoom */
+body{font-size:13px}
+header{padding:8px 16px}
+main{max-width:1180px;padding:8px 12px}
+.panel,.hero,.missionCard{padding:10px 12px;margin-bottom:7px;border-radius:13px}
+.identity{padding:8px 12px;margin-bottom:6px;border-radius:13px}
+.identity h1{font-size:20px;margin:0 0 2px}.identity p{margin:2px 0}
+.task{font-size:15px;padding:7px 10px;margin:5px 0;border-left-width:4px}
+.concept{padding:7px 10px;margin:5px 0;font-size:14px}
+.toolbar{gap:6px;margin-bottom:5px}button{padding:7px 10px;border-radius:9px;font-size:12px}
+.work{grid-template-columns:minmax(245px,320px) minmax(260px,1fr);gap:9px;align-items:start}
+.grid{max-width:320px;gap:2px;padding:2px;border-radius:10px}
+.cell{border-radius:4px;font-size:20px}
+.side{padding:7px;border-radius:10px}.side h3{margin:0 0 5px}.commands{gap:4px}
+.program{min-height:38px;padding:5px;gap:4px;border-radius:10px}.cmd{padding:5px 7px}
+.actions{gap:5px;margin:6px 0}.result{padding:7px 9px;min-height:34px;border-radius:9px}
+.scene{font-size:24px;padding:8px}.cards{gap:6px}.card{padding:9px;min-height:52px}
+.sequence{min-height:50px;padding:6px}.seq{padding:7px}
+footer{text-align:center;padding:8px 12px 10px;line-height:1.35;font-size:11px;color:#5f6979}
+footer span{display:block;margin-top:2px}
+@media(min-width:900px){.panel h3{margin:5px 0}.work+#program{margin-top:4px}}
+@media(max-width:760px){body{font-size:14px}.work{grid-template-columns:1fr}.grid{max-width:360px;margin:auto}button{font-size:13px}}
+
+/* v1.6 — fluxo visual: instrução antes da ação */
+.identity{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:6px 10px}
+.identity b{white-space:nowrap}.identity h1{font-size:18px;margin:0}.identity p{flex-basis:100%;margin:1px 0}
+.task{margin:4px 0 5px}
+.prehint{background:#f5f8fd;border-radius:9px;padding:7px 10px;margin:0 0 6px;font-weight:650}
+.work{grid-template-columns:minmax(235px,300px) minmax(430px,1fr);gap:8px}
+.grid{max-width:300px}
+.side{display:grid;grid-template-columns:190px minmax(220px,1fr);gap:8px;align-content:start}
+.side h3,.side hr,.side>b{display:none}
+.commandbox,.programbox{background:#f7f9fc;border-radius:9px;padding:7px}
+.commandbox h3,.programbox h3{display:block;margin:0 0 5px;font-size:13px}
+.commandbox .commands{display:grid;grid-template-columns:1fr;gap:3px}
+.commandbox button{padding:5px 7px}
+.programbox .program{background:white;margin-bottom:5px}
+.programbox .actions{margin:4px 0}
+.programbox .result{margin-top:4px}
+.toolsrow{grid-column:1/-1;display:flex;gap:4px;flex-wrap:wrap}
+.toolsrow button{padding:5px 8px}
+@media(max-width:900px){.work{grid-template-columns:minmax(230px,280px) 1fr}.side{grid-template-columns:160px 1fr}}
+@media(max-width:760px){.identity{display:block}.work{grid-template-columns:1fr}.side{grid-template-columns:1fr}.toolsrow{grid-column:auto}.grid{max-width:320px}}
+
+/* v1.7 — progressão e desbloqueio */
+.locked{opacity:.56;filter:saturate(.55);cursor:not-allowed!important;background:#edf0f5!important}
+.locked:hover{transform:none!important}.locked .ico{filter:grayscale(1)}

@@ -1,0 +1,604 @@
+<!--
+ LabPC — Lab Pensamento Computacional
+ Idealização e desenvolvimento: Prof. Elison Borges
+ © 2026 Elison Borges. Todos os direitos reservados.
+ Consulte AUTORIA-E-LICENCA.txt.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jornada da Cobra Educativa</title>
+<style>
+  :root {
+    --bg: #f4f7fb; --card: #ffffff; --text: #24324a; --muted: #667085;
+    --primary: #356ae6; --primary-hover: #244fc1; --success: #198754;
+    --warning: #f59e0b; --danger: #dc3545; --border: #dce3ef;
+    --snake-head: #356ae6; --snake-body: #6d5dfc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  
+  header { background: linear-gradient(135deg, #356ae6, #6d5dfc); color: white; width: 100%; text-align: center; padding: 20px; border-radius: 16px; margin-bottom: 20px; max-width: 900px; box-shadow: 0 4px 15px rgba(53, 106, 230, 0.2); }
+  header h1 { font-size: 2rem; margin-bottom: 8px; }
+  header p { font-size: 1.1rem; opacity: 0.9; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 8px 25px rgba(25,45,80,0.07); width: 100%; max-width: 900px; margin-bottom: 20px; }
+  .hidden { display: none !important; }
+  .center { text-align: center; }
+
+  h2 { margin-bottom: 16px; color: var(--text); }
+  p { line-height: 1.6; margin-bottom: 16px; color: var(--muted); }
+
+  /* Botões */
+  button { border: 0; border-radius: 12px; padding: 14px 20px; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--primary); color: white; margin: 5px; transition: 0.2s; }
+  button:hover { background: var(--primary-hover); transform: translateY(-2px); }
+  button.secondary { background: #eef2f7; color: var(--text); }
+  button.secondary:hover { background: #e2e8f0; }
+  button.success { background: var(--success); }
+  button.danger { background: var(--danger); }
+
+  /* Grid de Modos e Níveis */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .mode-box, .level-box { border: 2px solid var(--border); border-radius: 16px; padding: 20px; cursor: pointer; transition: 0.2s; text-align: center; }
+  .mode-box:hover, .level-box:hover { border-color: var(--primary); transform: translateY(-3px); }
+  .level-box.locked { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+  
+  .emoji-large { font-size: 3rem; margin-bottom: 10px; }
+
+  /* HUD do Jogo */
+  .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; background: #eef3ff; padding: 12px; border-radius: 12px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { background: white; border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font-weight: bold; font-size: 14px; color: var(--primary); }
+  
+  .target-word { font-size: 2.5rem; font-weight: 900; letter-spacing: 6px; color: var(--text); text-align: center; margin: 10px 0; }
+  .target-emoji { font-size: 4rem; text-align: center; margin: 10px 0; }
+
+  /* Progresso */
+  .progress { height: 12px; background: #e9eef6; border-radius: 20px; overflow: hidden; margin: 15px 0; }
+  .progress > div { height: 100%; background: linear-gradient(90deg, #356ae6, #6d5dfc); transition: 0.3s; width: 0%; }
+
+  /* Controle de Velocidade */
+  .speed-control { background: #fafcff; border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; text-align: center; margin-bottom: 15px; }
+  .speed-control input { width: 100%; max-width: 400px; margin: 10px 0; accent-color: var(--primary); }
+  
+  /* Canvas */
+  .canvas-container { display: flex; justify-content: center; position: relative; margin: 20px 0; }
+  canvas { background-color: #0b1120; border: 4px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+  
+  /* Inputs */
+  input[type="text"] { width: 100%; max-width: 400px; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 1.2rem; text-align: center; text-transform: uppercase; margin-bottom: 15px; outline: none; }
+  input[type="text"]:focus { border-color: var(--primary); }
+
+  /* Diagnóstico */
+  .stats-board { background: #fff8e7; border: 1px solid #f5d78c; padding: 15px; border-radius: 12px; margin-top: 15px; text-align: left; }
+</style>
+<script src="../../shared/labpc.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>🐍 Jornada da Cobra</h1>
+  <p>Alfabetização, Direcionalidade e Pensamento Computacional</p>
+</header>
+
+<!-- TELA INICIAL: MODOS DE JOGO -->
+<div id="screen-home" class="card">
+  <div class="center">
+    <h2>🎮 Escolha seu modo de aprendizagem</h2>
+    <p>Sem pressão, sem tempo esgotado. Aprenda no seu ritmo!</p>
+  </div>
+  
+  <div class="grid" style="margin-top: 20px;">
+    <div class="mode-box" onclick="showScreen('screen-levels'); setMode('treino')">
+      <div class="emoji-large">🟢</div>
+      <h3>Modo Treino</h3>
+      <p style="font-size: 14px;">A cobra só anda quando você aperta, sem barreiras e sem perder vidas.</p>
+    </div>
+    <div class="mode-box" onclick="showScreen('screen-levels'); setMode('desafio')">
+      <div class="emoji-large">⚡</div>
+      <h3>Modo Desafio</h3>
+      <p style="font-size: 14px;">Movimento contínuo, barreiras ativadas e limite de 3 vidas. Teste seu reflexo!</p>
+    </div>
+    <div class="mode-box" onclick="showScreen('screen-duo')">
+      <div class="emoji-large">🤝</div>
+      <h3>Modo Dupla</h3>
+      <p style="font-size: 14px;">Um aluno escolhe a palavra e "programa" a rota, o outro joga no teclado.</p>
+    </div>
+  </div>
+  
+  <div class="center" style="margin-top: 20px;">
+    <button class="secondary" onclick="window.location.href='../../index.html'">🏠 Central de Atividades</button>
+  </div>
+</div>
+
+<!-- TELA: SELEÇÃO DE NÍVEIS -->
+<div id="screen-levels" class="card hidden">
+  <h2>🗺️ Mapa de Palavras</h2>
+  <p id="mode-subtitle" class="center"></p>
+  <div class="grid" id="levels-container"></div>
+  <div class="center" style="margin-top: 20px;">
+    <button class="secondary" onclick="showScreen('screen-home')">🏠 Voltar</button>
+  </div>
+</div>
+
+<!-- TELA: CONFIGURAÇÃO DUPLA -->
+<div id="screen-duo" class="card hidden center">
+  <h2>🤝 Mestre e Robô (Dupla)</h2>
+  <div style="background: #eef3ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left;">
+    <strong>Instruções Computacionais:</strong><br>
+    👩‍💻 <strong>Aluno 1 (O Programador):</strong> Escreva uma palavra. Durante o jogo, você deve falar em voz alta as direções ("Vire para cima", "Vire para a direita").<br>
+    🤖 <strong>Aluno 2 (O Robô):</strong> Você só pode apertar as setas do teclado seguindo as instruções do Programador!
+  </div>
+  <input type="text" id="duo-word" placeholder="DIGITE A PALAVRA AQUI" maxlength="8">
+  <div>
+    <button onclick="startDuo()">🚀 Iniciar Algoritmo</button>
+    <button class="secondary" onclick="showScreen('screen-home')">🏠 Voltar</button>
+  </div>
+</div>
+
+<!-- TELA: JOGO -->
+<div id="screen-game" class="card hidden">
+  <div class="topbar">
+    <div>
+      <h3 id="hud-mode-name">Nível</h3>
+    </div>
+    <div class="badges">
+      <span class="badge" id="hud-streak">🔥 Sequência: 0</span>
+      <span class="badge" id="hud-lives">❤️❤️❤️</span>
+    </div>
+  </div>
+
+  <div class="speed-control">
+    <div style="font-weight:bold; margin-bottom:5px;">Velocidade da Cobra:</div>
+    <div style="display:flex; justify-content: space-between; font-size:12px; max-width:400px; margin:0 auto;">
+      <span>🐢 Devagar (Treino)</span> <span>⚡ Normal</span> <span>🚀 Rápido</span>
+    </div>
+    <input type="range" id="speedSlider" min="1" max="10" value="5">
+  </div>
+
+  <div class="target-emoji" id="game-emoji">☀️</div>
+  <div class="target-word" id="game-word">S _ _</div>
+  
+  <div class="progress"><div id="progressBar"></div></div>
+
+  <div class="canvas-container">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <div class="center" style="margin-top: 15px;">
+    <button class="secondary" onclick="pauseGame()" id="btn-pause">⏸️ Pausar</button>
+    <button class="danger" onclick="quitGame()">Sair da Partida</button>
+  </div>
+</div>
+
+<!-- TELA: DIAGNÓSTICO (PREPARAÇÃO I.A.) -->
+<div id="screen-data" class="card hidden">
+  <h2>📊 Diagnóstico de Aprendizagem</h2>
+  <p>Estes dados ficam salvos localmente e podem ser usados por futuros modelos de I.A. para adaptar automaticamente as letras falsas focando nas dificuldades do aluno.</p>
+  
+  <div class="stats-board" id="ai-stats-content">
+    <!-- Preenchido via JS -->
+  </div>
+  
+  <div class="center" style="margin-top: 20px;">
+    <button class="secondary" onclick="showScreen('screen-home')">🏠 Voltar</button>
+    <button class="danger" onclick="clearData()">🗑️ Limpar Dados</button>
+  </div>
+</div>
+
+<script>
+// --- BANCO DE DADOS (Jornada do Teclado) ---
+const WORD_BANK = [
+  { w: "SOL", e: "☀️", unlock: 1 },
+  { w: "CASA", e: "🏠", unlock: 1 },
+  { w: "BOLA", e: "⚽", unlock: 1 },
+  { w: "GATO", e: "🐱", unlock: 2 },
+  { w: "FLOR", e: "🌸", unlock: 2 },
+  { w: "ESCOLA", e: "🏫", unlock: 3 },
+  { w: "LIVRO", e: "📚", unlock: 3 },
+  { w: "TECLADO", e: "⌨️", unlock: 4 }
+];
+
+// --- ESTADO DO JOGO E I.A. ---
+let unlockedLevel = parseInt(localStorage.getItem("cobraUnlocked")) || 1;
+let diagnosticData = JSON.parse(localStorage.getItem("cobraAI_Data")) || {
+  wrongLetters: {}, wallCrashes: 0, streakRecord: 0
+};
+
+let currentMode = "treino"; // treino, desafio, dupla
+let currentWordObj = null;
+let sessionStartedAt = 0;
+let sessionErrors = 0;
+let sessionHits = 0;
+let sessionLevel = 0;
+let wordIndex = 0;
+let labStepAt = 0;
+let streak = 0;
+let lives = 3;
+let isPaused = false;
+
+// Variáveis do Canvas
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const GRID_SIZE = 20;
+const TILE_COUNT = 20; // 400 / 20
+
+let snake = [];
+let dir = { x: 1, y: 0 };
+let nextDir = { x: 1, y: 0 };
+let lettersOnBoard = [];
+let obstacles = [];
+let gameLoopTimeout;
+let movedInStep = false; // Para o modo treino
+
+// --- NAVEGAÇÃO ---
+function showScreen(id) {
+  document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  clearTimeout(gameLoopTimeout);
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-subtitle').innerHTML = mode === 'treino' 
+    ? "<strong>Modo Treino:</strong> Jogue no seu ritmo, sem perder vidas!" 
+    : "<strong>Modo Desafio:</strong> Cuidado com as barreiras e letras falsas!";
+  renderLevels();
+}
+
+function renderLevels() {
+  const container = document.getElementById('levels-container');
+  container.innerHTML = "";
+  
+  WORD_BANK.forEach((item, index) => {
+    const levelNum = index + 1;
+    const isUnlocked = levelNum <= unlockedLevel;
+    
+    const div = document.createElement("div");
+    div.className = `level-box ${isUnlocked ? '' : 'locked'}`;
+    div.innerHTML = `
+      <div class="emoji-large">${isUnlocked ? item.e : '🔒'}</div>
+      <h3>${isUnlocked ? item.w : 'Bloqueado'}</h3>
+      <p class="small">Nível ${levelNum}</p>
+    `;
+    if(isUnlocked) {
+      div.onclick = () => startGame(item);
+    }
+    container.appendChild(div);
+  });
+}
+
+// --- LÓGICA DE DIAGNÓSTICO (I.A. PREP) ---
+function logMistake(type, detail) {
+  if (type === 'wall') {
+    diagnosticData.wallCrashes++;
+  } else if (type === 'letter') {
+    diagnosticData.wrongLetters[detail] = (diagnosticData.wrongLetters[detail] || 0) + 1;
+  }
+  localStorage.setItem("cobraAI_Data", JSON.stringify(diagnosticData));
+}
+
+function showDiagnostics() {
+  showScreen('screen-data');
+  const div = document.getElementById('ai-stats-content');
+  let lettersHtml = Object.entries(diagnosticData.wrongLetters)
+    .sort((a, b) => b[1] - a[1]) // Ordena pelas mais erradas
+    .map(entry => `<span class="badge" style="background:#fff0f0; color:#dc3545;">${entry[0]}: ${entry[1]}x</span>`)
+    .join(" ");
+  
+  div.innerHTML = `
+    <p><strong>Bateu nas barreiras/paredes:</strong> ${diagnosticData.wallCrashes} vezes.</p>
+    <p><strong>Letras falsas capturadas (Confusão Visual):</strong></p>
+    <div style="display:flex; gap:5px; flex-wrap:wrap;">
+      ${lettersHtml || "<span class='badge'>Nenhum erro registrado ainda.</span>"}
+    </div>
+    <p style="margin-top:15px; font-size:14px; color:#666;">* No futuro, o jogo pode gerar automaticamente mais distratores com as letras que o aluno tem maior dificuldade de diferenciação.</p>
+  `;
+}
+
+function clearData() {
+  if(confirm("Apagar histórico de aprendizagem?")) {
+    diagnosticData = { wrongLetters: {}, wallCrashes: 0, streakRecord: 0 };
+    localStorage.removeItem("cobraAI_Data");
+    showDiagnostics();
+  }
+}
+
+// --- CORE DO JOGO ---
+function startDuo() {
+  const word = document.getElementById('duo-word').value.trim().toUpperCase().replace(/[^A-Z]/g, '');
+  if(word.length < 2) return alert("A palavra precisa ter pelo menos 2 letras!");
+  currentMode = "dupla";
+  startGame({ w: word, e: "🤝" });
+}
+
+function startGame(wordItem) {
+  currentWordObj = wordItem;
+  sessionStartedAt = Date.now(); sessionErrors = 0; sessionHits = 0;
+  sessionLevel = WORD_BANK.findIndex(x => x.w === wordItem.w) + 1;
+  LabPC.presence("cobra", "jogando");
+  LabPC.event({activity:"cobra", type:"start", status:"jogando", mode:currentMode, level:sessionLevel || "dupla", word:wordItem.w, progress:0, hits:0, errors:0, elapsed:0});
+  wordIndex = 0;
+  streak = 0;
+  lives = currentMode === 'treino' ? Infinity : 3;
+  isPaused = false;
+  
+  snake = [{ x: 5, y: 10 }, { x: 4, y: 10 }, { x: 3, y: 10 }];
+  dir = { x: 1, y: 0 };
+  nextDir = { x: 1, y: 0 };
+  
+  // Configura Obstáculos apenas no modo Desafio
+  obstacles = [];
+  if (currentMode === 'desafio') {
+    obstacles = [
+      {x: 8, y: 5}, {x: 8, y: 6}, {x: 8, y: 14}, {x: 8, y: 15},
+      {x: 12, y: 5}, {x: 12, y: 6}, {x: 12, y: 14}, {x: 12, y: 15}
+    ];
+  }
+
+  // Ajusta o Slider conforme o modo
+  const slider = document.getElementById('speedSlider');
+  if(currentMode === 'treino') slider.value = 2; // mais lento
+  if(currentMode === 'desafio') slider.value = 6;
+  
+  document.getElementById('hud-mode-name').innerText = currentMode.toUpperCase();
+  document.getElementById('game-emoji').innerText = wordItem.e;
+  document.getElementById('btn-pause').innerText = "⏸️ Pausar";
+  
+  spawnLetters();
+  updateHUD();
+  showScreen('screen-game');
+  
+  if(currentMode !== 'treino') {
+    loop(); // Loop contínuo
+  } else {
+    drawCanvas(); // No treino, desenha e espera o input
+  }
+}
+
+function spawnLetters() {
+  lettersOnBoard = [];
+  const targetChar = currentWordObj.w[wordIndex];
+  
+  // Letra Certa
+  let pos = getFreePos();
+  lettersOnBoard.push({ char: targetChar, x: pos.x, y: pos.y, correct: true });
+  
+  // Letras Falsas (Distratores)
+  const numFakes = currentMode === 'treino' ? 1 : 3; // Menos poluição visual no treino
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  for(let i=0; i<numFakes; i++) {
+    let fChar;
+    do { fChar = alphabet[Math.floor(Math.random() * alphabet.length)]; } 
+    while (fChar === targetChar);
+    
+    let fPos = getFreePos();
+    lettersOnBoard.push({ char: fChar, x: fPos.x, y: fPos.y, correct: false });
+  }
+}
+
+function getFreePos() {
+  let pos, collision;
+  do {
+    collision = false;
+    pos = { x: Math.floor(Math.random() * TILE_COUNT), y: Math.floor(Math.random() * TILE_COUNT) };
+    if (snake.some(s => s.x === pos.x && s.y === pos.y)) collision = true;
+    if (obstacles.some(o => o.x === pos.x && o.y === pos.y)) collision = true;
+    if (lettersOnBoard.some(l => l.x === pos.x && l.y === pos.y)) collision = true;
+  } while(collision);
+  return pos;
+}
+
+function loop() {
+  if(isPaused) return;
+  updateLogic();
+  drawCanvas();
+  
+  // Controle de velocidade dinâmico
+  const speedVal = parseInt(document.getElementById('speedSlider').value); // 1 a 10
+  const delay = 350 - (speedVal * 25); // 1 = 325ms (lento), 10 = 100ms (rápido)
+  
+  if(currentMode !== 'treino' || movedInStep) {
+    gameLoopTimeout = setTimeout(loop, delay);
+    movedInStep = false;
+  }
+}
+
+function updateLogic() {
+  dir = nextDir;
+  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+  
+  // Colisões com Parede
+  if (head.x < 0 || head.x >= TILE_COUNT || head.y < 0 || head.y >= TILE_COUNT) {
+    return handleMistake("Bateu na parede!", 'wall', null);
+  }
+  
+  // Colisões Corpo/Barreira
+  if (snake.some(s => s.x === head.x && s.y === head.y) || obstacles.some(o => o.x === head.x && o.y === head.y)) {
+    return handleMistake("Bateu em um obstáculo!", 'wall', null);
+  }
+
+  snake.unshift(head);
+  
+  // Verificação de Letras
+  const eatenIdx = lettersOnBoard.findIndex(l => l.x === head.x && l.y === head.y);
+  if (eatenIdx !== -1) {
+    const eaten = lettersOnBoard[eatenIdx];
+    if (eaten.correct) {
+      // ACERTO
+      wordIndex++;
+      sessionHits++;
+      LabPC.event({activity:"cobra",type:"progress",status:"jogando",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj.w,progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:Math.round((Date.now()-sessionStartedAt)/1000),target:eaten.char,stepDuration:Math.max(0,Math.round((Date.now()-labStepAt)/1000))}); labStepAt=Date.now();
+      streak++;
+      if(streak > diagnosticData.streakRecord) {
+        diagnosticData.streakRecord = streak;
+        localStorage.setItem("cobraAI_Data", JSON.stringify(diagnosticData));
+      }
+      
+      if(wordIndex >= currentWordObj.w.length) {
+        // VENCEU A PALAVRA
+        updateHUD();
+        drawCanvas();
+        setTimeout(handleWin, 200);
+        return;
+      }
+      spawnLetters();
+    } else {
+      // ERRO (Comeu letra errada)
+      snake.pop(); // Remove rabo extra
+      handleMistake(`Ops! A letra era ${currentWordObj.w[wordIndex]}. Você pegou ${eaten.char}.`, 'letter', eaten.char);
+      return; // Interrompe para evitar bugs visuais
+    }
+  } else {
+    snake.pop(); // Movimento normal
+  }
+  updateHUD();
+}
+
+function handleMistake(msg, aiType, aiDetail) {
+  logMistake(aiType, aiDetail);
+  sessionErrors++;
+  LabPC.event({activity:"cobra",type:"error",status:"jogando",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,errorType:aiType,detail:aiDetail||msg,elapsed:Math.round((Date.now()-sessionStartedAt)/1000)});
+  streak = 0;
+  
+  if (lives !== Infinity) {
+    lives--;
+    if (lives <= 0) {
+      updateHUD();
+      alert(`💥 Fim de jogo! ${msg}`);
+      return showScreen('screen-home');
+    }
+  }
+  
+  // Efeito visual e Reset suave de posição
+  document.getElementById('gameCanvas').style.borderColor = "var(--danger)";
+  setTimeout(() => document.getElementById('gameCanvas').style.borderColor = "var(--border)", 300);
+  
+  snake = [{ x: 5, y: 10 }, { x: 4, y: 10 }, { x: 3, y: 10 }];
+  dir = { x: 1, y: 0 };
+  nextDir = { x: 1, y: 0 };
+  updateHUD();
+}
+
+function handleWin() {
+  LabPC.event({activity:"cobra",type:"complete",status:"concluiu",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj.w,progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:Math.round((Date.now()-sessionStartedAt)/1000)});
+  LabPC.presence("cobra","concluiu");
+  alert(`🎉 Parabéns! Você formou: ${currentWordObj.w}`);
+  if (currentMode !== 'dupla') {
+    const currentLevelIdx = WORD_BANK.findIndex(w => w.w === currentWordObj.w);
+    if (currentLevelIdx + 1 >= unlockedLevel && unlockedLevel < WORD_BANK.length) {
+      unlockedLevel++;
+      localStorage.setItem("cobraUnlocked", unlockedLevel);
+    }
+    setMode(currentMode); // Atualiza grid
+    showScreen('screen-levels');
+  } else {
+    showScreen('screen-duo'); // Volta pra dupla criar nova
+  }
+}
+
+function updateHUD() {
+  // Palavra
+  let display = "";
+  for(let i=0; i<currentWordObj.w.length; i++) {
+    display += i < wordIndex ? `<span style="color:var(--success)">${currentWordObj.w[i]}</span> ` : "_ ";
+  }
+  document.getElementById('game-word').innerHTML = display;
+  
+  // Barra
+  const pct = (wordIndex / currentWordObj.w.length) * 100;
+  document.getElementById('progressBar').style.width = `${pct}%`;
+  
+  // Status
+  document.getElementById('hud-streak').innerText = `🔥 Sequência: ${streak}`;
+  document.getElementById('hud-lives').innerText = lives === Infinity ? "❤️ Treino livre" : "❤️".repeat(lives);
+}
+
+function drawCanvas() {
+  // Fundo
+  ctx.fillStyle = "#0b1120";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Obstáculos
+  ctx.fillStyle = "#475569";
+  obstacles.forEach(o => {
+    ctx.beginPath();
+    ctx.roundRect(o.x * GRID_SIZE + 1, o.y * GRID_SIZE + 1, GRID_SIZE - 2, GRID_SIZE - 2, 4);
+    ctx.fill();
+  });
+  
+  // Cobra
+  snake.forEach((segment, index) => {
+    // CORRIGIDO: Usando a cor HEX azul em vez da variável CSS
+    ctx.fillStyle = index === 0 ? "#356ae6" : "#6d5dfc"; 
+    ctx.beginPath();
+    ctx.roundRect(segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1, index === 0 ? 6 : 2);
+    ctx.fill();
+  });
+  
+  // Letras
+  lettersOnBoard.forEach(l => {
+    // Quadrado de fundo da letra
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.roundRect(l.x * GRID_SIZE, l.y * GRID_SIZE, GRID_SIZE, GRID_SIZE, 4);
+    ctx.fill();
+    
+    // CORRIGIDO: Usando a cor HEX escura para a letra para garantir que apareça
+    ctx.fillStyle = "#24324a"; 
+    ctx.font = "bold 15px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(l.char, l.x * GRID_SIZE + GRID_SIZE/2, l.y * GRID_SIZE + GRID_SIZE/2 + 1);
+  });
+}
+
+function pauseGame() {
+  isPaused = !isPaused;
+  LabPC.presence("cobra", isPaused ? "pausado" : "jogando");
+  LabPC.event({activity:"cobra",type:isPaused?"pause":"resume",status:isPaused?"pausado":"jogando",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:sessionStartedAt?Math.round((Date.now()-sessionStartedAt)/1000):0});
+  document.getElementById('btn-pause').innerText = isPaused ? "▶️ Continuar" : "⏸️ Pausar";
+  if(!isPaused && currentMode !== 'treino') loop();
+}
+
+function quitGame() {
+  if(confirm("Sair do jogo atual?")) { LabPC.event({activity:"cobra",type:"quit",status:"menu",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:sessionStartedAt?Math.round((Date.now()-sessionStartedAt)/1000):0}); LabPC.presence("cobra","menu"); showScreen('screen-home'); }
+}
+
+// --- CONTROLES ---
+window.addEventListener("keydown", e => {
+  // Evitar rolagem da tela com as setas
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+  
+  let keyValid = false;
+  switch (e.key) {
+    case 'ArrowUp':    if (dir.y !== 1) { nextDir = { x: 0, y: -1 }; keyValid = true; } break;
+    case 'ArrowDown':  if (dir.y !== -1) { nextDir = { x: 0, y: 1 }; keyValid = true; } break;
+    case 'ArrowLeft':  if (dir.x !== 1) { nextDir = { x: -1, y: 0 }; keyValid = true; } break;
+    case 'ArrowRight': if (dir.x !== -1) { nextDir = { x: 1, y: 0 }; keyValid = true; } break;
+  }
+  
+  // No Modo Treino, o jogo só processa a lógica quando o aluno aperta a tecla
+  if (keyValid && currentMode === 'treino' && !isPaused) {
+    movedInStep = true;
+    updateLogic();
+    drawCanvas();
+  }
+});
+
+// Integração Lab PC V1.2
+LabPC.on(m=>{ if(m.type==="teacherCommand" && m.command==="central") window.location.href="../../index.html"; if(m.type==="teacherCommand" && m.command==="resetActivity"){ localStorage.removeItem("cobraUnlocked"); localStorage.removeItem("cobraAI_Data"); location.reload(); } if(m.type==="teacherMessage") alert("📢 Professor: "+m.text); if(m.type==="teacherCommand" && m.command==="ping") { document.body.style.outline="8px solid #f59e0b"; setTimeout(()=>document.body.style.outline="",700); } });
+LabPC.connect("aluno");
+setTimeout(()=>LabPC.presence("cobra","menu"),250);
+// Init
+renderLevels();
+</script>
+<footer class="labpc-authorship" style="text-align:center;padding:18px 10px 24px;color:#66788a;font-size:12px;line-height:1.5">
+  <div><strong>LabPC — Lab Pensamento Computacional</strong></div>
+  <div>Idealização e desenvolvimento: Prof. Elison Borges · © 2026</div>
+</footer>
+</body>
+</html>

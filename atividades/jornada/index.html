@@ -1,0 +1,211 @@
+<!--
+ LabPC — Lab Pensamento Computacional
+ Idealização e desenvolvimento: Prof. Elison Borges
+ © 2026 Elison Borges. Todos os direitos reservados.
+ Consulte AUTORIA-E-LICENCA.txt.
+-->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jornada do Teclado 2.0</title>
+<style>
+:root{--bg:#eef6ff;--card:#fff;--ink:#18324b;--muted:#61788e;--accent:#2563eb;--good:#16a34a;--warn:#f59e0b;--bad:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#dff3ff,#f7fbff);color:var(--ink);min-height:100vh}
+button,input{font:inherit}.top{position:sticky;top:0;z-index:20;background:#ffffffee;backdrop-filter:blur(8px);border-bottom:1px solid #dbe7f2;padding:10px 18px;display:flex;gap:10px;align-items:center}
+.brand{font-weight:900;font-size:20px;flex:1}.btn{border:0;border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:#fff}.soft{background:#e8f1ff;color:#174a8b}.good{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#991b1b}
+main{max-width:1100px;margin:auto;padding:22px}.hero,.card{background:var(--card);border:1px solid #dce8f3;border-radius:24px;box-shadow:0 12px 35px #1d4f7a12}.hero{padding:22px;margin-bottom:18px}.hero h1{margin:0 0 6px;font-size:clamp(27px,4vw,44px)}.hero p{margin:0;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.stat{background:#f5f9ff;border-radius:16px;padding:12px;text-align:center}.stat b{display:block;font-size:24px}.stat small{color:var(--muted)}
+.worlds{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.world{padding:17px;position:relative;overflow:hidden}.world h3{margin:4px 0}.world p{color:var(--muted);min-height:42px}.world .num{font-size:12px;font-weight:900;color:#6b7f93}.locked{opacity:.56}.stars{font-size:18px}
+.extra{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.extra .card{padding:18px}
+.screen{display:none}.screen.active{display:block}.play{max-width:900px;margin:auto}.prompt{font-size:clamp(26px,5vw,46px);font-weight:900;text-align:center;padding:28px 15px;min-height:120px;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.typebox{width:100%;padding:18px;border:3px solid #bdd5ee;border-radius:18px;font-size:26px;outline:none;text-align:center}.typebox:focus{border-color:#60a5fa}
+.progress{height:14px;background:#e5edf5;border-radius:99px;overflow:hidden;margin:14px 0}.bar{height:100%;background:#3b82f6;width:0}.hud{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0}.pill{padding:8px 12px;background:#f0f6fc;border-radius:99px;font-weight:800}
+.feedback{text-align:center;min-height:34px;font-weight:900;font-size:19px}.ok{color:var(--good)}.no{color:var(--bad)}
+.memory-cover{font-size:28px;text-align:center;color:#7b8da0}.arcade{position:relative;height:440px;overflow:hidden;background:linear-gradient(#bfe7ff 0 70%,#dff4cf 70%);border-radius:20px;border:2px solid #cfe1ef}
+.wordfall{position:absolute;padding:8px 12px;background:#fff;border-radius:12px;font-weight:900;box-shadow:0 4px 12px #0002}.arcade-input{margin-top:12px}
+.result{text-align:center;padding:28px}.result h2{font-size:34px;margin:0 0 8px}.result .big{font-size:55px}
+.notice{padding:12px 14px;background:#fff8dc;border-radius:14px;color:#765b00;margin:10px 0}.adaptive{padding:10px 14px;background:#eaf7ff;border-radius:14px;color:#195b82;margin:10px 0}
+@media(max-width:800px){.worlds{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.extra{grid-template-columns:1fr}}@media(max-width:520px){.worlds{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top"><button class="btn soft" onclick="back()">← Voltar</button><div class="brand">⌨️ Jornada do Teclado 2.0</div><button class="btn soft" onclick="goCentral()">🏠 Central</button></div>
+<main>
+<section id="map" class="screen active">
+ <div class="hero"><h1>⌨️ Jornada do Teclado 2.0</h1><p>Aprenda, aplique e domine o teclado no seu ritmo.</p>
+  <div class="stats"><div class="stat"><b id="stWorld">1</b><small>Mundo alcançado</small></div><div class="stat"><b id="stAcc">—</b><small>Precisão</small></div><div class="stat"><b id="stDone">0</b><small>Desafios</small></div><div class="stat"><b id="stStreak">0</b><small>Maior sequência</small></div></div>
+ </div>
+ <div class="worlds" id="worlds"></div>
+ <div class="extra">
+  <div class="card"><h2>♾️ Jornada Infinita</h2><p>Palavras e frases continuam surgindo, com dificuldade que cresce conforme seu desempenho.</p><button class="btn primary" onclick="startInfinite()">Continuar jornada</button></div>
+  <div class="card"><h2>⚡ Tempestade de Palavras</h2><p>Digite as palavras antes que cheguem ao chão. Precisão vale mais que pressa.</p><button class="btn primary" onclick="startArcade()">Jogar arcade</button></div>
+ </div>
+</section>
+
+<section id="game" class="screen play">
+ <div class="card" style="padding:20px"><div class="hud"><span class="pill" id="gTitle"></span><span class="pill" id="gCount"></span><span class="pill" id="gAcc"></span><span class="pill" id="gTime"></span></div><div class="progress"><div id="bar" class="bar"></div></div>
+ <div id="adaptive" class="adaptive" style="display:none"></div>
+ <div id="caseTip" class="notice" style="display:none"></div>
+ <div id="prompt" class="prompt"></div>
+ <input id="answer" class="typebox" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite aqui...">
+ <div style="text-align:center;margin-top:12px"><button id="sendBtn" class="btn primary" onclick="check()">Enviar</button></div>
+ <div id="feedback" class="feedback"></div></div>
+</section>
+
+<section id="arcadeScreen" class="screen play">
+ <div class="card" style="padding:20px"><div class="hud"><button class="btn soft" onclick="exitArcade()">← Voltar às missões</button><span class="pill">⚡ Tempestade de Palavras</span><span class="pill" id="arcScore">0 palavras</span><span class="pill" id="arcAcc">100%</span><span class="pill" id="arcTime">60s</span></div>
+ <div id="arcade" class="arcade"></div><input id="arcInput" class="typebox arcade-input" autocomplete="off" spellcheck="false" placeholder="Digite uma palavra da tela..."></div>
+</section>
+
+<section id="result" class="screen play"><div class="card result"><div class="big">🌟</div><h2 id="rTitle">Muito bem!</h2><p id="rText"></p><div class="hud"><span class="pill" id="rAcc"></span><span class="pill" id="rTime"></span><span class="pill" id="rErrors"></span></div><button class="btn primary" onclick="showMap()">Continuar</button></div></section>
+</main>
+<script src="../../shared/labpc.js"></script>
+<script>
+const KEY='jornadaTecladoV20';
+function loadProgress(){
+ let raw=null;
+ try{ raw=JSON.parse(localStorage.getItem(KEY)||'null'); }catch{}
+ raw=(raw&&typeof raw==='object')?raw:{};
+ const unlocked=Number(raw.unlocked);
+ return {
+   unlocked:Number.isFinite(unlocked)&&unlocked>=1?Math.min(12,Math.floor(unlocked)):1,
+   best:(raw.best&&typeof raw.best==='object'&&!Array.isArray(raw.best))?raw.best:{},
+   totalDone:Number.isFinite(Number(raw.totalDone))?Number(raw.totalDone):0,
+   bestStreak:Number.isFinite(Number(raw.bestStreak))?Number(raw.bestStreak):0,
+   weak:(raw.weak&&typeof raw.weak==='object'&&!Array.isArray(raw.weak))?raw.weak:{},
+   history:Array.isArray(raw.history)?raw.history:[]
+ };
+}
+let save=loadProgress();
+const worlds=[
+ {n:'Explorador',icon:'🟢',desc:'Encontre e digite letras.',kind:'letters',need:10,min:80},
+ {n:'Caçador',icon:'🟢',desc:'Pequenas sequências de letras.',kind:'chunks',need:10,min:82},
+ {n:'Palavras',icon:'🟡',desc:'Palavras curtas do cotidiano.',kind:'short',need:10,min:84},
+ {n:'Palavras+',icon:'🟡',desc:'Palavras maiores e variadas.',kind:'long',need:10,min:85},
+ {n:'Frases',icon:'🟠',desc:'Frases simples e completas.',kind:'sentences',need:8,min:85},
+ {n:'Maiúsculas',icon:'🟠',desc:'Maiúsculas e início de frases.',kind:'caps',need:8,min:86},
+ {n:'Acentos',icon:'🔵',desc:'Palavras e frases com acentuação.',kind:'accent',need:8,min:86},
+ {n:'Pontuação',icon:'🔵',desc:'Vírgula, ponto, exclamação e interrogação.',kind:'punct',need:8,min:87},
+ {n:'Frases+',icon:'🔴',desc:'Frases mais longas e variadas.',kind:'longsent',need:8,min:88},
+ {n:'Precisão',icon:'🎯',desc:'Complete com alta precisão.',kind:'precision',need:10,min:92},
+ {n:'Velocidade',icon:'💀',desc:'Ritmo com precisão.',kind:'speed',need:12,min:90},
+ {n:'Mestre',icon:'👑',desc:'Mini textos com tudo combinado.',kind:'master',need:6,min:92}
+];
+const banks={
+letters:["A", "M", "R", "S", "O", "L", "E", "T", "P", "B", "C", "D", "F", "G", "I", "N", "U", "V", "Q", "H", "J", "X", "Z", "K"],
+chunks:["CAS", "BOL", "MAR", "ATO", "LUA", "RIO", "COR", "AVE", "MEL", "DIA", "PRA", "BRA", "TRA", "FLO", "CRI", "PLA", "GRA", "PRO", "TEA", "COM", "JOG", "LIV", "ESC", "AMI", "MEN", "PAR", "CAR", "CAM", "POR", "JAN", "SAP", "RAT", "GAT", "PAT", "VAS", "MES", "SOL", "SAL", "MIL", "FIL"],
+short:["casa", "bola", "gato", "pato", "rato", "sapo", "mesa", "cama", "mapa", "mala", "lata", "vaso", "dado", "dedo", "boca", "bico", "lobo", "fogo", "jogo", "lago", "mola", "cola", "fila", "fita", "pipa", "sino", "suco", "muro", "rua", "lua", "sol", "mar", "sal", "mel", "mil", "dia", "pia", "tia", "tio", "rei", "lei", "boi", "ave", "ovo", "uva", "luz", "paz", "voz", "vez", "cor", "flor", "trem", "azul", "verde", "rosa", "roxo", "preto", "livro", "folha", "porta", "chave", "caixa", "copo", "prato", "garfo", "faca", "leite", "bolo", "doce", "arroz", "feijao", "milho", "sopa", "fruta", "banana", "pera", "manga", "coco", "kiwi", "limao", "melancia", "tomate", "batata", "cebola", "cenoura", "escola", "aluno", "turma", "sala", "quadro", "giz", "papel", "lapis", "caneta", "estojo", "mochila", "recreio", "parque", "praia", "campo", "rio", "chuva", "vento", "nuvem", "pedra", "areia", "terra", "planta", "tronco", "galho", "semente", "peixe", "cachorro", "cavalo", "vaca", "porco", "galo", "zebra", "leao", "tigre", "urso", "panda", "foca", "macaco", "cobra", "coelho", "abelha", "mosca", "grilo", "conto", "poema", "texto", "frase", "nome", "som", "foto", "tela", "mouse", "cabo", "robô", "cubo", "bloco", "ponte", "roda", "barco", "carro", "moto", "aviao", "loja", "feira", "banco", "praça", "forno", "pano", "meia", "bota", "saia", "blusa", "camisa", "amigo", "amiga", "menino", "menina", "pessoa", "gente", "grupo", "dupla", "trio", "feliz", "forte", "alto", "baixo", "perto", "longe", "cedo", "tarde", "hoje", "ontem", "agora", "sempre", "nunca", "muito", "pouco", "mais", "menos", "abrir", "fechar", "entrar", "sair", "subir", "descer", "andar", "correr", "pular", "jogar", "ler", "ver", "ouvir", "falar", "olhar", "tocar", "pegar", "soltar", "criar", "montar", "cortar", "colar", "pintar"],
+long:["computador", "teclado", "monitor", "internet", "programa", "comando", "arquivo", "janela", "palavra", "caderno", "borracha", "apontador", "tesoura", "mochila", "biblioteca", "laboratorio", "atividade", "desafio", "aventura", "brincadeira", "brinquedo", "professor", "professora", "estudante", "colega", "amizade", "respeito", "cuidado", "equipe", "projeto", "desenho", "pintura", "historia", "planeta", "estrela", "foguete", "espaco", "universo", "natureza", "floresta", "montanha", "oceano", "cachoeira", "jardim", "borboleta", "formiga", "joaninha", "tartaruga", "elefante", "girafa", "rinoceronte", "golfinho", "baleia", "tubarao", "pinguim", "galinha", "coelho", "cachorro", "passarinho", "energia", "circuito", "bateria", "lampada", "motor", "sensor", "botao", "controle", "tecnologia", "criatividade", "imaginacao", "curiosidade", "descoberta", "pesquisa", "experiencia", "problema", "solucao", "estrategia", "sequencia", "caminho", "escolha", "tentativa", "resultado", "progresso", "movimento", "velocidade", "direcao", "esquerda", "direita", "frente", "plataforma", "obstaculo", "bandeira", "tesouro", "surpresa", "mensagem", "segredo", "codigo", "numero", "figura", "imagem", "camera", "musica", "colorido", "divertido", "diferente", "pequeno", "grande", "redondo", "quadrado", "comprido", "amarelo", "laranja", "branco", "cinza", "marrom", "domingo", "segunda", "terceira", "quarta", "quinta", "sexta", "sabado", "janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro", "familia", "cidade", "bairro", "mercado", "cozinha", "quarto", "banheiro", "garagem", "telhado", "cadeira", "armario", "geladeira", "telefone", "bicicleta", "viagem", "passeio", "cinema", "teatro", "museu", "futebol", "corrida", "piscina", "chocolate", "biscoito", "macarrao", "pipoca", "sanduiche", "morango", "abacaxi", "goiaba", "mamão", "melancia", "primavera", "verao", "outono", "inverno"],
+sentences:["A bola caiu.", "O gato pulou.", "Eu gosto de ler.", "Hoje tem aula.", "A casa e azul.", "Meu amigo chegou.", "O sol esta forte.", "A turma esta pronta.", "O livro ficou na mesa.", "O cachorro corre no parque.", "Eu uso o teclado com cuidado.", "A menina abriu a janela.", "O menino pegou o caderno.", "A chuva molhou o jardim.", "Nosso grupo terminou o desafio.", "A professora escreveu no quadro.", "O computador esta ligado.", "Vamos montar uma ponte.", "O barco passou pelo rio.", "A estrela brilha no ceu.", "Pedro abriu o livro.", "Ana chegou cedo.", "Lucas usa o teclado.", "Sofia gosta de ler.", "Marina desenhou uma casa.", "Bruno montou o circuito.", "Clara encontrou a resposta.", "Rafael guardou o material.", "Felipe terminou a atividade.", "Laura pintou uma flor."],
+caps:["Maria joga bola.", "Pedro abriu o livro.", "Ana chegou cedo.", "Joao viu a estrela.", "Brasil e nosso pais.", "Lucas usa o teclado.", "Sofia gosta de ler.", "Marina chegou primeiro.", "Carlos fechou a porta.", "Paulo levou o caderno.", "Beatriz desenhou um planeta.", "Felipe montou a ponte.", "Laura encontrou uma pista.", "Rafael abriu a mochila.", "Camila leu uma historia.", "Bruno terminou o jogo.", "Helena guardou o material.", "Miguel chamou o amigo.", "Gabriel olhou a tela.", "Alice pegou o lapis.", "Daniel entrou na sala.", "Luiza abriu a caixa."],
+accent:["café", "você", "árvore", "ônibus", "lâmpada", "lápis", "coração", "água", "pássaro", "música", "história", "família", "fácil", "difícil", "número", "página", "máquina", "câmera", "robô", "atenção", "estação", "avião", "limão", "pão", "mão", "irmão", "manhã", "maçã", "mamão", "açúcar", "céu", "chapéu", "tênis", "avó", "avô", "bebê", "sofá", "jacaré", "pé", "mês", "três", "português", "matemática", "ciência", "experiência", "sequência", "memória", "código", "saída", "início", "nível", "último", "próximo", "exercício", "prática", "rápido", "possível", "também", "alguém", "ninguém", "parabéns", "diversão", "educação", "computação", "criação", "colaboração", "comunicação", "solução", "informação", "organização", "pontuação", "acentuação", "precisão", "evolução", "missão", "vitória", "cenário", "horário", "relógio", "saúde", "país", "herói", "ideia", "útil", "quilômetros", "O café está quente.", "Você chegou cedo.", "A árvore é bonita.", "O ônibus já chegou.", "A lâmpada acendeu.", "Meu lápis é azul.", "O coração bate forte.", "A água está gelada.", "A música começou.", "O pássaro voou.", "A família chegou à escola.", "O bebê está no sofá.", "A maçã caiu no chão.", "O avião passou no céu.", "A manhã está agradável.", "A estação fica próxima.", "O jacaré entrou na água.", "A página está completa.", "A câmera está ligada.", "A máquina começou a funcionar.", "A missão está concluída.", "O código está correto.", "A sequência está completa.", "A experiência foi divertida.", "A atenção ajuda na atividade.", "O nível está mais difícil."],
+punct:["Olá, tudo bem?", "Que legal!", "Você trouxe o livro?", "Sim, eu consegui!", "Ana, venha aqui.", "Cuidado! O chão está molhado.", "Pedro, feche a porta.", "Vamos brincar?", "Que surpresa!", "Hoje, depois da aula, vou brincar.", "Maria perguntou: vamos começar?", "Atenção, turma!", "Você viu aquilo?", "Muito bem, continue!", "Primeiro, abra o arquivo.", "Depois, clique no botão.", "João, pegue o caderno.", "Que dia bonito!", "Você terminou?", "Sim, professor!", "Não corra, por favor.", "Olhe, uma estrela!", "Onde está o lápis?", "Pronto, podemos começar.", "Espere, ainda falta uma etapa."],
+longsent:["Hoje fomos ao parque e brincamos com nossos amigos.", "A professora escreveu uma frase muito divertida no quadro.", "Meu computador está pronto para uma nova aventura.", "Depois da chuva, apareceu um lindo arco-íris no céu.", "Na biblioteca, encontrei um livro sobre animais do Brasil.", "Durante a atividade, nosso grupo trabalhou com muita atenção.", "O menino abriu a mochila e encontrou todos os materiais.", "Antes do recreio, terminamos o desafio no laboratório.", "A turma organizou os objetos e deixou a mesa limpa.", "Com calma e atenção, conseguimos resolver o problema.", "Cada estudante escolheu uma estratégia diferente para avançar.", "Depois de algumas tentativas, a equipe encontrou a solução.", "Na aula de hoje, usamos o teclado para escrever novas frases.", "O computador recebeu o comando e mostrou a resposta na tela.", "Quando a música terminou, todos voltaram para seus lugares.", "A menina observou o caminho antes de mover o personagem.", "Nosso projeto ficou pronto depois de muito trabalho em equipe.", "Antes de clicar, leia a mensagem que aparece na tela.", "Uma boa estratégia pode tornar o desafio mais simples.", "A prática ajuda a digitar com mais precisão e confiança."],
+precision:["café", "você", "árvore", "ônibus", "lâmpada", "lápis", "coração", "água", "pássaro", "música", "história", "família", "fácil", "difícil", "número", "página", "máquina", "câmera", "robô", "atenção", "estação", "avião", "limão", "pão", "mão", "irmão", "manhã", "maçã", "mamão", "açúcar", "céu", "chapéu", "tênis", "avó", "avô", "bebê", "sofá", "jacaré", "pé", "mês", "três", "português", "matemática", "ciência", "experiência", "sequência", "memória", "código", "saída", "início", "nível", "último", "próximo", "exercício", "prática", "rápido", "possível", "também", "alguém", "ninguém", "parabéns", "diversão", "educação", "computação", "criação", "colaboração", "comunicação", "solução", "informação", "organização", "pontuação", "acentuação", "precisão", "evolução", "missão", "vitória", "cenário", "horário", "relógio", "saúde", "país", "herói", "ideia", "útil", "quilômetros", "Olá, tudo bem?", "Que legal!", "Você trouxe o livro?", "Sim, eu consegui!", "Ana, venha aqui.", "Cuidado! O chão está molhado.", "Pedro, feche a porta.", "Vamos brincar?", "Que surpresa!", "Hoje, depois da aula, vou brincar.", "Maria perguntou: vamos começar?", "Atenção, turma!", "Você viu aquilo?", "Muito bem, continue!", "Primeiro, abra o arquivo.", "Depois, clique no botão.", "João, pegue o caderno.", "Que dia bonito!", "Você terminou?", "Sim, professor!", "Não corra, por favor.", "Olhe, uma estrela!", "Onde está o lápis?", "Pronto, podemos começar.", "Espere, ainda falta uma etapa."],
+speed:["lei", "boi", "ave", "ovo", "uva", "luz", "paz", "voz", "vez", "cor", "flor", "trem", "azul", "verde", "rosa", "roxo", "preto", "livro", "folha", "porta", "chave", "caixa", "copo", "prato", "garfo", "faca", "leite", "bolo", "doce", "arroz", "feijao", "milho", "sopa", "fruta", "banana", "pera", "manga", "coco", "kiwi", "limao", "melancia", "tomate", "batata", "cebola", "cenoura", "escola", "aluno", "turma", "sala", "quadro", "giz", "papel", "lapis", "caneta", "estojo", "mochila", "recreio", "parque", "praia", "campo", "rio", "chuva", "vento", "nuvem", "pedra", "areia", "terra", "planta", "tronco", "galho", "semente", "peixe", "cachorro", "cavalo", "vaca", "porco", "galo", "zebra", "leao", "tigre", "urso", "panda", "foca", "macaco", "cobra", "coelho", "abelha", "mosca", "grilo", "conto", "poema", "texto", "frase", "nome", "som", "foto", "tela", "mouse", "cabo", "robô", "cubo", "bloco", "ponte", "roda", "barco", "carro", "moto", "aviao", "loja", "feira", "banco", "praça", "forno", "pano", "meia", "bota", "saia", "blusa", "camisa", "amigo", "computador", "teclado", "monitor", "internet", "programa", "comando", "arquivo", "janela", "palavra", "caderno", "borracha", "apontador", "tesoura", "mochila", "biblioteca", "laboratorio", "atividade", "desafio", "aventura", "brincadeira", "brinquedo", "professor", "professora", "estudante", "colega", "amizade", "respeito", "cuidado", "equipe", "projeto", "desenho", "pintura", "historia", "planeta", "estrela", "foguete", "espaco", "universo", "natureza", "floresta", "montanha", "oceano", "cachoeira", "jardim", "borboleta", "formiga", "joaninha", "tartaruga", "elefante", "girafa", "rinoceronte", "golfinho", "baleia", "tubarao", "pinguim", "galinha", "coelho", "cachorro", "passarinho", "energia", "circuito", "bateria", "lampada", "motor", "sensor", "botao", "controle", "tecnologia", "criatividade", "imaginacao", "curiosidade", "descoberta", "pesquisa", "experiencia", "problema", "solucao", "estrategia", "sequencia", "caminho", "escolha", "A bola caiu.", "O gato pulou.", "Eu gosto de ler.", "Hoje tem aula.", "A casa e azul.", "Meu amigo chegou.", "O sol esta forte.", "A turma esta pronta.", "O livro ficou na mesa.", "O cachorro corre no parque.", "Eu uso o teclado com cuidado.", "A menina abriu a janela.", "O menino pegou o caderno.", "A chuva molhou o jardim.", "Nosso grupo terminou o desafio.", "A professora escreveu no quadro.", "O computador esta ligado.", "Vamos montar uma ponte.", "O barco passou pelo rio.", "A estrela brilha no ceu.", "Pedro abriu o livro.", "Ana chegou cedo.", "Lucas usa o teclado.", "Sofia gosta de ler.", "Marina desenhou uma casa.", "Bruno montou o circuito.", "Clara encontrou a resposta.", "Rafael guardou o material.", "Felipe terminou a atividade.", "Laura pintou uma flor."],
+master:["Hoje, na escola, aprendemos a usar o teclado com atenção e cuidado.", "João perguntou: \"Vamos brincar depois da aula?\"", "A tecnologia pode ajudar quando usamos criatividade, atenção e responsabilidade.", "Você conseguiu chegar até aqui. Parabéns pela sua jornada!", "Depois da atividade, a turma organizou os materiais e voltou para a sala.", "No laboratório, cada desafio é uma nova oportunidade para aprender.", "Quando encontramos um problema, podemos testar ideias diferentes até chegar a uma solução.", "Antes de começar, observe o desafio, pense em uma estratégia e só depois execute os comandos.", "Durante a aula, cada grupo trabalhou no seu ritmo e compartilhou descobertas com os colegas.", "Digitar bem não significa apenas ser rápido; também é importante escrever com precisão.", "Hoje aprendemos palavras, frases, acentos e sinais de pontuação usando o mesmo teclado.", "Depois de várias tentativas, percebemos que planejar antes de agir pode facilitar o caminho."]
+};
+let run=null,timer=null,memTimer=null;
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem(KEY,JSON.stringify(save))}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active')}
+function showMap(){clearInterval(timer);clearTimeout(memTimer);run=null;renderMap();show('map');LabPC.presence('jornada','mapa')}
+function goCentral(){location.href='../../index.html'}
+function back(){if(run&&confirm('Voltar ao mapa? O desafio atual será encerrado.'))showMap();else if(!run)goCentral()}
+function renderMap(){
+ $('worlds').innerHTML=worlds.map((w,i)=>{let lock=i+1>save.unlocked,b=save.best[i+1];return `<div class="card world ${lock?'locked':''}"><span class="num">MUNDO ${i+1}</span><h3>${w.icon} ${w.n}</h3><p>${w.desc}</p><div class="stars">${b?`⭐ ${b.acc}% • ${b.time}s`:'☆ Ainda não concluído'}</div><button class="btn ${lock?'soft':'primary'}" ${lock?'disabled':''} onclick="startWorld(${i+1})">${lock?'🔒 Bloqueado':'Começar'}</button></div>`}).join('');
+ let vals=Object.values(save.best);$('stWorld').textContent=Number.isFinite(Number(save.unlocked))?Math.min(12,Number(save.unlocked)):1;$('stAcc').textContent=vals.length?Math.round(vals.reduce((a,b)=>a+b.acc,0)/vals.length)+'%':'—';$('stDone').textContent=save.totalDone;$('stStreak').textContent=save.bestStreak;
+}
+function pool(kind){return banks[kind]||banks.short}
+function adaptivePool(kind){
+ let p=[...pool(kind)], weak=Object.entries(save.weak).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]);
+ if(weak.length && ['short','long','sentences','caps','accent','punct','longsent','precision','speed','master'].includes(kind)){
+   // Reforço somente dentro do banco do próprio nível para não antecipar acentos/pontuação.
+   let candidates=pool(kind).filter(x=>weak.some(ch=>x.toLowerCase().includes(ch.toLowerCase())));
+   p=p.concat(candidates.slice(0,20));
+ }
+ return p;
+}
+function startWorld(n){let w=worlds[n-1];startRun({mode:'world',world:n,title:`Mundo ${n} — ${w.n}`,kind:w.kind,need:w.need,min:w.min})}
+function updateCaseTip(){
+ if(!run)return;
+ const tip=$('caseTip');
+ tip.style.display='block';
+ if(Number(run.world)>=6){
+   tip.innerHTML='🔠 <b>Atenção!</b> Neste mundo, letras MAIÚSCULAS e minúsculas são diferentes. Para fazer uma letra maiúscula, segure <b>Shift ⇧</b> e pressione a letra.';
+ }else{
+   tip.innerHTML='💡 <b>Dica do teclado:</b> por enquanto, não se preocupe com MAIÚSCULAS e minúsculas. Digite as letras corretas. A partir do Mundo 6 você aprenderá a usar <b>Shift ⇧</b>.';
+ }
+}
+function startInfinite(){let lvl=Math.max(3,Math.min(12,save.unlocked));let kind=worlds[lvl-1].kind;startRun({mode:'infinite',world:lvl,title:'♾️ Jornada Infinita',kind,need:20,min:85})}
+function startRun(cfg){
+ let p=adaptivePool(cfg.kind);
+ // Embaralhamento Fisher-Yates: não repete item dentro do mesmo desafio enquanto houver opções.
+ p=[...new Set(p)];
+ for(let i=p.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]]}
+ let items=[];
+ while(items.length<cfg.need){let batch=[...p];for(let i=batch.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[batch[i],batch[j]]=[batch[j],batch[i]]}items.push(...batch)}
+ items=items.slice(0,cfg.need);
+ run={...cfg,index:0,correct:0,errors:0,keys:0,streak:0,start:Date.now(),items};
+ show('game');$('gTitle').textContent=cfg.title;$('feedback').textContent='';$('answer').value='';$('answer').focus();
+ $('adaptive').style.display=Object.keys(save.weak).length?'block':'none';$('adaptive').textContent='🧠 A jornada pode reforçar automaticamente teclas que precisaram de mais tentativas.';
+ updateCaseTip();next();clearInterval(timer);timer=setInterval(updateHud,250);LabPC.presence('jornada',cfg.title);emit('start',{level:cfg.world,mode:cfg.mode,status:'jogando'});
+}
+function next(){
+ if(!run)return;if(run.index>=run.items.length)return finish();
+ let t=run.items[run.index];$('prompt').textContent=t;$('answer').value='';$('answer').focus();$('feedback').textContent='';updateHud();
+}
+function normalize(s){return s.trim().replace(/\s+/g,' ')}
+$('answer').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();check()}});
+$('answer').addEventListener('input',()=>{if(!run)return;run.keys++;});
+function markWeak(expected,typed){let a=expected.toLowerCase(),b=typed.toLowerCase();for(let i=0;i<a.length;i++)if(a[i]!==b[i])save.weak[a[i]]=(save.weak[a[i]]||0)+1}
+function check(){
+ if(!run)return;let exp=run.items[run.index],got=normalize($('answer').value);
+ const caseSensitive=Number(run.world)>=6;
+ const correct=caseSensitive ? got===exp : got.toLocaleLowerCase('pt-BR')===exp.toLocaleLowerCase('pt-BR');
+ if(correct){run.correct++;run.streak++;save.bestStreak=Math.max(save.bestStreak,run.streak);$('feedback').className='feedback ok';$('feedback').textContent='✓ Muito bem!';run.index++;emit('progress',{level:run.world,mode:run.mode,progress:`${run.index}/${run.need}`,hits:run.correct,errors:run.errors,word:exp,status:'jogando'});setTimeout(next,260)}
+ else{
+   run.errors++;run.streak=0;markWeak(exp,got);persist();$('feedback').className='feedback no';
+   const onlyCase = caseSensitive && got.toLocaleLowerCase('pt-BR')===exp.toLocaleLowerCase('pt-BR');
+   $('feedback').textContent=onlyCase?'💡 Quase! As letras estão certas. Observe as MAIÚSCULAS e minúsculas. Use Shift ⇧ quando precisar.':'Tente novamente. Observe com atenção.';
+   emit('error',{level:run.world,mode:run.mode,progress:`${run.index}/${run.need}`,errors:run.errors,errorsDelta:1,word:exp,status:'jogando',detail:onlyCase?'maiuscula_minuscula':''});$('answer').select()
+ }
+}
+function updateHud(){if(!run)return;let elapsed=Math.floor((Date.now()-run.start)/1000),attempts=run.correct+run.errors,acc=attempts?Math.round(run.correct/attempts*100):100;$('gCount').textContent=`${run.index+1}/${run.need}`;$('gAcc').textContent=`Precisão ${acc}%`;$('gTime').textContent=`${elapsed}s`;$('bar').style.width=(run.index/run.need*100)+'%'}
+function finish(){
+ clearInterval(timer);let elapsed=Math.floor((Date.now()-run.start)/1000),attempts=run.correct+run.errors,acc=attempts?Math.round(run.correct/attempts*100):100,passed=acc>=run.min;
+ if(run.mode==='world'&&passed){save.unlocked=Math.max(save.unlocked,Math.min(12,run.world+1));let old=save.best[run.world];if(!old||acc>old.acc||(acc===old.acc&&elapsed<old.time))save.best[run.world]={acc,time:elapsed};}
+ save.totalDone++;save.history.push({at:new Date().toISOString(),mode:run.mode,world:run.world,acc,time:elapsed,errors:run.errors});save.history=save.history.slice(-80);persist();
+ $('rTitle').textContent=passed?'Mundo concluído!':'Quase lá!';$('rText').textContent=passed?'Você avançou com boa precisão. Continue sua jornada.':`Sua precisão foi ${acc}%. Para este desafio, tente alcançar ${run.min}% ou mais.`;$('rAcc').textContent=`🎯 ${acc}% precisão`;$('rTime').textContent=`⏱️ ${elapsed}s`;$('rErrors').textContent=`⌫ ${run.errors} tentativa(s) incorreta(s)`;
+ emit(passed?'complete':'attempt',{level:run.world,mode:run.mode,progress:`${run.need}/${run.need}`,hits:run.correct,errors:run.errors,elapsed,status:passed?'concluído':'nova tentativa',detail:`precisao:${acc}`});run=null;show('result')
+}
+function emit(type,x={}){LabPC.event({activity:'jornada',type,...x})}
+
+// ARCADE
+let arc=null,arcLoop=null,arcSpawn=null;
+function startArcade(){show('arcadeScreen');$('arcade').innerHTML='';$('arcInput').value='';$('arcInput').focus();arc={start:Date.now(),score:0,errors:0,typed:0,words:[],duration:60};spawn();arcSpawn=setInterval(spawn,1800);arcLoop=setInterval(stepArc,50);LabPC.presence('jornada','arcade');emit('start',{mode:'arcade',level:'extra',status:'jogando'})}
+function exitArcade(){
+ clearInterval(arcLoop);clearInterval(arcSpawn);
+ arcLoop=null;arcSpawn=null;arc=null;
+ $('arcade').innerHTML='';
+ showMap();
+}
+function spawn(){if(!arc)return;let all=[...banks.short,...banks.long,...banks.accent.map(x=>x.split(' ')[1]||x.split(' ')[0])],word=all[Math.floor(Math.random()*all.length)].replace(/[.,!?]/g,'');let el=document.createElement('div');el.className='wordfall';el.textContent=word;el.style.left=(5+Math.random()*78)+'%';el.style.top='-40px';$('arcade').appendChild(el);arc.words.push({word,el,y:-40,speed:.55+Math.random()*.65})}
+function stepArc(){if(!arc)return;let sec=Math.floor((Date.now()-arc.start)/1000),left=arc.duration-sec;if(left<=0)return endArc();for(let w of [...arc.words]){w.y+=w.speed;w.el.style.top=w.y+'px';if(w.y>390){w.el.remove();arc.words.splice(arc.words.indexOf(w),1);arc.errors++}}$('arcScore').textContent=arc.score+' palavras';$('arcTime').textContent=left+'s';$('arcAcc').textContent=(arc.score+arc.errors?Math.round(arc.score/(arc.score+arc.errors)*100):100)+'%'}
+$('arcInput').addEventListener('input',()=>{if(!arc)return;let v=$('arcInput').value.trim().toLowerCase(),hit=arc.words.find(w=>w.word.toLowerCase()===v);if(hit){hit.el.remove();arc.words.splice(arc.words.indexOf(hit),1);arc.score++;$('arcInput').value=''}});
+function endArc(){clearInterval(arcLoop);clearInterval(arcSpawn);let acc=arc.score+arc.errors?Math.round(arc.score/(arc.score+arc.errors)*100):100;save.totalDone++;persist();emit('complete',{mode:'arcade',level:'extra',hits:arc.score,errors:arc.errors,elapsed:60,status:'concluído',detail:`precisao:${acc}`});$('rTitle').textContent='Tempestade concluída!';$('rText').textContent=`Você digitou ${arc.score} palavra(s) antes que chegassem ao chão.`;$('rAcc').textContent=`🎯 ${acc}% precisão`;$('rTime').textContent='⏱️ 60s';$('rErrors').textContent=`🌧️ ${arc.errors} palavra(s) chegaram ao chão`;arc=null;show('result')}
+
+LabPC.on(m=>{
+ if(m.type==='teacherMessage')alert('📢 Professor: '+m.text);
+ if(m.type==='teacherCommand'&&m.command==='central')goCentral();
+ if(m.type==='teacherCommand'&&m.command==='ping'){document.body.style.outline='8px solid #f59e0b';setTimeout(()=>document.body.style.outline='',5000)}
+ if(m.type==='teacherCommand'&&m.command==='resetActivity'){localStorage.removeItem(KEY);location.reload()}
+});
+LabPC.connect('aluno');setTimeout(()=>LabPC.presence('jornada','mapa'),250);renderMap();
+</script><footer class="labpc-authorship" style="text-align:center;padding:18px 10px 24px;color:#66788a;font-size:12px;line-height:1.5">
+  <div><strong>LabPC — Lab Pensamento Computacional</strong></div>
+  <div>Idealização e desenvolvimento: Prof. Elison Borges · © 2026</div>
+</footer>
+</body></html>

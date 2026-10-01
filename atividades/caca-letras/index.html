@@ -1,0 +1,338 @@
+<!--
+ LabPC — Lab Pensamento Computacional
+ Idealização e desenvolvimento: Prof. Elison Borges
+ © 2026 Elison Borges. Todos os direitos reservados.
+ Consulte AUTORIA-E-LICENCA.txt.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caça-Letras V1.1</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#10182b,#182b4d);color:#fff;min-height:100vh}
+button{font:inherit;cursor:pointer}
+.screen{display:none;min-height:100vh;padding:24px}
+.screen.active{display:flex}
+.home{align-items:center;justify-content:center}
+.panel{width:min(980px,100%);background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:28px;box-shadow:0 15px 50px rgba(0,0,0,.25)}
+h1{text-align:center;font-size:clamp(32px,6vw,58px);margin:0 0 8px}
+.subtitle{text-align:center;color:#cbd8ef;margin:0 0 26px;font-size:18px}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.level-card{background:#fff;color:#17233b;border:0;border-radius:16px;padding:16px;min-height:115px;text-align:left;position:relative;transition:.15s}
+.level-card:hover:not(:disabled){transform:translateY(-3px)}
+.level-card:disabled{opacity:.38;cursor:not-allowed}
+.level-number{font-weight:bold;font-size:22px}
+.level-name{font-size:14px;margin-top:8px}
+.home-actions{text-align:center;margin-top:22px}
+.danger{background:#b83b4b!important}
+.primary{background:#5ee1a1!important;color:#10241b!important}
+.secondary{background:#fff!important;color:#18233a!important}
+.game{flex-direction:column;align-items:center}
+.game-wrap{width:min(900px,100%);display:flex;flex-direction:column;gap:12px}
+.hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.hud-box{background:rgba(255,255,255,.1);border-radius:12px;padding:10px;text-align:center}
+.hud-box strong{display:block;font-size:20px;margin-top:3px}
+.game-buttons{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:10px 16px;font-weight:bold}
+.arena{position:relative;width:100%;height:min(68vh,610px);min-height:430px;overflow:hidden;background:linear-gradient(#071021,#10274b);border:3px solid rgba(255,255,255,.25);border-radius:18px}
+.arena.paused:after{content:"PAUSADO";position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.55);font-size:40px;font-weight:bold;z-index:50}
+.letter{position:absolute;width:58px;height:58px;border-radius:14px;display:grid;place-items:center;background:#fff;color:#17233b;font-size:30px;font-weight:900;box-shadow:0 7px 16px rgba(0,0,0,.35);user-select:none}
+.danger-line{position:absolute;left:0;right:0;bottom:58px;border-top:3px dashed #ff6578;z-index:5}
+.danger-label{position:absolute;right:8px;bottom:65px;color:#ff9aaa;font-size:12px;font-weight:bold}
+.keyboard{display:grid;grid-template-columns:repeat(13,1fr);gap:5px;padding:10px;background:rgba(255,255,255,.07);border-radius:14px}
+.key{border:0;border-radius:7px;padding:10px 3px;background:#dfe7f5;color:#17233b;font-weight:bold}
+.key.flash{transform:scale(.92);background:#5ee1a1}
+.message{text-align:center;min-height:26px;color:#dbe7fb;font-weight:bold}
+.overlay{position:absolute;inset:0;z-index:100;background:rgba(5,12,25,.88);display:none;place-items:center;text-align:center;padding:25px}
+.overlay.show{display:grid}
+.overlay-box{max-width:520px}
+.overlay h2{font-size:38px;margin:0 0 10px}
+.overlay p{color:#cbd8ef;line-height:1.5}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px 0}
+.stat{background:rgba(255,255,255,.1);border-radius:12px;padding:12px 18px}
+@media(max-width:700px){
+ .levels{grid-template-columns:repeat(2,1fr)}
+ .hud{grid-template-columns:repeat(3,1fr)}
+ .hud-box:nth-child(4),.hud-box:nth-child(5){display:none}
+ .keyboard{grid-template-columns:repeat(9,1fr)}
+ .arena{min-height:420px}
+}
+</style>
+</head>
+<body>
+
+<section id="home" class="screen active home">
+  <div class="panel">
+    <h1>⌨️ CAÇA-LETRAS</h1>
+    <p class="subtitle">As letras estão caindo! Encontre a tecla certa antes que elas cheguem ao chão.</p>
+    <div id="levels" class="levels"></div>
+    <div class="home-actions">
+      <button class="btn secondary" onclick="location.href='../../index.html'">← Voltar à Central</button>
+      <button class="btn danger" id="resetProgress">🗑️ Zerar progresso</button>
+    </div>
+  </div>
+</section>
+
+<section id="game" class="screen game">
+  <div class="game-wrap">
+    <div class="hud">
+      <div class="hud-box">Nível<strong id="hudLevel">1</strong></div>
+      <div class="hud-box">Pontos<strong id="hudScore">0</strong></div>
+      <div class="hud-box">Vidas<strong id="hudLives">❤️❤️❤️❤️❤️</strong></div>
+      <div class="hud-box">Sequência<strong id="hudStreak">0</strong></div>
+      <div class="hud-box">Melhor<strong id="hudBest">0</strong></div>
+    </div>
+    <div class="game-buttons">
+      <button class="btn secondary" id="pauseBtn">⏸️ Pausar</button>
+      <button class="btn secondary" id="exitBtn">🏠 Sair</button>
+    </div>
+
+    <div class="speed-control" style="background:rgba(255,255,255,.09);border-radius:14px;padding:12px 16px;text-align:center;">
+      <div style="font-weight:bold;margin-bottom:7px;">🐢 Velocidade das letras: <span id="speedValue">50%</span></div>
+      <input id="speedSlider" type="range" min="25" max="100" value="50" step="5"
+             aria-label="Velocidade das letras"
+             style="width:min(600px,100%);accent-color:#5ee1a1;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#cbd8ef;max-width:600px;margin:3px auto 0;">
+        <span>🐢 Devagar</span><span>⚡ Normal</span><span>🚀 Rápido</span>
+      </div>
+    </div>
+
+    <div id="arena" class="arena">
+      <div class="danger-line"></div>
+      <div class="danger-label">ZONA DE PERIGO</div>
+      <div id="overlay" class="overlay">
+        <div class="overlay-box">
+          <h2 id="overlayTitle"></h2>
+          <p id="overlayText"></p>
+          <div id="overlayStats" class="stats"></div>
+          <button class="btn primary" id="overlayBtn"></button>
+        </div>
+      </div>
+    </div>
+    <div id="message" class="message">Digite a letra que está caindo.</div>
+    <div id="keyboard" class="keyboard"></div>
+  </div>
+</section>
+
+<script>
+const alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const levelData=[
+ {speed:0.55,spawn:1250,max:1,target:12,name:"Aquecimento"},
+ {speed:0.68,spawn:1120,max:1,target:14,name:"Começando"},
+ {speed:0.82,spawn:1000,max:1,target:16,name:"Atenção"},
+ {speed:0.96,spawn:920,max:2,target:17,name:"Olho vivo"},
+ {speed:1.08,spawn:900,max:2,target:19,name:"Dupla"},
+ {speed:1.22,spawn:820,max:2,target:21,name:"Mais rápido"},
+ {speed:1.35,spawn:760,max:3,target:22,name:"Três de uma vez"},
+ {speed:1.50,spawn:700,max:3,target:24,name:"Reflexo"},
+ {speed:1.68,spawn:650,max:3,target:26,name:"Velocidade"},
+ {speed:1.86,spawn:600,max:4,target:28,name:"Caos"},
+ {speed:2.05,spawn:550,max:4,target:31,name:"Avançado"},
+ {speed:2.28,spawn:500,max:5,target:35,name:"🏆 Mestre"}
+];
+
+let unlocked=Number(localStorage.getItem("cacaLetrasUnlocked")||1);
+let bestScores=JSON.parse(localStorage.getItem("cacaLetrasBest")||"{}");
+let bestStreak=Number(localStorage.getItem("cacaLetrasBestStreak")||0);
+
+let level=1,score=0,lives=5,streak=0,hits=0,misses=0;
+let running=false,paused=false,lastTime=0,spawnTimer=0,id=0,letters=new Map(),animation=0;
+let speedMultiplier=Number(localStorage.getItem("cacaLetrasSpeed")||50)/100;
+let labStartedAt=0;
+
+const $=id=>document.getElementById(id);
+const home=$("home"),game=$("game"),arena=$("arena"),keyboard=$("keyboard");
+
+function renderLevels(){
+  $("levels").innerHTML="";
+  levelData.forEach((d,i)=>{
+    const n=i+1, b=document.createElement("button");
+    b.className="level-card"; b.disabled=n>unlocked;
+    b.innerHTML=`<div class="level-number">Nível ${n} ${n>unlocked?"🔒":""}</div>
+                 <div class="level-name">${d.name}<br>🎯 ${d.target} acertos</div>`;
+    b.onclick=()=>startGame(n);
+    $("levels").appendChild(b);
+  });
+}
+function save(){
+ localStorage.setItem("cacaLetrasUnlocked",unlocked);
+ localStorage.setItem("cacaLetrasBest",JSON.stringify(bestScores));
+ localStorage.setItem("cacaLetrasBestStreak",bestStreak);
+}
+function buildKeyboard(){
+ alphabet.forEach(ch=>{
+   const b=document.createElement("button");
+   b.className="key"; b.textContent=ch; b.dataset.key=ch;
+   b.onclick=()=>handleKey(ch);
+   keyboard.appendChild(b);
+ });
+}
+function startGame(n){
+ labStartedAt=Date.now(); LabPC.presence("letras","jogando"); LabPC.event({activity:"letras",type:"start",status:"jogando",level:n,mode:"individual",word:"",progress:0,hits:0,errors:0,elapsed:0});
+ level=n; score=0; lives=n===12?3:5; streak=0; hits=0; misses=0;
+ letters.forEach(x=>x.el.remove()); letters.clear();
+ paused=false; running=true; lastTime=performance.now(); spawnTimer=0;
+ $("pauseBtn").textContent="⏸️ Pausar";
+ home.classList.remove("active"); game.classList.add("active");
+ updateHud(); hideOverlay(); $("message").textContent="Digite a letra que está caindo!";
+ cancelAnimationFrame(animation); animation=requestAnimationFrame(loop);
+}
+function spawn(){
+ const d=levelData[level-1];
+ if(letters.size>=d.max)return;
+ const el=document.createElement("div");
+ const ch=alphabet[Math.floor(Math.random()*alphabet.length)];
+ el.className="letter"; el.textContent=ch; el.dataset.ch=ch;
+ const maxX=Math.max(10,arena.clientWidth-68);
+ const x=8+Math.random()*maxX;
+ el.style.left=x+"px"; el.style.top="-65px";
+ arena.appendChild(el);
+ const obj={el,ch,x,y:-65,speed:d.speed*(0.88+Math.random()*.24)*speedMultiplier};
+ letters.set(++id,obj);
+}
+function loop(t){
+ if(!running)return;
+ if(!paused){
+   const dt=Math.min(40,t-lastTime); lastTime=t;
+   spawnTimer+=dt;
+   if(spawnTimer>=levelData[level-1].spawn){spawnTimer=0;spawn();}
+   const danger=arena.clientHeight-72;
+   for(const [key,o] of [...letters]){
+     o.y+=o.speed*dt;
+     o.el.style.transform=`translateY(${o.y}px)`;
+     if(o.y>=danger){
+       o.el.remove(); letters.delete(key); loseLife();
+       if(!running)break;
+     }
+   }
+   updateHud();
+ }
+ animation=requestAnimationFrame(loop);
+}
+function handleKey(ch){
+ if(!running||paused)return;
+ const candidates=[...letters.entries()].filter(([k,o])=>o.ch===ch);
+ if(!candidates.length){
+   $("message").textContent=`A tecla ${ch} não corresponde a nenhuma letra ativa.`;
+   return;
+ }
+ candidates.sort((a,b)=>b[1].y-a[1].y);
+ const [key,o]=candidates[0];
+ o.el.remove(); letters.delete(key);
+ hits++; streak++; score+=10+Math.min(streak,10);
+ LabPC.event({activity:"letras",type:"progress",status:"jogando",level,mode:"individual",word:ch,progress:hits,hits,errors:misses,score,elapsed:Math.round((Date.now()-labStartedAt)/1000),detail:"letra capturada"});
+ if(streak>bestStreak){bestStreak=streak;save();}
+ $("message").textContent=`✓ ${ch} capturada!`;
+ flashKey(ch);
+ if(hits>=levelData[level-1].target)finishLevel();
+ updateHud();
+}
+function loseLife(){
+ lives--; misses++; streak=0;
+ LabPC.event({activity:"letras",type:"error",status:"jogando",level,mode:"individual",progress:hits,hits,errors:misses,score,elapsed:Math.round((Date.now()-labStartedAt)/1000),detail:"letra escapou"});
+ $("message").textContent="⚠️ Uma letra escapou!";
+ if(lives<=0)gameOver();
+}
+function flashKey(ch){
+ const k=document.querySelector(`[data-key="${ch}"]`);
+ if(k){k.classList.add("flash");setTimeout(()=>k.classList.remove("flash"),100);}
+}
+function updateHud(){
+ $("hudLevel").textContent=level;
+ $("hudScore").textContent=score;
+ $("hudLives").textContent="❤️".repeat(lives)+"🖤".repeat(Math.max(0,5-lives));
+ $("hudStreak").textContent=streak;
+ $("hudBest").textContent=bestScores[level]||0;
+}
+function showOverlay(title,text,stats,button,action){
+ $("overlayTitle").textContent=title; $("overlayText").textContent=text;
+ $("overlayStats").innerHTML=stats.map(x=>`<div class="stat">${x}</div>`).join("");
+ $("overlayBtn").textContent=button; $("overlayBtn").onclick=action;
+ $("overlay").classList.add("show");
+}
+function hideOverlay(){$("overlay").classList.remove("show")}
+function finishLevel(){
+ LabPC.event({activity:"letras",type:"complete",status:"concluiu",level,mode:"individual",progress:hits,hits,errors:misses,score,elapsed:Math.round((Date.now()-labStartedAt)/1000)}); LabPC.presence("letras","concluiu");
+ running=false;
+ letters.forEach(x=>x.el.remove());letters.clear();
+ const old=bestScores[level]||0;
+ if(score>old)bestScores[level]=score;
+ if(level<12){
+   unlocked=Math.max(unlocked,level+1);save();
+   showOverlay("🎉 Nível concluído!",`Você capturou ${hits} letras. O próximo nível foi liberado.`,
+     [`Pontos: ${score}`,`Acertos: ${hits}`,`Sequência: ${streak}`],
+     "➡️ Próximo nível",()=>startGame(level+1));
+ }else{
+   save();
+   showOverlay("🏆 Mestre do Caça-Letras!",`Você terminou os 12 níveis de dificuldade.`,
+     [`Pontos: ${score}`,`Acertos: ${hits}`,`Melhor sequência: ${bestStreak}`],
+     "🏠 Voltar ao início",goHome);
+ }
+ updateHud();
+}
+function gameOver(){
+ LabPC.event({activity:"letras",type:"gameOver",status:"fim",level,mode:"individual",progress:hits,hits,errors:misses,score,elapsed:Math.round((Date.now()-labStartedAt)/1000)}); LabPC.presence("letras","fim");
+ running=false;
+ letters.forEach(x=>x.el.remove());letters.clear();
+ const old=bestScores[level]||0;
+ if(score>old)bestScores[level]=score;
+ save();
+ showOverlay("💥 Fim de jogo",`As letras chegaram à zona de perigo. Tente novamente!`,
+   [`Pontos: ${score}`,`Acertos: ${hits}`,`Erros: ${misses}`],
+   "🔄 Tentar novamente",()=>startGame(level));
+ updateHud();
+}
+function goHome(){
+ if(running) LabPC.event({activity:"letras",type:"quit",status:"menu",level,mode:"individual",progress:hits,hits,errors:misses,score,elapsed:labStartedAt?Math.round((Date.now()-labStartedAt)/1000):0}); LabPC.presence("letras","menu");
+ running=false; paused=false; cancelAnimationFrame(animation);
+ letters.forEach(x=>x.el.remove());letters.clear();
+ game.classList.remove("active");home.classList.add("active");renderLevels();
+}
+const speedSlider=$("speedSlider");
+const speedValue=$("speedValue");
+speedSlider.value=Math.round(speedMultiplier*100);
+speedValue.textContent=speedSlider.value+"%";
+
+speedSlider.oninput=()=>{
+  speedMultiplier=Number(speedSlider.value)/100;
+  speedValue.textContent=speedSlider.value+"%";
+  localStorage.setItem("cacaLetrasSpeed",speedSlider.value);
+};
+
+$("pauseBtn").onclick=()=>{
+ if(!running)return;
+ paused=!paused;
+ $("pauseBtn").textContent=paused?"▶️ Continuar":"⏸️ Pausar";
+ arena.classList.toggle("paused",paused);
+ if(!paused)lastTime=performance.now();
+};
+$("exitBtn").onclick=goHome;
+$("resetProgress").onclick=()=>{
+ if(confirm("Zerar todos os níveis desbloqueados e recordes pessoais?")){
+   unlocked=1;bestScores={};bestStreak=0;save();renderLevels();
+ }
+};
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"){goHome();return}
+ if(e.code==="Space"){e.preventDefault();$("pauseBtn").click();return}
+ if(/^[a-zA-Z]$/.test(e.key))handleKey(e.key.toUpperCase());
+});
+buildKeyboard();renderLevels();
+</script>
+
+<script src="../../shared/labpc.js"></script>
+<script>
+(function(){
+ LabPC.on(m=>{if(m.type==="teacherCommand"&&m.command==="central")location.href="../../index.html";if(m.type==="teacherCommand"&&m.command==="resetActivity"){["cacaLetrasBest","cacaLetrasBestStreak","cacaLetrasSpeed","cacaLetrasUnlocked"].forEach(k=>localStorage.removeItem(k));location.reload();}if(m.type==="teacherMessage")alert("📢 Professor: "+m.text);if(m.type==="teacherCommand"&&m.command==="ping"){document.body.style.outline="8px solid #f59e0b";setTimeout(()=>document.body.style.outline="",700)}});
+ LabPC.connect("aluno");
+})();
+</script>
+<footer class="labpc-authorship" style="text-align:center;padding:18px 10px 24px;color:#66788a;font-size:12px;line-height:1.5">
+  <div><strong>LabPC — Lab Pensamento Computacional</strong></div>
+  <div>Idealização e desenvolvimento: Prof. Elison Borges · © 2026</div>
+</footer>
+</body>
+</html>

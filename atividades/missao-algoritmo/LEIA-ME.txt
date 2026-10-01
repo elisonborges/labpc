@@ -1,0 +1,67 @@
+LABPC — MISSÃO ALGORITMO v1.7 — RECONSTRUÇÃO PEDAGÓGICA
+
+Esta versão substitui a v1.2 para testes pedagógicos.
+
+Objetivo da reconstrução:
+- recuperar a progressão da Matriz Funcional aprovada;
+- diferenciar as identidades e mecânicas das 10 missões;
+- reduzir o padrão repetitivo “selecionar cartões e concluir”;
+- reforçar observar, ordenar, planejar, prever, investigar, depurar, criar e comparar;
+- manter navegação intuitiva e comemorações explícitas.
+
+Inclui:
+- 10 missões / 40 níveis;
+- telas de identidade próprias por missão;
+- sequências e organização;
+- descoberta formal de ALGORITMO na Missão 2;
+- experimentação de ordem na Missão 3;
+- linguagem humana × repertório do Nexo na Missão 4;
+- Modo Direções separado na Missão 5;
+- incompletude na Missão 6;
+- BUG/DEPURAR e hipótese na Missão 7;
+- clareza contextual na Missão 8;
+- autoria/oficina na Missão 9;
+- investigação e surpresa na Missão 10;
+- Desafio Final “O Resgate do Nexo”;
+- banners de conclusão e botões Próximo nível/Próxima missão;
+- progresso local independente: labpc_algoritmo_v13;
+- modo de teste do professor.
+
+IMPORTANTE:
+Esta é uma versão reconstruída para nova rodada de validação. Ainda não deve ser integrada ao LabPC Rede ou Portable.
+
+ALTERAÇÕES v1.7
+- Interface compactada para reduzir rolagem vertical.
+- Área do Nexo/mapa reduzida, sobretudo em telas de laboratório.
+- Espaçamentos de painéis, instruções, conceitos e resultados reduzidos.
+- Botão APAGAR PROGRAMA adicionado aos níveis com programação, inclusive Missão 2 Nível 3.
+- Crédito de assistência de IA preservado, porém apresentado como apoio tecnológico secundário no rodapé.
+- Regra de desbloqueio ainda NÃO ativada nesta versão de protótipo: todos os níveis permanecem acessíveis para facilitar testes do professor.
+
+ALTERAÇÕES v1.7
+- Informação de orientação sobre programa pronto movida para o topo, antes da área de interação.
+- Layout desktop redimensionado para uso confortável em zoom de navegador 100%, aproximando a densidade que antes exigia redução manual.
+- Grade do Nexo reduzida para cerca de 320 px em desktop.
+- Botões, painéis, programa, resultados e espaçamentos compactados.
+- Rodapé/créditos centralizados e com hierarquia visual secundária para o apoio tecnológico.
+
+ALTERAÇÕES v1.7
+- Orientações operacionais aparecem antes da interação, não no rodapé da atividade.
+- Missão e título do nível ficam lado a lado em desktop.
+- Área de comandos ficou mais estreita.
+- Programa, Executar, Nexo ao início e Passo a passo foram movidos para a lateral dos comandos.
+- Ferramentas Planejar/Prever/Ajuda ficam em uma faixa compacta logo abaixo.
+- Modo Direções agora mostra 'O QUE FAZER' antes das setas.
+- Mantida adaptação responsiva para telas estreitas.
+
+ALTERAÇÕES v1.7 — DESBLOQUEIO PROGRESSIVO
+- Aluno inicia apenas com Missão 1 / Nível 1 disponível.
+- Concluir um nível libera o próximo nível.
+- Concluir o Nível 4 libera a missão seguinte.
+- Níveis e missões concluídos permanecem revisitáveis.
+- Próximos níveis/missões aparecem visíveis com cadeado.
+- Acesso direto a nível bloqueado é impedido pela própria aplicação.
+- Modo Professor libera temporariamente todas as missões e níveis.
+- Modo Professor não grava liberações falsas nem altera o progresso do aluno.
+- Área de teste do professor ativa o Modo Professor antes de saltar para um nível.
+- Reiniciar apaga somente os dados desta Missão Algoritmo.

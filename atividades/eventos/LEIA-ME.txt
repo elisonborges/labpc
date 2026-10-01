@@ -1,0 +1,35 @@
+MISSÃO EVENTOS — LABPC — V1.2 DE TESTE
+
+Atividade independente para validação antes de integrar à plataforma LabPC.
+
+Objetivo pedagógico:
+Compreender que um evento é um acontecimento percebido pelo programa e que pode
+disparar uma ação/resposta.
+
+9 missões:
+1. O que é um evento?
+2. Evento ou ação?
+3. Faça acontecer!
+4. Ligue evento e ação
+5. Teste seu programa
+6. Eventos malucos
+7. Detetive de eventos
+8. Mestre dos Eventos
+
+Como testar:
+Extraia a pasta inteira e abra index.html no navegador.
+Não precisa de internet ou servidor.
+
+Idealização e desenvolvimento: Prof. Elison Borges
+© 2026 Elison Borges.
+
+9. Programador de Eventos — ordenar blocos EVENTO → AÇÃO e acionar fisicamente o evento para executar o programa.
+
+V1.1: revisão de linguagem para português brasileiro e nova atividade de programação em blocos.
+
+V1.2 — revisão após testes:
+- botão VOLTAR dentro das missões;
+- botão MISSÕES permanece disponível;
+- Missão 9 ganhou TENTAR NOVAMENTE;
+- blocos podem ser reorganizados sem atualizar a página;
+- erro de ordem mantém o aluno no desafio.

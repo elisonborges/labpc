@@ -1,0 +1,84 @@
+:root{--azul:#0B3C91;--azul2:#1E90FF;--ciano:#00C2FF;--amarelo:#FFD23F;--laranja:#FF8C3A;--verde:#4CAF50;--cinza:#667280;--claro:#F4F9FD;--graf:#212529}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e9f8ff,#f9fbfd);color:var(--graf)}button{font:inherit}.tela{display:none;min-height:100vh;padding:22px}.tela.ativa{display:block}
+#abertura{background:radial-gradient(circle at 70% 20%,#27b7ff,#0d66bd 40%,#07346f 82%);color:#fff;overflow:hidden}.marca{font-weight:900;font-size:34px}.marca span{color:var(--amarelo)}.hero{max-width:1000px;margin:8vh auto;display:flex;align-items:center;gap:50px}.nexo{width:74px;height:74px;border-radius:24px;background:#fff;display:grid;place-items:center;font-size:46px;box-shadow:0 10px 28px #001d4c2b;flex:0 0 auto}.nexo-grande{width:230px;height:230px;font-size:145px;border-radius:65px}.kicker{font-weight:900;letter-spacing:.3em}.hero h1{font-size:70px;color:var(--amarelo);margin:0}.sub{font-size:21px}.fala{background:#fff;color:var(--azul);padding:17px 20px;border-radius:20px;font-weight:700;box-shadow:0 7px 22px #001d4c1c;margin:20px 0}.fala.pequena{margin:0;flex:1}.btn{border:0;border-radius:15px;padding:14px 20px;font-weight:900;cursor:pointer;box-shadow:0 5px 15px #001d4c18}.verde{background:var(--verde);color:#fff}.azul{background:var(--azul2);color:#fff}.amarelo{background:var(--amarelo);color:#614b00}.branco{background:#fff;color:var(--azul);border:2px solid #dce9f5}footer{text-align:center;font-weight:700}
+.topbar{max-width:1180px;margin:auto;background:#fff;border-radius:20px;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 25px #0b3c9114}.topbar>div{display:flex;flex-direction:column;text-align:center;color:var(--azul)}.topbar small{color:var(--cinza);margin-top:3px}.icon{width:52px;height:52px;border:0;border-radius:16px;background:#eaf4ff;color:var(--azul);font-size:24px;cursor:pointer}.intro{max-width:1180px;margin:25px auto 18px;display:flex;align-items:center;gap:16px}.intro h2{margin:0;color:var(--azul)}.intro p{margin:4px 0;color:var(--cinza)}
+.cards{max-width:1180px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:#fff;border:0;border-radius:22px;min-height:170px;padding:18px;text-align:left;cursor:pointer;box-shadow:0 8px 24px #0b3c9114}.card:hover{transform:translateY(-2px)}.card .num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--azul);color:#fff;font-weight:900}.card .emo{display:block;font-size:43px;margin:12px 0 7px}.card strong{color:var(--azul);font-size:17px}.card small{display:block;color:var(--cinza);margin-top:5px}.card.pronta{border:3px solid #bfe6c1}.card.pronta:after{content:"PRONTA PARA TESTE";display:block;color:#258b2a;font-weight:900;font-size:11px;margin-top:10px}.card.done:after{content:"✓ CONCLUÍDA";color:#258b2a}.acoes{max-width:1180px;margin:20px auto;text-align:right}
+.dots{max-width:1180px;margin:20px auto 12px;display:flex;justify-content:center;gap:9px}.dot{width:16px;height:16px;border-radius:50%;background:#d8e2ec}.dot.ok{background:var(--azul2)}.atividade{max-width:1180px;min-height:500px;margin:auto;background:#fff;border-radius:28px;box-shadow:0 8px 28px #0b3c9114;padding:28px}.nexobar{max-width:1180px;margin:12px auto 16px;display:flex;align-items:center;gap:14px}.centro{text-align:center;max-width:800px;margin:50px auto}.centro h2{color:var(--azul)}.bigemoji{font-size:90px}
+.painel-intro{text-align:center;max-width:850px;margin:30px auto}.painel-intro h2{color:var(--azul);font-size:34px}.computador-cena{margin:25px auto;max-width:760px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;align-items:end}.obj{background:#eef8ff;border:3px solid #d6ecfb;border-radius:24px;padding:18px;min-height:150px;display:grid;place-items:center;text-align:center}.obj .svg{width:150px;height:110px}.obj b{color:var(--azul)}
+.opcoes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:900px;margin:25px auto}.opcao{border:3px solid #dceaf4;background:#fff;border-radius:24px;padding:20px;min-height:185px;cursor:pointer;display:grid;place-items:center}.opcao:hover{border-color:var(--ciano);background:#f4fcff}.opcao.errada{animation:shake .25s}.opcao.certa{border-color:var(--verde);background:#effbef}.opcao svg{width:145px;height:100px}.pergunta{text-align:center}.pergunta h2{color:var(--azul);font-size:30px}.pergunta p{color:var(--cinza)}.feedback{text-align:center;padding:40px}.feedback .check{font-size:80px}.feedback h2{color:var(--verde);font-size:34px}.feedback p{font-size:18px;color:var(--cinza)}.minirow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:22px}.tag{padding:10px 14px;border-radius:14px;background:#eaf4ff;color:var(--azul);font-weight:800}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}.modal{display:none;position:fixed;inset:0;background:#09284ebb;place-items:center;padding:20px;z-index:20}.modal.open{display:grid}.modalbox{background:#fff;border-radius:28px;padding:30px;max-width:470px;text-align:center}.modalbox .nexo{margin:auto}.modalbox h2{color:var(--azul)}.modalbox div:last-child{display:flex;gap:10px;justify-content:center}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.hero{gap:25px}.nexo-grande{width:180px;height:180px;font-size:110px}.hero h1{font-size:52px}.opcoes{grid-template-columns:1fr 1fr}.computador-cena{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.tela{padding:13px}.hero{flex-direction:column;text-align:center}.cards,.opcoes,.computador-cena{grid-template-columns:1fr}.nexobar{flex-wrap:wrap}.hero h1{font-size:42px}.atividade{padding:16px}.obj{min-height:130px}}
+
+.nexobar-topo{position:relative;z-index:2}.nexobar-topo .amarelo{min-width:118px;font-size:16px}
+
+/* Missão 4 — arrastar e soltar */
+.m4-bancada{display:grid;grid-template-columns:1fr 1.35fr;gap:24px;margin-top:22px}
+.m4-pecas{background:#eef8ff;border:3px dashed #b9dff6;border-radius:24px;padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-content:start}
+.m4-peca{background:#fff;border:3px solid #dceaf4;border-radius:20px;min-height:145px;padding:12px;display:grid;place-items:center;cursor:grab;user-select:none;touch-action:none}
+.m4-peca svg{width:120px;height:82px}.m4-peca b{color:var(--azul);font-size:13px}.m4-peca.arrastando{opacity:.45}.m4-peca.selecionada{border-color:var(--amarelo);box-shadow:0 0 0 4px #ffd23f44}.m4-peca.usada{opacity:.22;pointer-events:none}
+.m4-mesa{background:#fff7e7;border:4px solid #e8c891;border-radius:26px;padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:15px;min-height:380px}
+.m4-slot{border:4px dashed #8ea8bb;border-radius:22px;min-height:160px;display:grid;place-items:center;text-align:center;color:#587084;font-weight:900;padding:12px;background:#ffffffaa;cursor:pointer}
+.m4-slot.sobre{border-color:var(--ciano);background:#eafcff}.m4-slot.ocupado{border-style:solid;border-color:var(--verde);background:#effbef}.m4-slot.ocupado svg{width:120px;height:82px}.m4-slot.ocupado b{color:var(--azul)}.m4-slot.erro-slot{border-color:#ef4444;background:#fff0f0}
+@media(max-width:800px){.m4-bancada{grid-template-columns:1fr}.m4-pecas,.m4-mesa{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.m4-pecas,.m4-mesa{grid-template-columns:1fr}}
+
+/* Missão 5 — conceito de hardware */
+.m5-conceito{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px 0}
+.m5-conceito span{background:#eef8ff;border:2px solid #c9e8fa;border-radius:18px;padding:14px 18px;font-weight:900;color:#0b3c91}
+.m5-emoji{font-size:72px;line-height:100px}
+.m5-hardware{font-size:clamp(34px,7vw,66px);font-weight:1000;letter-spacing:3px;color:#0b3c91;background:#eef8ff;border:4px solid #b9dff6;border-radius:24px;padding:18px 28px;margin:18px auto;max-width:560px}
+.m5-frase{background:#fff7d7;border-radius:18px;padding:15px;font-weight:800;max-width:650px;margin:18px auto}
+
+/* Missão 6 — conceito de software */
+.m6-acoes{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px 0}
+.m6-acoes span{background:#f1f7ff;border:2px solid #c9ddfa;border-radius:18px;padding:14px 18px;font-weight:900;color:#0b3c91}
+.m6-icon{font-size:68px;line-height:95px}
+.m6-software{font-size:clamp(34px,7vw,66px);font-weight:1000;letter-spacing:3px;color:#0b3c91;background:#eef8ff;border:4px solid #b9dff6;border-radius:24px;padding:18px 28px;margin:18px auto;max-width:560px}
+.m6-frase{background:#eaf8ff;border-radius:18px;padding:15px;font-weight:800;max-width:700px;margin:18px auto}
+
+/* Missão 7 — classificação hardware/software */
+.m7-duas{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px auto;max-width:800px}
+.m7-caixa{border:4px solid #d8e5ef;border-radius:24px;padding:22px;display:grid;place-items:center;gap:9px;min-height:190px}
+.m7-caixa strong{font-size:24px;color:#0b3c91}.m7-caixa p{margin:0}.m7-caixa small,.m7-caixa span{font-weight:800}
+.m7-caixa.hard{background:#eef8ff;border-color:#b9dff6}.m7-caixa.soft{background:#fff7df;border-color:#f3d889}
+.m7-caixa svg{width:150px;height:95px}.m7-emoji{font-size:76px;line-height:95px}
+.m7-alvo{max-width:380px;margin:18px auto;padding:18px;border:3px solid #dceaf4;border-radius:24px;background:#fff;display:grid;place-items:center;gap:8px}
+.m7-alvo svg{width:160px;height:100px}.m7-alvo b{font-size:19px;color:#0b3c91}
+.m7-botoes{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:700px;margin:22px auto}
+.m7-escolha{border:4px solid #d8e5ef;border-radius:24px;padding:22px;background:#fff;cursor:pointer;display:grid;place-items:center;gap:6px;font-size:42px}
+.m7-escolha b{font-size:22px;color:#0b3c91}.m7-escolha small{font-size:14px;color:#667280}
+.m7-escolha.hard{background:#eef8ff}.m7-escolha.soft{background:#fff7df}
+.m7-escolha.certa{border-color:#4caf50;background:#effbef}.m7-escolha.errada{border-color:#ef4444;background:#fff0f0}
+.m7-resumo{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:20px}
+.m7-resumo span{padding:14px 18px;border-radius:18px;background:#eef8ff;font-weight:900}
+@media(max-width:650px){.m7-duas,.m7-botoes{grid-template-columns:1fr}}
+
+/* Missão 8 — Desafio do Explorador */
+.m8-regras,.m8-selos{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px auto}
+.m8-regras span,.m8-selos span{background:#eef8ff;border:2px solid #c9e8fa;border-radius:18px;padding:13px 17px;font-weight:900;color:#0b3c91}
+.m8-final{max-width:850px;margin:auto}.m8-final .check{font-size:70px}
+
+/* Item 4.7 - Persistência e telemetria */
+.telemetria-aviso{max-width:900px;margin:12px auto 28px;padding:12px 16px;border-radius:16px;
+background:#eef8ff;border:2px solid #c9e8fa;color:#35546b;font-size:14px;text-align:center}
+
+.labpc-central-btn{white-space:nowrap;font-weight:800;margin-left:8px}
+
+/* Item 5.3 revisão: Home também na tela azul de abertura */
+#abertura{position:relative}
+.labpc-home-abertura{
+  position:absolute;
+  top:18px;
+  left:18px;
+  z-index:20;
+  min-width:104px;
+  font-weight:900;
+}
+@media(max-width:700px){
+  .labpc-home-abertura{top:12px;left:12px;min-width:auto;padding:10px 14px}
+}
+
+/* V3.0.0 — separação visual entre HOME e marca LabPC */
+#abertura .marca{margin-left:125px}
+@media(max-width:700px){#abertura .marca{margin-left:108px}}

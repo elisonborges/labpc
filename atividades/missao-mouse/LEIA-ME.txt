@@ -1,0 +1,49 @@
+MISSÃO MOUSE — PROTÓTIPO INDEPENDENTE v1.0
+LabPC — Lab Pensamento Computacional
+
+Idealização e desenvolvimento: Prof. Elison Borges
+© 2026 Elison Borges
+
+COMO TESTAR
+1. Extraia o ZIP inteiro.
+2. Abra index.html no navegador.
+3. Teste preferencialmente com mouse físico.
+4. O progresso é salvo no armazenamento local do navegador.
+
+ESCOPO DESTA VERSÃO
+- 10 missões / 40 níveis.
+- Execução independente, sem servidor e sem Painel do Professor.
+- Telemetria local de protótipo no navegador.
+- Sem integração com LabPC em Rede ou Portable.
+- Sem ranking, vidas ou cronômetro competitivo.
+
+OBJETIVO DO TESTE
+Validar fluxo, clareza das instruções, progressão, clique, pressão mantida,
+arrastar/soltar, precisão e duplo clique antes da integração oficial.
+
+
+ATUALIZAÇÃO v1.0.1
+- Área de orientação do Nexo recebeu maior destaque visual.
+- Instruções ganharam contraste, borda, fundo destacado e avatar próprio.
+- Interface foi compactada para funcionar melhor com o navegador em 100%.
+- Área principal de atividade passou a se adaptar melhor à altura disponível da tela.
+
+Esta versão mantém a lógica pedagógica do protótipo v1.0.
+
+ATUALIZAÇÃO v1.1
+- Missão 5 ganhou barra visual de tempo para pressão mantida.
+- Incluído desafio de “embaixadinhas” com clique na bola.
+- Missão 6 alterna posições de origem e destino.
+- Missão 7 passou a incluir quebra-cabeça de 3 peças com referência visual.
+- Missão 9 mostra linha de caminho e exige arraste até o destino.
+- Mensagens de feedback/sucesso ganharam área maior e presença visual do Nexo.
+
+ATUALIZAÇÃO v1.2 — REFINAMENTO DOS DESAFIOS
+- Embaixadinha recebeu cenário com chão e obstáculos móveis.
+- O clique controla a altura da bola; objetivo é agir no momento adequado.
+- Contato com chão/obstáculo orienta, mas não elimina a criança.
+- Quebra-cabeça corrigido e reconstruído.
+- Progressão: 2, 3, 4 e 5 peças.
+- Cada nível usa uma referência diferente: foguete, robô, casa e carro.
+- Peças começam em ordem variada.
+- Celebração final mostra Nexo e a imagem concluída antes de avançar.

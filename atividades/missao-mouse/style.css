@@ -1,0 +1,121 @@
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
+header{height:64px;background:white;border-bottom:1px solid #dfe5ef;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+header strong{font-size:22px;margin-right:14px}header span{color:#596579}
+main{max-width:1050px;margin:auto;padding:24px}.screen{display:none}.screen.active{display:block}
+.hero{display:flex;gap:18px;align-items:center;background:white;border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 8px 30px #0000000c}
+.hero h1{margin:0 0 6px}.nexo{font-size:58px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{background:white;border:1px solid #dfe5ef;border-radius:16px;padding:16px;cursor:pointer;min-height:128px;box-shadow:0 5px 18px #0000000a}
+.card:hover{transform:translateY(-2px)}.card.done{outline:2px solid #9fcaa7}.card h3{margin:4px 0 8px;font-size:17px}.small{font-size:13px;color:#667085}
+.progress{height:12px;background:#e6eaf0;border-radius:10px;overflow:hidden;margin-top:20px}.progress div{height:100%;background:#77a884;width:0}
+button{border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;background:#263a5b;color:white}.ghost{background:#eef2f7;color:#24344f}
+.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#d9dee7;margin:3px}.dot.on{background:#607ca7}
+.instruction{background:white;border-radius:15px;padding:15px 18px;margin-bottom:12px;font-size:18px}
+.stage{position:relative;height:520px;background:white;border:2px solid #dfe5ef;border-radius:22px;overflow:hidden;user-select:none;touch-action:none}
+.feedback{min-height:44px;padding:12px 4px;font-weight:700}.actions{display:flex;gap:10px}.target,.bubble,.choice,.drag{position:absolute;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.target{width:120px;height:120px;border-radius:50%;background:#e9eff8;border:4px solid #8aa1c5;font-size:48px}
+.bubble{border-radius:50%;background:#eaf3ff;border:3px solid #8aa1c5;font-size:30px}.choice{width:120px;height:100px;border:2px solid #ccd5e3;border-radius:16px;background:#fafcff;font-size:42px}
+.hold{position:absolute;width:190px;height:90px;border-radius:18px;background:#e8eef7;border:3px solid #8aa1c5;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.drag{width:90px;height:90px;border-radius:18px;background:#eef3fa;border:3px solid #91a5c3;font-size:42px;z-index:3}
+.drop{position:absolute;width:150px;height:120px;border:3px dashed #9eabc0;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:42px;color:#8490a3}
+.folder{position:absolute;font-size:72px;cursor:pointer}.path{position:absolute;background:#e8edf5;border-radius:45px}.finish{position:absolute;font-size:56px}
+footer{text-align:center;color:#7a8495;font-size:12px;padding:18px}
+@media(max-width:700px){main{padding:12px}.stage{height:480px}.grid{grid-template-columns:1fr 1fr}}
+
+/* ===== Ajustes v1.0.1 — destaque do Nexo + escala para 100% ===== */
+body{min-height:100vh}
+header{height:54px;padding:0 18px}
+header strong{font-size:20px}
+main{max-width:980px;padding:14px 18px}
+.hero{padding:16px 18px;margin-bottom:14px}
+.hero .nexo{font-size:50px}
+.hero h1{font-size:26px}
+.card{min-height:112px;padding:13px}
+.progress{margin-top:14px}
+
+.topline{margin-bottom:8px}
+.instruction{
+  position:relative;
+  min-height:70px;
+  padding:13px 18px 13px 76px;
+  margin-bottom:9px;
+  border:2px solid #9eb4d4;
+  background:linear-gradient(135deg,#eef5ff,#fff8df);
+  box-shadow:0 5px 16px #00000012;
+  font-size:19px;
+  font-weight:700;
+  line-height:1.3;
+  display:flex;
+  align-items:center;
+}
+.instruction::before{
+  content:"🤖";
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  background:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  box-shadow:0 2px 9px #00000018;
+}
+.instruction .nexo-label{font-weight:800}
+.stage{height:min(430px,55vh)}
+.feedback{min-height:38px;padding:8px 4px}
+.actions button{padding:9px 13px}
+footer{padding:10px;font-size:11px}
+
+@media(max-height:760px){
+  header{height:48px}
+  main{padding-top:9px;padding-bottom:8px}
+  .topline{margin-bottom:5px}
+  .instruction{min-height:58px;padding-top:9px;padding-bottom:9px}
+  .stage{height:390px}
+  .feedback{min-height:32px;padding:6px 4px}
+  footer{padding:6px}
+}
+@media(max-width:700px){
+  main{padding:10px}
+  .instruction{font-size:17px;padding-left:68px}
+  .stage{height:min(410px,58vh)}
+}
+
+/* ===== v1.1 — feedback do Nexo, temporizador e desafios ampliados ===== */
+.feedback{
+  min-height:68px;margin-top:9px;padding:11px 16px 11px 66px;
+  border:2px solid #d9e2ef;border-radius:15px;background:#fff;
+  position:relative;display:flex;align-items:center;font-size:17px;
+  box-shadow:0 4px 14px #0000000d;
+}
+.feedback:not(:empty)::before{
+  content:"🤖";position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:40px;height:40px;border-radius:50%;background:#eef5ff;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+}
+.timerBox{position:absolute;left:50%;top:18px;transform:translateX(-50%);width:min(440px,72%);text-align:center}
+.timerLabel{font-weight:800;margin-bottom:7px}.timerTrack{height:24px;background:#e6ebf2;border-radius:14px;overflow:hidden;border:2px solid #c6d1df}
+.timerFill{height:100%;width:0;background:#9bb7a4;transition:width .08s linear}
+.ball{position:absolute;width:68px;height:68px;border-radius:50%;background:#f3d57a;border:3px solid #b99338;display:flex;align-items:center;justify-content:center;font-size:34px;cursor:pointer}
+.reference{position:absolute;right:24px;top:20px;width:150px;padding:10px;border:2px solid #d9e2ef;border-radius:14px;background:#fafcff;text-align:center}
+.puzzleSlot{position:absolute;width:110px;height:110px;border:3px dashed #aeb9c9;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;background:#f8fafc}
+.guideLine{position:absolute;height:14px;background:#dfe7f2;border-radius:12px;transform-origin:left center;pointer-events:none}
+@media(max-height:760px){.feedback{min-height:56px;padding-top:8px;padding-bottom:8px}.stage{height:370px}}
+
+/* ===== v1.2 — Embaixadinha com obstáculos + puzzle progressivo ===== */
+.gameGround{position:absolute;left:0;right:0;bottom:0;height:18px;background:#dce5d8;border-top:3px solid #a9b9a3}
+.obstacle{position:absolute;background:#d8e1ee;border:3px solid #8fa1bb;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:34px}
+.gameHud{position:absolute;left:18px;top:16px;background:#fff;border:2px solid #d9e2ef;border-radius:12px;padding:8px 12px;font-weight:800;z-index:4}
+.puzzleBoard{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);border:3px solid #d3dce8;border-radius:18px;background:#f8fafc}
+.pieceTray{position:absolute;left:18px;bottom:16px;right:18px;height:92px;border-radius:14px;background:#eef3f8;border:2px solid #d6dfeb}
+.puzzlePiece{position:absolute;border:3px solid #879bb9;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;cursor:grab;z-index:5}
+.puzzlePiece:active{cursor:grabbing}
+.puzzleSlot2{position:absolute;border:3px dashed #a8b5c7;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;color:#9aa7b8;font-size:13px;text-align:center}
+.reference2{position:absolute;right:16px;top:16px;width:130px;border:2px solid #d9e2ef;border-radius:14px;background:#fff;padding:8px;text-align:center;z-index:4}
+.referencePic{font-size:50px;margin-top:4px}
+.celebrate{position:absolute;inset:0;background:#ffffffee;z-index:20;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px}
+.celebrate .box{max-width:520px;border:3px solid #9eb4d4;border-radius:22px;background:#f6faff;padding:25px;font-size:20px}
+.celebrate .robot{font-size:58px;margin-bottom:8px}
