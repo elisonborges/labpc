@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Missão Eventos 1.1 — TESTE — LabPC</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eaf7ff,#fff8df);color:#18324b;min-height:100vh}
+header{text-align:center;padding:18px 12px;background:#fff;box-shadow:0 2px 12px #0001}h1{margin:0;font-size:clamp(25px,5vw,42px)}header p{margin:7px 0 0}
+main{max-width:1000px;margin:auto;padding:18px}.card{background:#fff;border-radius:22px;padding:20px;box-shadow:0 8px 26px #0002;margin-bottom:16px}
+.hidden{display:none!important}.btn{border:0;border-radius:14px;padding:12px 18px;font-size:17px;font-weight:800;cursor:pointer;background:#2563eb;color:white;margin:5px}.btn.alt{background:#fff;color:#18324b;border:2px solid #cbd8e5}.btn.good{background:#138a50}.btn:disabled{opacity:.45;cursor:not-allowed}
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.phase{padding:16px;border:2px solid #dbe7f0;border-radius:18px;background:#fff;text-align:left;cursor:pointer}.phase.locked{opacity:.45;cursor:not-allowed}.phase b{display:block;font-size:18px;margin:7px 0}.badge{display:inline-block;border-radius:999px;padding:5px 9px;background:#e8fff3;color:#12633c;font-size:12px;font-weight:bold}
+.progress{height:12px;background:#e8eef5;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:#2563eb;width:0}
+.question{text-align:center;font-size:clamp(22px,4vw,34px);font-weight:900;margin:20px 0}.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.choice{background:#f8fbff;border:2px solid #cddcea;border-radius:16px;padding:16px;font-size:18px;font-weight:700;cursor:pointer;min-height:74px}.choice:hover{border-color:#2563eb}
+.feedback{text-align:center;min-height:34px;font-size:18px;font-weight:800;margin:12px}.ok{color:#138a50}.no{color:#b6472d}
+.stage{position:relative;height:250px;background:linear-gradient(#bfe9ff 0 72%,#b9e49a 72%);border-radius:20px;overflow:hidden;border:3px solid #fff;box-shadow:inset 0 0 0 2px #c6d7e4}
+#hero{position:absolute;width:62px;height:102px;left:50%;bottom:35px;transform:translateX(-50%);transition:left .18s,bottom .18s,transform .18s}
+#hero.fallback{width:58px;height:58px;border-radius:50%;background:#ffd43b;border:5px solid #18324b}
+.keys{text-align:center;margin:14px}.key{display:inline-block;padding:10px 15px;border:2px solid #9eb3c5;border-bottom-width:5px;border-radius:10px;background:#fff;font-weight:900;margin:5px}
+.rulegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;max-width:620px;margin:auto}.rulegrid select{font-size:17px;padding:10px;border-radius:10px}
+.bigrule{font-size:22px;text-align:center;background:#f4f9ff;border-radius:16px;padding:15px;margin:12px}
+.tip{background:#fff8df;border:2px solid #f1c85a;border-radius:14px;padding:12px;margin:12px 0}.center{text-align:center}.stars{font-size:25px}
+footer{text-align:center;padding:20px;color:#66788a;font-size:12px;line-height:1.5}
+
+.block-area{display:grid;grid-template-columns:1fr;gap:10px;max-width:680px;margin:16px auto}
+.codeblock{border:0;border-radius:14px;padding:14px 16px;text-align:left;font-size:17px;font-weight:800;cursor:pointer;background:#f1f7ff;border-left:9px solid #2563eb}
+.codeblock.event{background:#fff4c7;border-left-color:#e5a800}.codeblock.action{background:#e8f4ff;border-left-color:#2980b9}.codeblock.selected{outline:4px solid #63a4ff}
+.programline{max-width:680px;margin:12px auto;padding:14px;border:2px dashed #9db5c8;border-radius:16px;min-height:64px;background:#fbfdff}
+</style>
+<script src="../../shared/labpc.js"></script>
+<style id="labpc-central-back-style">
+.labpc-central-back{position:fixed;top:14px;left:14px;z-index:9999;background:#fff;border:2px solid #d7e1ea;border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.10)}
+.labpc-central-back:hover{transform:translateY(-1px)}
+@media(max-width:700px){.labpc-central-back{position:static;margin:10px 14px 0}}
+</style>
+</head>
+<body>
+<button class="labpc-central-back" onclick="goCentral()">🏠 Voltar à Central</button>
+<header><h1>⚡ Missão Eventos 1.1 — TESTE</h1><p>Descubra como os acontecimentos fazem programas reagirem!</p></header>
+<main><div class="tip center"><b>VERSÃO DE TESTE 1.1</b> — progresso separado da Missão Eventos oficial.</div>
+<section id="home" class="card">
+ <div class="tip"><b>💡 Ideia principal:</b> um <b>EVENTO</b> é algo que acontece. Quando o programa percebe o evento, ele executa uma <b>AÇÃO</b>.<br><b>EVENTO → AÇÃO</b></div>
+ <div class="center"><button class="btn" onclick="showMap()">🚀 COMEÇAR</button><button class="btn alt" onclick="resetGame()">↻ Reiniciar progresso</button></div>
+</section>
+<section id="mapCard" class="card hidden"><h2>🗺️ Mapa das missões</h2><p>Complete uma missão para liberar a próxima.</p><div id="map" class="map"></div></section>
+<section id="game" class="card hidden">
+ <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><button class="btn alt" onclick="goBack()">← Voltar</button><button class="btn alt" onclick="showMap()">🗺️ Missões</button></div><b id="phaseTitle"></b><span id="counter"></span></div>
+ <div class="progress"><div id="bar"></div></div><div id="content"></div>
+ <div id="feedback" class="feedback"></div>
+</section>
+</main>
+<script>
+const KEY='missaoEventosV11Teste';
+let save=load(), current=0, step=0, score=0, rules={ArrowLeft:'left',ArrowRight:'right',' ':'jump'};
+function load(){try{let x=JSON.parse(localStorage.getItem(KEY)||'{}');return {unlocked:Math.max(1,Math.min(9,Number(x.unlocked)||1)),done:x.done||{}}}catch(e){return {unlocked:1,done:{}}}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+const phases=[
+ {t:'O que é um evento?',d:'Evento → ação',type:'quiz',qs:[
+  ['A campainha tocou. Qual foi o EVENTO?',['A campainha tocar','Abrir a porta','Sentar no sofá'],0],
+  ['Começou a chover. Você abriu o guarda-chuva. Qual foi a AÇÃO?',['A chuva começar','Abrir o guarda-chuva','O céu ficar azul'],1],
+  ['O alarme tocou e todos olharam para ele. O que aconteceu primeiro?',['Todos olharam','O alarme tocou','Nada aconteceu'],1]]},
+ {t:'Evento ou ação?',d:'Aprenda a separar',type:'classify',items:[
+  ['⌨️ Apertar a tecla ESPAÇO','EVENTO'],['🦘 O personagem pular','AÇÃO'],['🖱️ Clicar no botão','EVENTO'],['💡 A luz acender','AÇÃO'],['🚨 Sensor perceber fumaça','EVENTO'],['🔔 O alarme tocar','AÇÃO']]},
+ {t:'Faça acontecer!',d:'Use o teclado',type:'keys'},
+ {t:'Ligue evento e ação',d:'Monte as regras',type:'rules'},
+ {t:'Teste seu programa',d:'Crie e experimente',type:'program'},
+ {t:'Eventos malucos',d:'A regra pode mudar',type:'crazy'},
+ {t:'Detetive de eventos',d:'Descubra a causa',type:'quiz',qs:[
+  ['No jogo, o personagem pulou. Qual evento pode ter causado isso?',['A tecla ESPAÇO foi pressionada','A cadeira foi arrastada','O relógio marcou 10h'],0],
+  ['Um botão ficou verde logo depois de um clique. Qual é o EVENTO?',['Ficar verde','O clique','A cor verde'],1],
+  ['Um sensor percebeu muito calor e disparou um alerta. Qual é a AÇÃO?',['Perceber calor','O sensor','Disparar o alerta'],2],
+  ['Quando a seta → é pressionada, o personagem anda. Quem decidiu essa resposta?',['O programador','A própria tecla','O monitor'],0]]},
+ {t:'Mestre dos Eventos',d:'Desafio final',type:'final'},
+ {t:'Programador de Eventos',d:'Coloque os blocos em ordem',type:'blocks'}
+];
+function show(id){['home','mapCard','game'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id))}
+function goCentral(){ window.location.href='../../index.html'; }
+function showMap(){show('mapCard');renderMap()}
+function goBack(){
+ setfb('');
+ if(current===9 && blockReady) blockReady=false;
+ if(step>0){step--;render()} else showMap();
+}
+function renderMap(){let m=document.getElementById('map');m.innerHTML='';phases.forEach((p,i)=>{let n=i+1,open=n<=save.unlocked,done=save.done[n];let b=document.createElement('button');b.className='phase'+(open?'':' locked');b.disabled=!open;b.innerHTML=`<span class="badge">${done?'✓ CONCLUÍDA':open?'🔓 LIBERADA':'🔒 BLOQUEADA'}</span><b>${n}. ${p.t}</b><small>${p.d}</small>`;b.onclick=()=>start(n);m.appendChild(b)})}
+function start(n){current=n;step=0;score=0;show('game');document.getElementById('phaseTitle').textContent=`Missão ${n}: ${phases[n-1].t}`;render()}
+function setfb(t,ok=true){let f=document.getElementById('feedback');f.className='feedback '+(ok?'ok':'no');f.textContent=t}
+function prog(a,b){document.getElementById('counter').textContent=`${a}/${b}`;document.getElementById('bar').style.width=(a/b*100)+'%'}
+function complete(){save.done[current]=true;save.unlocked=Math.max(save.unlocked,Math.min(9,current+1));persist();document.getElementById('content').innerHTML=`<div class="center"><div style="font-size:70px">🏆</div><h2>Missão concluída!</h2><p>Você aprendeu mais sobre <b>eventos e ações</b>.</p><button class="btn good" onclick="showMap()">CONTINUAR →</button></div>`;prog(1,1);setfb('Muito bem!')}
+function render(){
+ setfb('');let p=phases[current-1],c=document.getElementById('content');
+ if(p.type==='quiz'){let q=p.qs[step];prog(step+1,p.qs.length);c.innerHTML=`<div class="question">${q[0]}</div><div class="choices">${q[1].map((x,i)=>`<button class="choice" onclick="answerQuiz(${i})">${x}</button>`).join('')}</div>`}
+ if(p.type==='classify'){let it=p.items[step];prog(step+1,p.items.length);c.innerHTML=`<div class="question">${it[0]}</div><p class="center">Isso é um...</p><div class="choices"><button class="choice" onclick="answerClass('EVENTO')">⚡ EVENTO</button><button class="choice" onclick="answerClass('AÇÃO')">🎬 AÇÃO</button></div>`}
+ if(p.type==='keys') renderKeys();
+ if(p.type==='rules') renderRules();
+ if(p.type==='program') renderProgram();
+ if(p.type==='crazy') renderCrazy();
+ if(p.type==='final') renderFinal();
+ if(p.type==='blocks') renderBlocks();
+}
+function answerQuiz(i){let q=phases[current-1].qs[step];if(i===q[2]){setfb('✓ Isso!');score++;step++;setTimeout(()=>step>=phases[current-1].qs.length?complete():render(),450)}else setfb('Quase! Pense no que aconteceu primeiro e no que aconteceu como resposta.',false)}
+function answerClass(x){let it=phases[current-1].items[step];if(x===it[1]){setfb('✓ Muito bem!');step++;setTimeout(()=>step>=phases[current-1].items.length?complete():render(),400)}else setfb(x==='EVENTO'?'Isso parece ser a ação que aconteceu depois do evento.':'Pense no que aconteceu primeiro: esse é o evento.',false)}
+function heroHTML(){return `<div class="stage"><img id="hero" src="assets/personagem.png" onerror="this.outerHTML='<div id=&quot;hero&quot; class=&quot;fallback&quot;></div>'"></div>`}
+let keySeq=['ArrowLeft','ArrowRight',' '];
+function renderKeys(){prog(step+1,3);let labels={'ArrowLeft':'←','ArrowRight':'→',' ':'ESPAÇO'},acts={'ArrowLeft':'andar para a esquerda','ArrowRight':'andar para a direita',' ':'pular'};document.getElementById('content').innerHTML=heroHTML()+`<div class="question">Pressione <span class="key">${labels[keySeq[step]]}</span></div><p class="center">EVENTO: pressionar a tecla → AÇÃO: ${acts[keySeq[step]]}</p>`}
+document.addEventListener('keydown',e=>{if(current===3&&!document.getElementById('game').classList.contains('hidden')){e.preventDefault();if(e.key===keySeq[step]){animate(e.key);setfb('⚡ Evento detectado! O personagem respondeu.');step++;setTimeout(()=>step>=3?complete():render(),650)}else setfb('Use a tecla mostrada na missão.',false)}if((current===5||current===6)&&!document.getElementById('game').classList.contains('hidden')){if(['ArrowLeft','ArrowRight',' '].includes(e.key)){e.preventDefault();if(current===5&&!predicted){setfb('Primeiro faça sua previsão.',false);return;}act(rules[e.key]);if(current===5&&e.key===' '){tested=true;document.getElementById('programCompare')?.classList.remove('hidden');setfb('⚡ EVENTO detectado → 🎬 AÇÃO executada. Compare com sua previsão.');}}}})
+function animate(k){setTimeout(()=>act(k==='ArrowLeft'?'left':k==='ArrowRight'?'right':'jump'),20)}
+function act(a){let h=document.getElementById('hero');if(!h)return;if(a==='left')h.style.left='32%';if(a==='right')h.style.left='68%';if(a==='jump'){h.style.bottom='105px';setTimeout(()=>h.style.bottom='35px',300)}if(a==='spin'){h.style.transform='translateX(-50%) rotate(360deg)';setTimeout(()=>h.style.transform='translateX(-50%)',400)}}
+function renderRules(){prog(1,1);document.getElementById('content').innerHTML=`<div class="question">Complete as regras</div><div class="rulegrid">
+<b>Quando ← for pressionada</b><select id="r1"><option value="">Escolha...</option><option value="left">andar para a esquerda</option><option value="right">andar para a direita</option><option value="jump">pular</option></select>
+<b>Quando → for pressionada</b><select id="r2"><option value="">Escolha...</option><option value="right">andar para a direita</option><option value="left">andar para a esquerda</option><option value="jump">pular</option></select>
+<b>Quando ESPAÇO for pressionado</b><select id="r3"><option value="">Escolha...</option><option value="jump">pular</option><option value="left">andar para a esquerda</option><option value="right">andar para a direita</option></select></div><div class="center"><button class="btn" onclick="checkRules()">TESTAR REGRAS</button></div>`}
+function checkRules(){const r1=document.getElementById('r1'),r2=document.getElementById('r2'),r3=document.getElementById('r3');if(r1.value==='left'&&r2.value==='right'&&r3.value==='jump'){setfb('✓ Você montou o programa!');setTimeout(complete,500)}else setfb('Alguma regra está trocada. Leia cada evento com atenção.',false)}
+let predicted=false,tested=false;
+function renderProgram(){rules={ArrowLeft:'left',ArrowRight:'right',' ':'jump'};predicted=false;tested=false;prog(1,1);document.getElementById('content').innerHTML=heroHTML()+`
+<div class="question">❓ PREVEJA: se você apertar ESPAÇO, o que acontecerá?</div>
+<div class="choices"><button class="choice" onclick="programPredict('left')">Andará para a esquerda</button><button class="choice" onclick="programPredict('jump')">Pulará</button><button class="choice" onclick="programPredict('right')">Andará para a direita</button></div>
+<div id="programTest" class="tip hidden"><b>▶ TESTE:</b> agora pressione <span class="key">ESPAÇO</span> e observe o personagem.</div>
+<div id="programCompare" class="hidden center"><p><b>🔎 COMPARE:</b> aconteceu o que você previu?</p><button class="btn good" onclick="complete()">SIM, COMPAREI O EVENTO E A AÇÃO</button></div>`;}
+function programPredict(x){predicted=true;document.getElementById('programTest').classList.remove('hidden');setfb(x==='jump'?'Boa previsão! Agora teste para confirmar.':'Previsão registrada. Agora teste para descobrir.',x==='jump');}
+function renderCrazy(){rules={ArrowLeft:'jump',ArrowRight:'spin',' ':'right'};prog(1,1);document.getElementById('content').innerHTML=heroHTML()+`<div class="bigrule">😈 NOVAS REGRAS:<br><b>← → PULAR &nbsp;&nbsp; | &nbsp;&nbsp; → → GIRAR &nbsp;&nbsp; | &nbsp;&nbsp; ESPAÇO → ANDAR</b></div><div class="keys"><span class="key">←</span><span class="key">→</span><span class="key">ESPAÇO</span></div><div class="tip"><b>⏳ E se você não apertar nenhuma tecla?</b> Observe por alguns segundos: o personagem espera. Sem o evento, a ação não começa sozinha.</div><div class="center"><button class="btn" onclick="complete()">TESTEI E OBSERVEI A ESPERA</button></div><p class="center">A tecla não escolhe a ação. <b>O programador cria a regra!</b></p>`}
+function renderFinal(){prog(step+1,4);let qs=[
+ ['Qual sequência explica melhor um programa orientado por eventos?',['AÇÃO → EVENTO','EVENTO → AÇÃO','TELA → COMPUTADOR'],1],
+ ['Você aperta ESPAÇO e o personagem pula. Qual é o evento?',['O personagem pular','Apertar ESPAÇO','A tela acender'],1],
+ ['Se o programador mudar a regra, a mesma tecla pode fazer outra ação?',['Sim','Não'],0],
+ ['Um sensor percebe calor e liga um alerta. O sensor perceber calor é...',['um evento','uma pontuação','um desenho'],0]
+];let q=qs[step];document.getElementById('content').innerHTML=`<div class="stars">⭐ ⭐ ⭐</div><div class="question">${q[0]}</div><div class="choices">${q[1].map((x,i)=>`<button class="choice" onclick="finalAns(${i})">${x}</button>`).join('')}</div>`}
+function finalAns(i){let ans=[1,1,0,0][step];if(i===ans){setfb('✓ Excelente!');step++;setTimeout(()=>step>=4?complete():render(),400)}else setfb('Pense: o que acontece primeiro? E qual resposta vem depois?',false)}
+
+const blockChallenges=[
+ {goal:'Faça o personagem PULAR quando ESPAÇO for pressionado.',blocks:[
+  ['event','⚡ quando a tecla ESPAÇO for pressionada'],['action','🎬 faça o personagem PULAR']],event:' ',action:'jump'},
+ {goal:'Faça o personagem ANDAR PARA A DIREITA quando → for pressionada.',blocks:[
+  ['action','🎬 faça o personagem ANDAR PARA A DIREITA'],['event','⚡ quando a tecla → for pressionada']],event:'ArrowRight',action:'right'},
+ {goal:'Faça o personagem ANDAR PARA A ESQUERDA quando ← for pressionada.',blocks:[
+  ['event','⚡ quando a tecla ← for pressionada'],['action','🎬 faça o personagem ANDAR PARA A ESQUERDA']],event:'ArrowLeft',action:'left'}
+];
+let blockOrder=[], blockReady=false, blockExpected=null;
+function renderBlocks(){
+ let ch=blockChallenges[step];prog(step+1,blockChallenges.length);blockOrder=[];blockReady=false;blockExpected=ch;
+ let shuffled=[...ch.blocks].sort(()=>Math.random()-.5);
+ document.getElementById('content').innerHTML=heroHTML()+`
+ <div class="question">🧩 ${ch.goal}</div>
+ <div class="tip"><b>1.</b> Clique primeiro no bloco de <b>EVENTO</b> e depois no bloco de <b>AÇÃO</b>.<br><b>2.</b> Clique em MONTAR PROGRAMA.<br><b>3.</b> Acione o evento no teclado para testar.</div>
+ <div class="block-area">${shuffled.map((b,i)=>`<button class="codeblock ${b[0]}" data-kind="${b[0]}" data-text="${b[1]}" onclick="pickBlock(this)">${b[1]}</button>`).join('')}</div>
+ <div id="programline" class="programline">Seu programa aparecerá aqui...</div>
+ <div class="center"><button class="btn" onclick="buildProgram()">🧱 MONTAR PROGRAMA</button><button class="btn alt" onclick="resetBlocks()">🔄 TENTAR NOVAMENTE</button></div>`;
+}
+function pickBlock(el){
+ if(el.classList.contains('selected'))return;
+ if(blockOrder.length>=2)return;
+ el.classList.add('selected');blockOrder.push({kind:el.dataset.kind,text:el.dataset.text});
+ document.getElementById('programline').innerHTML=blockOrder.map((b,i)=>`<div><b>${i+1}.</b> ${b.text}</div>`).join('');
+}
+function resetBlocks(){
+ blockOrder=[];blockReady=false;setfb('');renderBlocks();
+}
+function buildProgram(){
+ if(blockOrder.length<2){setfb('Escolha os dois blocos antes de montar o programa.',false);return}
+ if(blockOrder[0].kind!=='event'||blockOrder[1].kind!=='action'){setfb('A ordem ainda não está certa. O que precisa acontecer primeiro: o EVENTO ou a AÇÃO? Clique em TENTAR NOVAMENTE para reorganizar os blocos.',false);return}
+ blockReady=true;setfb('✓ Programa montado! Agora acione o EVENTO usando o teclado.');
+}
+document.addEventListener('keydown',e=>{
+ if(current!==9||document.getElementById('game').classList.contains('hidden')||!blockReady)return;
+ if(['ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+ if(e.key===blockExpected.event){
+   act(blockExpected.action);setfb('⚡ Evento detectado → ação executada! Muito bem!');
+   blockReady=false;step++;setTimeout(()=>step>=blockChallenges.length?complete():renderBlocks(),850);
+ }else if(['ArrowLeft','ArrowRight',' '].includes(e.key)){
+   setfb('Esse não é o evento que você programou. Observe o primeiro bloco.',false);
+ }
+});
+
+function resetGame(){if(confirm('Reiniciar o progresso da Missão Eventos neste computador?')){try{localStorage.removeItem(KEY)}catch(e){}save=load();showMap()}}
+</script>
+
+<script>
+(function(){
+  function labEvent(event,data){
+    try{ if(window.LabPC&&LabPC.event) LabPC.event(event,Object.assign({activity:'eventos'},data||{})); }catch(e){}
+  }
+  try{
+    if(window.LabPC){
+      LabPC.connect('aluno');
+      LabPC.presence('eventos','jogando');
+      LabPC.on(function(m){
+        if(!m||m.type!=='command') return;
+        if(m.command==='goCentral') location.href='../../index.html';
+        if(m.command==='resetActivity'){
+          try{localStorage.removeItem('missaoEventosV1')}catch(e){}
+          location.reload();
+        }
+      });
+    }
+  }catch(e){}
+  const oldStart=window.start;
+  if(typeof oldStart==='function') window.start=function(n){labEvent('start',{level:n,status:'jogando'});return oldStart.apply(this,arguments)};
+  const oldComplete=window.complete;
+  if(typeof oldComplete==='function') window.complete=function(){labEvent('complete',{level:current,progress:'concluida',status:'concluida'});return oldComplete.apply(this,arguments)};
+  const oldSetfb=window.setfb;
+  if(typeof oldSetfb==='function') window.setfb=function(t,ok){if(ok===false)labEvent('error',{level:current,errorsDelta:1,status:'jogando'});return oldSetfb.apply(this,arguments)};
+  window.addEventListener('beforeunload',()=>{try{LabPC.presence('eventos','saiu')}catch(e){}});
+})();
+</script>
+</body></html>
