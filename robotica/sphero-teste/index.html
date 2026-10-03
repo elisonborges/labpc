@@ -10,7 +10,7 @@ main{max-width:1240px;margin:auto;padding:8px 18px}.card{background:#fff;border-
 .robot{font-size:52px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.38;font-size:13px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
-<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03.1 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
 <main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
@@ -38,13 +38,12 @@ const SERVICE_API='00010001-574f-4f20-5370-6865726f2121';
 const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
 const CHAR_HANDSHAKE='00020005-574f-4f20-5370-6865726f2121';
 const CHAR_API='00010002-574f-4f20-5370-6865726f2121';
-const CHAR_API_RX='00010003-574f-4f20-5370-6865726f2121';
-let apiChar=null,apiRx=null,seq=0;const pending=new Map();
+let apiChar=null,seq=0;const pending=new Map();
 let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
 function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
-function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;apiRx=null;server=null}
+function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;server=null}
 async function connect(){
  diag.textContent='';
  if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
@@ -57,17 +56,16 @@ async function connect(){
   server=await device.gatt.connect();
   log('GATT conectado: sim');
   const api=await server.getPrimaryService(SERVICE_API); log('Serviço API Sphero: OK');
-  apiChar=await api.getCharacteristic(CHAR_API); log('Canal de comandos TX: OK');
+  apiChar=await api.getCharacteristic(CHAR_API); log('Canal API v2: OK');
   try{
-   apiRx=await api.getCharacteristic(CHAR_API_RX);
-   await apiRx.startNotifications();
-   apiRx.addEventListener('characteristicvaluechanged',e=>{
+   await apiChar.startNotifications();
+   apiChar.addEventListener('characteristicvaluechanged',e=>{
     const a=new Uint8Array(e.target.value.buffer);
     log('RX ← '+[...a].map(x=>x.toString(16).padStart(2,'0')).join(' '));
     handleRx(a);
    });
-   log('Canal de respostas RX: escutando');
-  }catch(rxErr){log('RX indisponível: '+rxErr.name+' — '+rxErr.message)}
+   log('Respostas API v2: escutando na característica 00010002');
+  }catch(rxErr){log('Notificações API v2 indisponíveis: '+rxErr.name+' — '+rxErr.message)}
   try{
    const init=await server.getPrimaryService(SERVICE_INIT); log('Serviço de inicialização: OK');
    const hs=await init.getCharacteristic(CHAR_HANDSHAKE);
