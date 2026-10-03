@@ -113,8 +113,13 @@ async function identifyRobot(){
  try{
   setStatus('✨ Identificando '+(device?.name||'Sphero')+'...','ok');
   const colors=[[255,0,0],[0,255,0],[0,0,255],[255,255,255]];
-  for(const [r,g,b] of colors){await sendLedRaw(r,g,b,false);await wait(320)}
-  await sendLedRaw(128,0,180,false);
+  log('Identificação iniciada: '+(device?.name||'Sphero'));
+  for(const [r,g,b] of colors){
+   await sendLedRaw(r,g,b,false);
+   await wait(900);
+  }
+  await wait(500);
+  await sendLedRaw(0,0,0,false);
   setStatus('✨ Este é o '+(device?.name||'Sphero')+'.','ok');
   log('Identificação visual concluída: '+(device?.name||'Sphero'));
  }finally{btn.disabled=false}
