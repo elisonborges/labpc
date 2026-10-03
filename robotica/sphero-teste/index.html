@@ -10,24 +10,35 @@ main{max-width:1240px;margin:auto;padding:20px 24px}.card{background:#fff;border
 .robot{font-size:78px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:18px;align-items:start}.steps{line-height:1.65}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:90px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
-<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 01 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 02 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
 <main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
 <div class="row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
+<div id="ledPanel" style="display:none;margin-top:18px;border-top:2px solid #eef2f6;padding-top:16px">
+ <div style="font-weight:900;text-align:center;margin-bottom:10px">💡 TESTE DE LED</div>
+ <div class="row">
+  <button class="btn" onclick="setLed(255,0,0)">🔴 VERMELHO</button>
+  <button class="btn" onclick="setLed(0,255,0)">🟢 VERDE</button>
+  <button class="btn" onclick="setLed(0,0,255)">🔵 AZUL</button>
+  <button class="btn alt" onclick="setLed(0,0,0)">⚫ APAGAR</button>
+ </div>
+</div>
 </section></div><div class="side">
-<section class="card steps"><b>Como testar</b><br>1. Ligue o Bluetooth do computador.<br>2. Acorde o BOLT/BOLT+ e deixe-o próximo ao computador.<br>3. Use Chrome ou Edge.<br>4. Clique em <b>CONECTAR SPHERO</b> e escolha o robô na janela do navegador.<br>5. Se a conexão funcionar, esta página mostrará o nome do robô e confirmará o acesso aos serviços Sphero.</section>
+<section class="card steps"><b>Como testar</b><br>1. Ligue o Bluetooth do computador.<br>2. Acorde o BOLT/BOLT+ e deixe-o próximo ao computador.<br>3. Use Chrome ou Edge.<br>4. Clique em <b>CONECTAR SPHERO</b> e escolha o robô na janela do navegador.<br>5. Depois de conectar, use os botões <b>VERMELHO, VERDE, AZUL</b> e <b>APAGAR</b> para testar o LED do robô.</section>
 <section class="card"><b>Diagnóstico</b><div id="diag" class="tech">Nenhum teste executado.</div></section>
 </div></div></main><footer>LabPC — Lab Pensamento Computacional · Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges</footer>
 <script>
 const SERVICE_API='00010001-574f-4f20-5370-6865726f2121';
 const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
 const CHAR_HANDSHAKE='00020005-574f-4f20-5370-6865726f2121';
+const CHAR_API='00010002-574f-4f20-5370-6865726f2121';
+let apiChar=null,seq=0;
 let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
 function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
-function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;server=null}
+function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';apiChar=null;server=null}
 async function connect(){
  diag.textContent='';
  if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
@@ -40,6 +51,7 @@ async function connect(){
   server=await device.gatt.connect();
   log('GATT conectado: sim');
   const api=await server.getPrimaryService(SERVICE_API); log('Serviço API Sphero: OK');
+  apiChar=await api.getCharacteristic(CHAR_API); log('Canal de comandos: OK');
   try{
    const init=await server.getPrimaryService(SERVICE_INIT); log('Serviço de inicialização: OK');
    const hs=await init.getCharacteristic(CHAR_HANDSHAKE);
@@ -47,12 +59,30 @@ async function connect(){
    log('Handshake BLE: enviado');
   }catch(e){log('Inicialização/handshake: '+e.message)}
   setStatus('✅ CONECTADO: '+(device.name||'Sphero BOLT/BOLT+'),'ok');
-  bCon.disabled=true;bDis.disabled=false;
+  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';
  }catch(e){
   setStatus(e.name==='NotFoundError'?'Conexão cancelada ou nenhum robô selecionado.':'Não foi possível concluir a conexão.','no');
   log('Erro: '+e.name+' — '+e.message);
  }
 }
+
+function escByte(b,out){if(b===0xAB){out.push(0xAB,0x23)}else if(b===0x8D){out.push(0xAB,0x05)}else if(b===0xD8){out.push(0xAB,0x50)}else out.push(b)}
+function packet(did,cid,data=[]){
+ const flags=0x0A,s=seq++&255;
+ const body=[flags,0x12,did,cid,s,...data];
+ let chk=0;for(const b of body)chk=(chk+b)&255;chk=(~chk)&255;
+ const out=[0x8D];for(const b of [...body,chk])escByte(b,out);out.push(0xD8);return new Uint8Array(out)
+}
+async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indisponível.');if(apiChar.properties.writeWithoutResponse)await apiChar.writeValueWithoutResponse(p);else await apiChar.writeValue(p)}
+async function setLed(r,g,b){
+ try{
+  // IO device: define LEDs RGB principais. Teste deliberadamente isolado antes de movimento.
+  const p=packet(0x1A,0x0E,[0x00,0x00,0x00,0x07,r,g,b]);
+  await sendPacket(p);log('Comando LED enviado: RGB('+r+','+g+','+b+')');
+  setStatus('💡 Comando de LED enviado ao Sphero.','ok');
+ }catch(e){setStatus('Não foi possível enviar o comando de LED.','no');log('LED: '+e.name+' — '+e.message)}
+}
+
 function disconnect(){if(device?.gatt?.connected)device.gatt.disconnect();else disconnected()}
 bCon.addEventListener('click',connect);bDis.addEventListener('click',disconnect);
 </script></body></html>
