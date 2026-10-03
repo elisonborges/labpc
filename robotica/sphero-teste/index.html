@@ -4,10 +4,10 @@
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eaf7ff,#fff8df);color:#18324b;min-height:100vh}
 header{background:#fff;padding:8px 20px;box-shadow:0 2px 12px #0001}header .head{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px}header .brand{display:flex;align-items:center;gap:10px}header .brandicon{font-size:30px}header h1{margin:0;font-size:clamp(22px,2.5vw,30px)}header p{margin:3px 0 0;font-size:13px}
-main{max-width:1240px;margin:auto;padding:12px 20px}.card{background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 8px 26px #0002;margin-bottom:10px}
+main{max-width:1240px;margin:auto;padding:8px 18px}.card{background:#fff;border-radius:18px;padding:11px 14px;box-shadow:0 8px 26px #0002;margin-bottom:10px}
 .status{padding:18px;border-radius:16px;background:#eef5fb;font-size:18px;font-weight:800;text-align:center;margin:18px 0}.ok{background:#e8fff3;color:#12633c}.no{background:#fff0eb;color:#a33b24}
 .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}.connect-row{flex-wrap:nowrap}.led-row{flex-wrap:nowrap}.led-row .btn{padding:12px 14px;font-size:15px}@media(max-width:560px){.connect-row,.led-row{flex-wrap:wrap}}.btn{border:0;border-radius:14px;padding:14px 20px;font-size:17px;font-weight:800;cursor:pointer;background:#2563eb;color:#fff}.btn.alt{background:#fff;color:#18324b;border:2px solid #cbd8e5}.btn:disabled{opacity:.45;cursor:not-allowed}
-.robot{font-size:62px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.48;font-size:14px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
+.robot{font-size:52px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.38;font-size:13px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
 <header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 02 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
@@ -17,7 +17,7 @@ footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 <div id="battery" style="display:none;margin:10px auto 16px;max-width:360px">
  <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>🔋 Bateria do Sphero</span><span id="batteryText">conectado</span></div>
  <div style="height:14px;background:#e7edf3;border-radius:99px;overflow:hidden;margin-top:6px"><div id="batteryBar" style="height:100%;width:100%;background:#72b67a"></div></div>
- <div style="font-size:11px;color:#66788a;margin-top:4px">Percentual real será ativado após validarmos a leitura de energia do BOLT/BOLT+.</div>
+ <div style="font-size:10px;color:#66788a;margin-top:3px">Leitura real será ativada após a validação dos comandos.</div>
 </div>
 <div class="row connect-row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
 <div id="ledPanel" style="display:none;margin-top:12px;border-top:2px solid #eef2f6;padding-top:10px">
@@ -82,18 +82,22 @@ async function connect(){
 }
 
 function escByte(b,out){if(b===0xAB){out.push(0xAB,0x23)}else if(b===0x8D){out.push(0xAB,0x05)}else if(b===0xD8){out.push(0xAB,0x50)}else out.push(b)}
-function packet(did,cid,data=[]){
- const flags=0x0A,s=seq++&255;
- const body=[flags,0x12,did,cid,s,...data];
- let chk=0;for(const b of body)chk=(chk+b)&255;chk=(~chk)&255;
+function packet(did,cid,data=[],targetId=null){
+ let flags=0x0A; // solicita resposta + reinicia timeout de inatividade
+ if(targetId!==null) flags|=0x10; // pacote contém Target ID
+ const s=seq++&255;
+ const body=[flags];
+ if(targetId!==null) body.push(targetId);
+ body.push(did,cid,s,...data);
+ const chk=0xFF-(body.reduce((a,b)=>a+b,0)&0xFF);
  const out=[0x8D];for(const b of [...body,chk])escByte(b,out);out.push(0xD8);return new Uint8Array(out)
 }
 async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indisponível.');if(apiChar.properties.writeWithoutResponse)await apiChar.writeValueWithoutResponse(p);else await apiChar.writeValue(p)}
 async function setLed(r,g,b){
  try{
   // IO device: define LEDs RGB principais. Teste deliberadamente isolado antes de movimento.
-  const p=packet(0x1A,0x1A,[0x00,0x00,0x00,0x03,r,g,b,r,g,b]);
-  await sendPacket(p);log('Comando LED enviado: RGB('+r+','+g+','+b+')');
+  const p=packet(0x1A,0x1C,[0x3F,r,g,b,r,g,b],0x11);
+  await sendPacket(p);log('TX LED BOLT → TID 0x11 / DID 0x1A / CID 0x1C / RGB('+r+','+g+','+b+')');
   setStatus('🧪 Pacote de teste enviado. Verifique o robô e o Diagnóstico.','ok');
  }catch(e){setStatus('Não foi possível enviar o comando de LED.','no');log('LED: '+e.name+' — '+e.message)}
 }
