@@ -10,14 +10,14 @@ main{max-width:1240px;margin:auto;padding:8px 18px}.card{background:#fff;border-
 .robot{font-size:52px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.38;font-size:13px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
-<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 02 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
 <main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
 <div id="battery" style="display:none;margin:10px auto 16px;max-width:360px">
  <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>🔋 Bateria do Sphero</span><span id="batteryText">conectado</span></div>
  <div style="height:14px;background:#e7edf3;border-radius:99px;overflow:hidden;margin-top:6px"><div id="batteryBar" style="height:100%;width:100%;background:#72b67a"></div></div>
- <div style="font-size:10px;color:#66788a;margin-top:3px">Leitura real será ativada após a validação dos comandos.</div>
+ <div style="font-size:10px;color:#66788a;margin-top:3px">Leitura informada pelo próprio Sphero.</div>
 </div>
 <div class="row connect-row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
 <div id="ledPanel" style="display:none;margin-top:12px;border-top:2px solid #eef2f6;padding-top:10px">
@@ -39,7 +39,7 @@ const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
 const CHAR_HANDSHAKE='00020005-574f-4f20-5370-6865726f2121';
 const CHAR_API='00010002-574f-4f20-5370-6865726f2121';
 const CHAR_API_RX='00010003-574f-4f20-5370-6865726f2121';
-let apiChar=null,apiRx=null,seq=0;
+let apiChar=null,apiRx=null,seq=0;const pending=new Map();
 let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
@@ -64,6 +64,7 @@ async function connect(){
    apiRx.addEventListener('characteristicvaluechanged',e=>{
     const a=new Uint8Array(e.target.value.buffer);
     log('RX ← '+[...a].map(x=>x.toString(16).padStart(2,'0')).join(' '));
+    handleRx(a);
    });
    log('Canal de respostas RX: escutando');
   }catch(rxErr){log('RX indisponível: '+rxErr.name+' — '+rxErr.message)}
@@ -74,7 +75,7 @@ async function connect(){
    log('Handshake BLE: enviado');
   }catch(e){log('Inicialização/handshake: '+e.message)}
   setStatus('✅ CONECTADO: '+(device.name||'Sphero BOLT/BOLT+'),'ok');
-  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';
+  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';setTimeout(readBattery,250);
  }catch(e){
   setStatus(e.name==='NotFoundError'?'Conexão cancelada ou nenhum robô selecionado.':'Não foi possível concluir a conexão.','no');
   log('Erro: '+e.name+' — '+e.message);
@@ -92,6 +93,47 @@ function packet(did,cid,data=[],targetId=null){
  const chk=0xFF-(body.reduce((a,b)=>a+b,0)&0xFF);
  const out=[0x8D];for(const b of [...body,chk])escByte(b,out);out.push(0xD8);return new Uint8Array(out)
 }
+
+function unescapePacket(a){
+ const out=[];for(let i=0;i<a.length;i++){let b=a[i];if(b===0xAB&&i+1<a.length){b=a[++i]|0x88}out.push(b)}return out
+}
+function handleRx(a){
+ try{
+  const p=unescapePacket(a);
+  if(p[0]!==0x8D||p[p.length-1]!==0xD8)return;
+  const flags=p[1];let i=2;
+  if(flags&0x10)i++; // target
+  if(flags&0x20)i++; // source
+  const did=p[i++],cid=p[i++],s=p[i++],data=p.slice(i,p.length-2);
+  const waiter=pending.get(s);
+  if(waiter){pending.delete(s);waiter.resolve({did,cid,data})}
+ }catch(e){log('Parser RX: '+e.message)}
+}
+async function requestPacket(did,cid,data=[],targetId=null,timeout=1800){
+ const s=seq&255,p=packet(did,cid,data,targetId);
+ return new Promise(async(resolve,reject)=>{
+  const timer=setTimeout(()=>{pending.delete(s);reject(new Error('Sem resposta do Sphero'))},timeout);
+  pending.set(s,{resolve:v=>{clearTimeout(timer);resolve(v)}});
+  try{await sendPacket(p)}catch(e){clearTimeout(timer);pending.delete(s);reject(e)}
+ })
+}
+async function readBattery(){
+ try{
+  const res=await requestPacket(0x13,0x10);
+  // Resposta V2 traz status API como primeiro byte; percentual vem em seguida.
+  const d=res.data;let pct=null;
+  if(d.length>=2&&d[0]===0x00)pct=d[1];else if(d.length>=1&&d[0]<=100)pct=d[0];
+  if(pct===null||pct<0||pct>100)throw new Error('Resposta de bateria não reconhecida: '+d.join(','));
+  document.getElementById('batteryText').textContent=pct+'%';
+  document.getElementById('batteryBar').style.width=pct+'%';
+  log('Bateria: '+pct+'%');
+ }catch(e){
+  document.getElementById('batteryText').textContent='leitura indisponível';
+  document.getElementById('batteryBar').style.width='0%';
+  log('Bateria: '+e.message);
+ }
+}
+
 async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indisponível.');if(apiChar.properties.writeWithoutResponse)await apiChar.writeValueWithoutResponse(p);else await apiChar.writeValue(p)}
 async function setLed(r,g,b){
  try{
