@@ -3,22 +3,22 @@
 <title>LabPC Robótica — Teste BOLT/BOLT+</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eaf7ff,#fff8df);color:#18324b;min-height:100vh}
-header{background:#fff;padding:18px;text-align:center;box-shadow:0 2px 12px #0001}h1{margin:0;font-size:clamp(25px,4vw,38px)}
-main{max-width:900px;margin:auto;padding:22px}.card{background:#fff;border-radius:22px;padding:24px;box-shadow:0 8px 26px #0002;margin-bottom:16px}
+header{background:#fff;padding:14px 22px;box-shadow:0 2px 12px #0001}header .head{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px}header .brand{display:flex;align-items:center;gap:10px}header .brandicon{font-size:34px}header h1{margin:0;font-size:clamp(24px,3vw,34px)}header p{margin:3px 0 0;font-size:13px}
+main{max-width:1240px;margin:auto;padding:20px 24px}.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 26px #0002;margin-bottom:14px}
 .status{padding:18px;border-radius:16px;background:#eef5fb;font-size:18px;font-weight:800;text-align:center;margin:18px 0}.ok{background:#e8fff3;color:#12633c}.no{background:#fff0eb;color:#a33b24}
 .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.btn{border:0;border-radius:14px;padding:14px 20px;font-size:17px;font-weight:800;cursor:pointer;background:#2563eb;color:#fff}.btn.alt{background:#fff;color:#18324b;border:2px solid #cbd8e5}.btn:disabled{opacity:.45;cursor:not-allowed}
-.robot{font-size:90px;text-align:center}.steps{line-height:1.7}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px}
+.robot{font-size:78px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:18px;align-items:start}.steps{line-height:1.65}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:90px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
-<header><h1>🤖 LabPC Robótica</h1><p>Protótipo 01 — conexão com Sphero BOLT / BOLT+</p></header>
-<main><section class="card">
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 01 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
 <div class="row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
-</section>
+</section></div><div class="side">
 <section class="card steps"><b>Como testar</b><br>1. Ligue o Bluetooth do computador.<br>2. Acorde o BOLT/BOLT+ e deixe-o próximo ao computador.<br>3. Use Chrome ou Edge.<br>4. Clique em <b>CONECTAR SPHERO</b> e escolha o robô na janela do navegador.<br>5. Se a conexão funcionar, esta página mostrará o nome do robô e confirmará o acesso aos serviços Sphero.</section>
 <section class="card"><b>Diagnóstico</b><div id="diag" class="tech">Nenhum teste executado.</div></section>
-</main><footer>LabPC — Lab Pensamento Computacional · Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges</footer>
+</div></div></main><footer>LabPC — Lab Pensamento Computacional · Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges</footer>
 <script>
 const SERVICE_API='00010001-574f-4f20-5370-6865726f2121';
 const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
