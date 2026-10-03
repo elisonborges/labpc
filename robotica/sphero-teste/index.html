@@ -12,14 +12,14 @@ footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
 <header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 02 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
 <main><div class="workspace"><div><section class="card">
-<div class="robot">🔵</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:14px"><div class="robot">🔵</div><div id="robotName" style="font-weight:900;font-size:22px;color:#12395b;display:none"></div></div>
 <div id="status" class="status">Aguardando conexão.</div>
 <div id="battery" style="display:none;margin:10px auto 16px;max-width:360px">
  <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>🔋 Bateria do Sphero</span><span id="batteryText">conectado</span></div>
  <div style="height:14px;background:#e7edf3;border-radius:99px;overflow:hidden;margin-top:6px"><div id="batteryBar" style="height:100%;width:100%;background:#72b67a"></div></div>
  <div style="font-size:10px;color:#66788a;margin-top:3px">Leitura real será ativada após a validação dos comandos.</div>
 </div>
-<div class="row connect-row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
+<div class="row connect-row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button><button id="identify" class="btn alt" disabled onclick="identifyRobot()">✨ IDENTIFICAR</button></div>
 <div id="ledPanel" style="display:none;margin-top:12px;border-top:2px solid #eef2f6;padding-top:10px">
  <div style="font-weight:900;text-align:center;margin-bottom:10px">💡 TESTE DE LED</div>
  <div class="row led-row">
@@ -44,7 +44,7 @@ let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
 function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
-function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;apiRx=null;server=null}
+function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('identify').disabled=true;document.getElementById('robotName').style.display='none';document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;apiRx=null;server=null}
 async function connect(){
  diag.textContent='';
  if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
@@ -74,7 +74,7 @@ async function connect(){
    log('Handshake BLE: enviado');
   }catch(e){log('Inicialização/handshake: '+e.message)}
   setStatus('✅ CONECTADO: '+(device.name||'Sphero BOLT/BOLT+'),'ok');
-  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';
+  bCon.disabled=true;bDis.disabled=false;document.getElementById('identify').disabled=false;document.getElementById('robotName').textContent=device.name||'Sphero';document.getElementById('robotName').style.display='block';document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';
  }catch(e){
   setStatus(e.name==='NotFoundError'?'Conexão cancelada ou nenhum robô selecionado.':'Não foi possível concluir a conexão.','no');
   log('Erro: '+e.name+' — '+e.message);
@@ -100,6 +100,21 @@ async function setLed(r,g,b){
   await sendPacket(p);log('TX LED BOLT → TID 0x11 / DID 0x1A / CID 0x1C / RGB('+r+','+g+','+b+')');
   setStatus('🧪 Pacote de teste enviado. Verifique o robô e o Diagnóstico.','ok');
  }catch(e){setStatus('Não foi possível enviar o comando de LED.','no');log('LED: '+e.name+' — '+e.message)}
+}
+
+
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+async function identifyRobot(){
+ if(!apiChar)return;
+ const btn=document.getElementById('identify');btn.disabled=true;
+ try{
+  setStatus('✨ Identificando '+(device?.name||'Sphero')+'...','ok');
+  const colors=[[255,0,0],[0,255,0],[0,0,255],[255,255,255]];
+  for(const [r,g,b] of colors){await setLed(r,g,b);await wait(260)}
+  await setLed(128,0,180);
+  setStatus('✨ Este é o '+(device?.name||'Sphero')+'.','ok');
+  log('Identificação visual concluída: '+(device?.name||'Sphero'));
+ }finally{btn.disabled=false}
 }
 
 function disconnect(){if(device?.gatt?.connected)device.gatt.disconnect();else disconnected()}
