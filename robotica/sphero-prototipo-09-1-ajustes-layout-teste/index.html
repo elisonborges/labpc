@@ -294,3 +294,4 @@ const _prepare=prepareConnectedDevice;prepareConnectedDevice=async function(s,r=
 const _readBattery=readBattery;readBattery=async function(){await _readBattery();setTimeout(()=>{const st=document.getElementById('batteryText').textContent||'—';const vv=document.getElementById('batteryVoltage').textContent.replace('Tensão:','').trim();document.getElementById('topBattery').textContent='🔋 '+st+(vv?' · '+vv:'')},30)};
 const _calibrate=calibrate;calibrate=async function(){await _calibrate();document.getElementById('bMoveTop').disabled=document.getElementById('bMove').disabled;document.getElementById('calStatusTop').textContent=document.getElementById('calStatus').textContent};
 </script></body></html>
+<!-- republicacao-pages-2026-10-03 -->
