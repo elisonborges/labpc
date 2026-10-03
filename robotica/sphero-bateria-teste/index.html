@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LabPC Robótica — Teste BOLT/BOLT+</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eaf7ff,#fff8df);color:#18324b;min-height:100vh}
+header{background:#fff;padding:8px 20px;box-shadow:0 2px 12px #0001}header .head{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px}header .brand{display:flex;align-items:center;gap:10px}header .brandicon{font-size:30px}header h1{margin:0;font-size:clamp(22px,2.5vw,30px)}header p{margin:3px 0 0;font-size:13px}
+main{max-width:1240px;margin:auto;padding:8px 18px}.card{background:#fff;border-radius:18px;padding:11px 14px;box-shadow:0 8px 26px #0002;margin-bottom:10px}
+.status{padding:18px;border-radius:16px;background:#eef5fb;font-size:18px;font-weight:800;text-align:center;margin:18px 0}.ok{background:#e8fff3;color:#12633c}.no{background:#fff0eb;color:#a33b24}
+.row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}.connect-row{flex-wrap:nowrap}.led-row{flex-wrap:nowrap}.led-row .btn{padding:12px 14px;font-size:15px}@media(max-width:560px){.connect-row,.led-row{flex-wrap:wrap}}.btn{border:0;border-radius:14px;padding:14px 20px;font-size:17px;font-weight:800;cursor:pointer;background:#2563eb;color:#fff}.btn.alt{background:#fff;color:#18324b;border:2px solid #cbd8e5}.btn:disabled{opacity:.45;cursor:not-allowed}
+.robot{font-size:52px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.38;font-size:13px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
+footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
+</style></head><body>
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03.3 — diagnóstico de bateria — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<main><div class="workspace"><div><section class="card">
+<div class="robot">🔵</div>
+<div id="status" class="status">Aguardando conexão.</div>
+<div id="battery" style="display:none;margin:10px auto 16px;max-width:360px">
+ <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>🔋 Bateria do Sphero</span><span id="batteryText">conectado</span></div>
+ <div style="height:14px;background:#e7edf3;border-radius:99px;overflow:hidden;margin-top:6px"><div id="batteryBar" style="height:100%;width:100%;background:#72b67a"></div></div>
+ <div style="font-size:10px;color:#66788a;margin-top:3px">Leitura informada pelo próprio Sphero.</div>
+ <div style="display:flex;gap:6px;margin-top:7px">
+  <button class="secondary" style="flex:1;padding:7px 8px;font-size:11px" onclick="readBatteryDiagnostic()">🔎 DIAGNOSTICAR BATERIA</button>
+ </div>
+</div>
+<div class="row connect-row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
+<div id="ledPanel" style="display:none;margin-top:12px;border-top:2px solid #eef2f6;padding-top:10px">
+ <div style="font-weight:900;text-align:center;margin-bottom:10px">💡 TESTE DE LED</div>
+ <div class="row led-row">
+  <button class="btn" onclick="setLed(255,0,0)">🔴 VERMELHO</button>
+  <button class="btn" onclick="setLed(0,255,0)">🟢 VERDE</button>
+  <button class="btn" onclick="setLed(0,0,255)">🔵 AZUL</button>
+  <button class="btn alt" onclick="setLed(0,0,0)">⚫ APAGAR</button>
+ </div>
+</div>
+</section></div><div class="side">
+<section class="card steps"><b>Como testar</b><br>1. Ligue o Bluetooth do computador.<br>2. Acorde o BOLT/BOLT+ e deixe-o próximo ao computador.<br>3. Use Chrome ou Edge.<br>4. Clique em <b>CONECTAR SPHERO</b> e escolha o robô na janela do navegador.<br>5. Depois de conectar, use os botões <b>VERMELHO, VERDE, AZUL</b> e <b>APAGAR</b> para testar o LED do robô.</section>
+<section class="card"><b>Diagnóstico</b><div id="diag" class="tech">Nenhum teste executado.</div></section>
+</div></div></main><footer>LabPC — Lab Pensamento Computacional · Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges</footer>
+<script>
+const SERVICE_API='00010001-574f-4f20-5370-6865726f2121';
+const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
+const CHAR_HANDSHAKE='00020005-574f-4f20-5370-6865726f2121';
+const CHAR_API='00010002-574f-4f20-5370-6865726f2121';
+let apiChar=null,seq=0;const pending=new Map();let rxFrame=[];
+let device=null,server=null;
+const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
+function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
+function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
+function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;server=null}
+async function connect(){
+ diag.textContent='';
+ if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
+ try{
+  setStatus('Procurando Sphero próximo...');
+  device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE_API]}],optionalServices:[SERVICE_INIT]});
+  log('Dispositivo escolhido: '+(device.name||'sem nome'));
+  device.addEventListener('gattserverdisconnected',disconnected);
+  setStatus('Conectando ao robô...');
+  server=await device.gatt.connect();
+  log('GATT conectado: sim');
+  const api=await server.getPrimaryService(SERVICE_API); log('Serviço API Sphero: OK');
+  apiChar=await api.getCharacteristic(CHAR_API); log('Canal API v2: OK');
+  try{
+   await apiChar.startNotifications();
+   apiChar.addEventListener('characteristicvaluechanged',e=>{
+    const a=new Uint8Array(e.target.value.buffer);
+    log('RX ← '+[...a].map(x=>x.toString(16).padStart(2,'0')).join(' '));
+    handleRx(a);
+   });
+   log('Respostas API v2: escutando na característica 00010002');
+  }catch(rxErr){log('Notificações API v2 indisponíveis: '+rxErr.name+' — '+rxErr.message)}
+  try{
+   const init=await server.getPrimaryService(SERVICE_INIT); log('Serviço de inicialização: OK');
+   const hs=await init.getCharacteristic(CHAR_HANDSHAKE);
+   await hs.writeValue(new TextEncoder().encode('usetheforce...band'));
+   log('Handshake BLE: enviado');
+  }catch(e){log('Inicialização/handshake: '+e.message)}
+  setStatus('✅ CONECTADO: '+(device.name||'Sphero BOLT/BOLT+'),'ok');
+  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';setTimeout(readBattery,250);
+ }catch(e){
+  setStatus(e.name==='NotFoundError'?'Conexão cancelada ou nenhum robô selecionado.':'Não foi possível concluir a conexão.','no');
+  log('Erro: '+e.name+' — '+e.message);
+ }
+}
+
+function escByte(b,out){if(b===0xAB){out.push(0xAB,0x23)}else if(b===0x8D){out.push(0xAB,0x05)}else if(b===0xD8){out.push(0xAB,0x50)}else out.push(b)}
+function packet(did,cid,data=[],targetId=null){
+ let flags=0x0A; // solicita resposta + reinicia timeout de inatividade
+ if(targetId!==null) flags|=0x10; // pacote contém Target ID
+ const s=seq++&255;
+ const body=[flags];
+ if(targetId!==null) body.push(targetId);
+ body.push(did,cid,s,...data);
+ const chk=0xFF-(body.reduce((a,b)=>a+b,0)&0xFF);
+ const out=[0x8D];for(const b of [...body,chk])escByte(b,out);out.push(0xD8);return new Uint8Array(out)
+}
+
+function unescapePacket(a){
+ const out=[];for(let i=0;i<a.length;i++){let b=a[i];if(b===0xAB&&i+1<a.length){b=a[++i]|0x88}out.push(b)}return out
+}
+function handleRx(a){
+ try{
+  for(const b of a){
+   if(b===0x8D)rxFrame=[0x8D];
+   else if(rxFrame.length)rxFrame.push(b);
+   if(b===0xD8&&rxFrame.length){
+    const raw=Uint8Array.from(rxFrame);rxFrame=[];
+    const p=unescapePacket(raw);
+    log('RX pacote ← '+[...p].map(x=>x.toString(16).padStart(2,'0')).join(' '));
+    if(p[0]!==0x8D||p[p.length-1]!==0xD8)continue;
+    const flags=p[1];let i=2;
+    if(flags&0x10)i++;
+    if(flags&0x20)i++;
+    const did=p[i++],cid=p[i++],s=p[i++],data=p.slice(i,p.length-2);
+    const waiter=pending.get(s);
+    if(waiter){pending.delete(s);waiter.resolve({did,cid,data})}
+   }
+  }
+ }catch(e){log('Parser RX: '+e.message)}
+}
+async function requestPacket(did,cid,data=[],targetId=null,timeout=1800){
+ const s=seq&255,p=packet(did,cid,data,targetId);
+ return new Promise(async(resolve,reject)=>{
+  const timer=setTimeout(()=>{pending.delete(s);reject(new Error('Sem resposta do Sphero'))},timeout);
+  pending.set(s,{resolve:v=>{clearTimeout(timer);resolve(v)}});
+  try{await sendPacket(p)}catch(e){clearTimeout(timer);pending.delete(s);reject(e)}
+ })
+}
+
+async function batteryQuery(cid,label){
+ try{
+  const res=await requestPacket(0x13,cid);
+  const bytes=[...res.data];
+  log(label+' RAW: '+bytes.map(x=>x.toString(16).padStart(2,'0')).join(' ')+' | dec: '+bytes.join(','));
+  return bytes;
+ }catch(e){log(label+': '+e.message);return null}
+}
+async function readBatteryDiagnostic(){
+ log('--- DIAGNÓSTICO DE BATERIA ---');
+ const pct=await batteryQuery(0x10,'Percentual (CID 0x10)');
+ const volt=await batteryQuery(0x03,'Tensão (CID 0x03)');
+ const state=await batteryQuery(0x17,'Estado (CID 0x17)');
+ if(volt&&volt.length){
+  let n=0;for(const b of volt)n=(n<<8)|b;
+  log('Tensão interpretada: '+(n/100).toFixed(2)+' V');
+ }
+ if(state&&state.length)log('Estado interpretado: código '+state[state.length-1]);
+ log('--- FIM DO DIAGNÓSTICO ---');
+}
+
+async function readBattery(){
+ try{
+  const res=await requestPacket(0x13,0x10);
+  // Resposta V2 traz status API como primeiro byte; percentual vem em seguida.
+  const d=res.data;let pct=null;
+  if(d.length>=1&&d[d.length-1]<=100)pct=d[d.length-1];
+  if(pct===null||pct<0||pct>100)throw new Error('Resposta de bateria não reconhecida: '+d.join(','));
+  document.getElementById('batteryText').textContent=pct+'%';
+  document.getElementById('batteryBar').style.width=pct+'%';
+  log('Bateria: '+pct+'%');
+ }catch(e){
+  document.getElementById('batteryText').textContent='leitura indisponível';
+  document.getElementById('batteryBar').style.width='0%';
+  log('Bateria: '+e.message);
+ }
+}
+
+async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indisponível.');if(apiChar.properties.writeWithoutResponse)await apiChar.writeValueWithoutResponse(p);else await apiChar.writeValue(p)}
+async function setLed(r,g,b){
+ try{
+  // IO device: define LEDs RGB principais. Teste deliberadamente isolado antes de movimento.
+  const p=packet(0x1A,0x1C,[0x3F,r,g,b,r,g,b],0x11);
+  await sendPacket(p);log('TX LED BOLT → TID 0x11 / DID 0x1A / CID 0x1C / RGB('+r+','+g+','+b+')');
+  setStatus('🧪 Pacote de teste enviado. Verifique o robô e o Diagnóstico.','ok');
+ }catch(e){setStatus('Não foi possível enviar o comando de LED.','no');log('LED: '+e.name+' — '+e.message)}
+}
+
+function disconnect(){if(device?.gatt?.connected)device.gatt.disconnect();else disconnected()}
+bCon.addEventListener('click',connect);bDis.addEventListener('click',disconnect);
+</script></body></html>
