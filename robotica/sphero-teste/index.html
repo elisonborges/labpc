@@ -179,4 +179,13 @@ async function setLed(r,g,b){
 
 function disconnect(){if(device?.gatt?.connected)device.gatt.disconnect();else disconnected()}
 bCon.addEventListener('click',connect);bDis.addEventListener('click',disconnect);
-</script></body></html>
+</script></body></html<div id="calPanel" style="display:none;margin-top:12px;border-top:2px solid #eef2f6;padding-top:10px">
+ <div style="font-weight:900;font-size:17px;text-align:center;margin-bottom:7px">🧭 CALIBRAÇÃO</div>
+ <div style="font-size:13px;line-height:1.35;margin:4px 0 8px">Coloque o robô no chão e gire-o com a mão até a direção desejada. Depois clique em <b>DEFINIR FRENTE</b>.</div>
+ <div style="display:flex;gap:8px">
+  <button id="bCal" class="secondary" style="flex:1" onclick="calibrate()">🧭 DEFINIR FRENTE</button>
+  <button id="bMove" class="secondary" style="flex:1" onclick="testForward()" disabled>⬆ TESTAR FRENTE</button>
+ </div>
+ <div id="calStatus" style="font-size:11px;color:#66788a;margin-top:6px">Aguardando calibração.</div>
+</div>
+>
