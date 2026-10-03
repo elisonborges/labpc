@@ -10,7 +10,7 @@ main{max-width:1240px;margin:auto;padding:8px 18px}.card{background:#fff;border-
 .robot{font-size:52px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.38;font-size:13px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
-<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 04 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03.2 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
 <main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
@@ -43,7 +43,7 @@ let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
 function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
-function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';document.getElementById('calPanel').style.display='none';document.getElementById('bMove').disabled=true;apiChar=null;server=null}
+function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;server=null}
 async function connect(){
  diag.textContent='';
  if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
@@ -73,7 +73,7 @@ async function connect(){
    log('Handshake BLE: enviado');
   }catch(e){log('Inicialização/handshake: '+e.message)}
   setStatus('✅ CONECTADO: '+(device.name||'Sphero BOLT/BOLT+'),'ok');
-  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';document.getElementById('calPanel').style.display='block';setTimeout(readBattery,250);
+  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';setTimeout(readBattery,250);
  }catch(e){
   setStatus(e.name==='NotFoundError'?'Conexão cancelada ou nenhum robô selecionado.':'Não foi possível concluir a conexão.','no');
   log('Erro: '+e.name+' — '+e.message);
@@ -140,33 +140,6 @@ async function readBattery(){
  }
 }
 
-
-async function calibrate(){
- try{
-  if(!apiChar)throw new Error('Conecte o Sphero primeiro');
-  const res=await requestPacket(0x16,0x06,[],0x12);
-  document.getElementById('calStatus').textContent='Frente definida. Faça o teste curto.';
-  document.getElementById('bMove').disabled=false;
-  log('Calibração: reset_yaw confirmado pelo BOLT');
- }catch(e){document.getElementById('calStatus').textContent='Falha na calibração.';log('Calibração: '+e.message)}
-}
-async function drive(speed,heading,direction=0){
- const h=Math.max(0,Math.min(360,heading));
- return requestPacket(0x16,0x07,[speed&255,(h>>8)&255,h&255,direction&255],0x12);
-}
-async function testForward(){
- const b=document.getElementById('bMove');b.disabled=true;
- try{
-  document.getElementById('calStatus').textContent='Teste: movimento curto para a frente...';
-  await drive(45,0,0);
-  await new Promise(r=>setTimeout(r,650));
-  await drive(0,0,0);
-  document.getElementById('calStatus').textContent='Teste concluído. O robô foi para a frente?';
-  log('Teste de frente concluído: velocidade 45 / 650 ms / heading 0');
- }catch(e){document.getElementById('calStatus').textContent='Falha no teste de movimento.';log('Movimento: '+e.message)}
- finally{b.disabled=false}
-}
-
 async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indisponível.');if(apiChar.properties.writeWithoutResponse)await apiChar.writeValueWithoutResponse(p);else await apiChar.writeValue(p)}
 async function setLed(r,g,b){
  try{
@@ -179,13 +152,4 @@ async function setLed(r,g,b){
 
 function disconnect(){if(device?.gatt?.connected)device.gatt.disconnect();else disconnected()}
 bCon.addEventListener('click',connect);bDis.addEventListener('click',disconnect);
-</script></body></html<div id="calPanel" style="display:none;margin-top:12px;border-top:2px solid #eef2f6;padding-top:10px">
- <div style="font-weight:900;font-size:17px;text-align:center;margin-bottom:7px">🧭 CALIBRAÇÃO</div>
- <div style="font-size:13px;line-height:1.35;margin:4px 0 8px">Coloque o robô no chão e gire-o com a mão até a direção desejada. Depois clique em <b>DEFINIR FRENTE</b>.</div>
- <div style="display:flex;gap:8px">
-  <button id="bCal" class="secondary" style="flex:1" onclick="calibrate()">🧭 DEFINIR FRENTE</button>
-  <button id="bMove" class="secondary" style="flex:1" onclick="testForward()" disabled>⬆ TESTAR FRENTE</button>
- </div>
- <div id="calStatus" style="font-size:11px;color:#66788a;margin-top:6px">Aguardando calibração.</div>
-</div>
->
+</script></body></html>
