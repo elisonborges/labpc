@@ -1,0 +1,347 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LabPC Robótica — Protótipo 09.4</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f2f7fb;color:#102d4f;min-height:100vh;overflow-x:hidden}
+button,select,input{font:inherit}header{height:64px;background:#fff;border-bottom:1px solid #dce7f0;display:flex;align-items:center;padding:7px 20px;gap:18px}
+.brand{display:flex;align-items:center;gap:9px;min-width:320px}.brandicon{font-size:30px}.brand h1{margin:0;font-size:26px}.brand p{margin:1px 0 0;font-size:11px}
+.topstate{margin-left:auto;display:flex;gap:8px;align-items:center}.pill{padding:9px 12px;border-radius:10px;background:#fff;border:1px solid #d9e5ef;font-size:12px;font-weight:800;white-space:nowrap}.pill.ok{background:#e8fff3;color:#12633c}
+.btn{border:0;border-radius:9px;padding:9px 12px;font-weight:900;cursor:pointer;background:#2563eb;color:#fff;font-size:12px}.btn.alt{background:#fff;color:#17324b;border:1px solid #b9cad9}.btn:disabled{opacity:.45}
+main{height:calc(100vh - 90px);min-height:510px;padding:8px 14px;max-width:1500px;margin:auto;display:flex;flex-direction:column;gap:7px}.prep{display:grid;grid-template-columns:1.05fr .9fr 1.2fr;gap:8px;height:132px}.card{background:#fff;border:1px solid #dbe6ef;border-radius:12px;padding:9px 11px;box-shadow:0 2px 8px #17324b0b}.card h3{margin:0 0 6px;font-size:15px}.start ol{margin:0;padding-left:24px;font-size:11px;line-height:1.55}.ledgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}.ledgrid button{padding:7px;font-size:11px}.cal p{font-size:11px;margin:0 0 7px;line-height:1.35}.calrow{display:flex;gap:6px}.secondary{border:1px solid #c6d4df;background:#fff;border-radius:8px;padding:7px 9px;font-weight:800;cursor:pointer}.secondary:disabled{opacity:.45}
+.editor{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 10px}.editorTitle{display:flex;align-items:end;justify-content:space-between;margin-bottom:6px}.editorTitle h2{margin:0;font-size:18px}.editorTitle p{margin:2px 0 0;font-size:10px;color:#61758a}.editorGrid{flex:1;min-height:0;display:grid;grid-template-columns:190px minmax(390px,1.25fr) minmax(330px,.85fr);gap:8px}
+.panel{border:1px solid #dce7f0;border-radius:10px;padding:7px;background:#fbfdff;min-height:0;overflow:hidden}.editorGrid>.panel:first-child{display:flex;flex-direction:column}.editorGrid>.panel:first-child .commands{flex:1;min-height:0}.panelTitle{font-size:11px;font-weight:900;margin-bottom:6px}.commands{display:grid;gap:4px;max-height:100%;overflow-y:auto;padding-right:2px}.commands button{text-align:left;padding:7px 9px;background:#fff;border:1px solid #cfdae4;border-radius:7px;font-weight:900;font-size:11px;cursor:pointer}.commands .purple{color:#6336c6}
+.programHead{display:flex;justify-content:space-between;align-items:center}.programList{height:calc(100% - 25px);overflow:auto;padding-right:2px;display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(5,minmax(0,1fr));gap:4px 8px;align-content:start}.programList .cmdrow{margin-bottom:0;min-height:0}.programList .empty{grid-column:1/-1;grid-row:1/-1}.empty{font-size:11px;color:#718397;text-align:center;padding:30px 5px}.cmdrow{display:grid;grid-template-columns:24px 1fr auto;gap:6px;align-items:center;padding:6px;margin-bottom:4px;border-radius:8px;background:#fff4dc;border:1px solid #f1dfba;font-size:11px;font-weight:800}.cmdrow.move{background:#eafff1;border-color:#c9edd6}.cmdrow.turn{background:#fff0e3;border-color:#f2d1b7}.cmdrow.diag{background:#f3edff;border-color:#dcd0fa}.cmdrow.wait{background:#f6edff;border-color:#dfcdf5}.cmdrow.stop{background:#ffeaea;border-color:#f4caca}.cmdcfg{display:flex;gap:4px;align-items:center}.cmdcfg select{padding:5px;border:1px solid #c8d5e0;border-radius:6px;background:#fff}.tiny{padding:4px 6px!important;font-size:10px!important}
+.visual{display:flex;flex-direction:column}.gridWrap{flex:1;min-height:170px;position:relative;border:1px solid #d7e3ed;border-radius:9px;overflow:hidden;background-color:#fbfdff;background-image:linear-gradient(#dfe9f1 1px,transparent 1px),linear-gradient(90deg,#dfe9f1 1px,transparent 1px);background-size:32px 32px}.robotDot{position:absolute;left:50%;top:50%;width:38px;height:38px;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;background:#e8f4ff;border:3px solid #3b82f6;font-size:21px;transition:left .35s linear,top .35s linear,transform .2s}.heading{position:absolute;left:50%;top:50%;transform:translate(-50%,-48px);font-size:20px;color:#2563eb;font-weight:900;transition:left .35s linear,top .35s linear,transform .2s}.visualInfo{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:6px;font-size:11px;font-weight:800}.runrow{display:grid;grid-template-columns:1fr 110px;gap:6px;margin-top:6px}.run{background:#16834f}.stopbtn{background:#d92d20}.diag{padding:0!important;overflow:hidden}.diag summary{cursor:pointer;padding:7px 10px;font-size:11px;font-weight:900;background:#f5f8fa}.tech{display:none;font-family:monospace;font-size:9px;padding:7px;white-space:pre-wrap}.diag[open] .tech{display:block}
+footer{height:26px;text-align:center;font-size:10px;color:#6c7f91;padding:6px}
+#status,#battery,#ledPanel,#calPanel,#dirPanel,#programPanel{display:none!important}
+@media(max-width:1050px){.programList{display:block}.programList .cmdrow{margin-bottom:4px}body{overflow:auto;height:auto}main{height:auto}.prep{height:auto;grid-template-columns:1fr}.editorGrid{grid-template-columns:170px 1fr}.visual{grid-column:1/-1;min-height:300px}}
+ .keepalive{background:#fff7ed;border-color:#fed7aa}.keepalive strong{color:#9a3412}.keepalive.on{background:#ecfdf5;border-color:#86efac}.keepalive.on strong{color:#166534}
+</style></head><body>
+<header><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Programação com Sphero BOLT / BOLT+</p></div></div>
+<div class="topstate"><button id="openDiag" class="secondary" style="white-space:nowrap">↗ ⚙ DIAGNÓSTICO</button><button id="keepAliveToggle" class="secondary" style="white-space:nowrap" title="Teste experimental para manter comunicação ativa">♡ KEEP-ALIVE OFF</button><span id="topStatus" class="pill">⚪ Aguardando conexão</span><span id="topBattery" class="pill">🔋 —</span><button id="connectTop" class="btn">CONECTAR</button><button id="reconnectTop" class="btn" style="display:none">↻ RECONECTAR</button><button id="disconnectTop" class="btn alt" disabled>DESCONECTAR</button></div></header>
+<main>
+<section class="prep">
+ <div class="card start"><h3>🚀 Como começar</h3><ol><li>Conecte o Sphero.</li><li>Posicione o robô e clique em <b>DEFINIR FRENTE</b>.</li><li>Monte a sequência em <b>MEU PROGRAMA</b>.</li><li>Clique em <b>▶ EXECUTAR</b>.</li><li>Se a conexão cair, use <b>↻ RECONECTAR</b>.</li></ol></div>
+ <div class="card"><h3>💡 Teste de LED</h3><div class="ledgrid"><button class="secondary" onclick="setLed(255,0,0)">🔴 VERMELHO</button><button class="secondary" onclick="setLed(0,255,0)">🟢 VERDE</button><button class="secondary" onclick="setLed(0,0,255)">🔵 AZUL</button><button class="secondary" onclick="setLed(0,0,0)">⚫ APAGAR</button></div></div>
+ <div class="card cal"><h3>🎯 Calibração</h3><p>Posicione o BOLT apontando para a direção que será considerada <b>frente</b>.</p><div class="calrow"><button id="bCalTop" class="btn" style="flex:1" onclick="calibrate()">🎯 DEFINIR FRENTE</button><button id="bMoveTop" class="secondary" style="flex:1" onclick="testForward()" disabled>▶ TESTAR FRENTE</button></div><div id="calStatusTop" style="font-size:10px;color:#66788a;margin-top:5px">Aguardando calibração.</div></div>
+</section>
+<section class="card editor"><div class="editorTitle"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2>🧩 Editor de Programa</h2><p style="margin:0">Monte a sequência e configure cada comando antes de executar.</p></div></div>
+<div class="editorGrid">
+ <div class="panel"><div class="panelTitle">COMANDOS</div><div class="commands">
+  <button onclick="addProgramCmd('speed')">⚡ VELOCIDADE</button><button onclick="addProgramCmd('move')">⬆ MOVER</button><button onclick="addProgramCmd('right')">↱ DIREITA</button><button onclick="addProgramCmd('left')">↰ ESQUERDA</button><button class="purple" onclick="addProgramCmd('diagRight')">↗ DIAGONAL DIREITA</button><button class="purple" onclick="addProgramCmd('diagLeft')">↖ DIAGONAL ESQUERDA</button><button onclick="addProgramCmd('wait')">⏱ ESPERAR</button><button onclick="addProgramCmd('stop')">■ PARAR</button>
+ </div></div>
+ <div class="panel"><div class="programHead"><span class="panelTitle">MEU PROGRAMA</span><button class="secondary tiny" onclick="clearProgram()">🗑 LIMPAR</button></div><div id="programListNew" class="programList"></div></div>
+ <div class="panel visual"><div class="panelTitle">VISUALIZAÇÃO DO ROBÔ</div><div id="simGrid" class="gridWrap"><div id="simArrow" class="heading" style="display:none">↑</div><div id="simRobot" class="robotDot">🤖</div></div><div class="visualInfo"><span id="simDirection">Frente (0°)</span><span>⚡ Velocidade atual: <b id="simSpeed">40</b></span></div><div class="runrow"><button id="bRunProgramNew" class="btn run" onclick="runEditorProgram()">▶ EXECUTAR</button><button class="btn stopbtn" onclick="emergencyStop()">■ PARAR</button></div><div id="programStatusNew" style="font-size:10px;color:#66788a;margin-top:4px">Monte um programa para começar.</div></div>
+</div></section>
+<div id="diag" style="display:none">Nenhum teste executado.</div>
+</main><footer>LabPC — Lab Pensamento Computacional · Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges</footer><div style="display:none"><div id="status"></div><div id="battery"><span id="batteryText"></span><span id="batteryVoltage"></span></div><button id="connect"></button><button id="reconnect"></button><button id="disconnect"></button><div id="ledPanel"></div><div id="calPanel"></div><div id="dirPanel"></div><div id="programPanel"></div><button id="bMove"></button><span id="speedValue"></span><input id="speedTest" value="35"><div id="calStatus"></div><div id="dirStatus"></div><button id="bRunProgram"></button><div id="programStatus"></div></div><script>
+const SERVICE_API='00010001-574f-4f20-5370-6865726f2121';
+const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
+const CHAR_HANDSHAKE='00020005-574f-4f20-5370-6865726f2121';
+const CHAR_API='00010002-574f-4f20-5370-6865726f2121';
+let apiChar=null,seq=0;const pending=new Map();let rxFrame=[];
+let device=null,server=null;
+const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bRec=document.getElementById('reconnect'),bDis=document.getElementById('disconnect');
+let manualDisconnect=false,connecting=false,retryTimer=null;
+function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
+function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='speedTest')document.getElementById('speedValue').textContent=e.target.value});
+function resetUiDisconnected(msg='Sphero desconectado.'){
+ setStatus(msg,'no');bCon.disabled=false;bDis.disabled=true;bRec.style.display=device?'inline-block':'none';
+ document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';document.getElementById('calPanel').style.display='none';document.getElementById('dirPanel').style.display='none';document.getElementById('programPanel').style.display='none';document.getElementById('bMove').disabled=true;apiChar=null;server=null;
+}
+function disconnected(){
+ const wasManual=manualDisconnect;manualDisconnect=false;
+ resetUiDisconnected(wasManual?'Sphero desconectado.':'Conexão com o Sphero foi perdida.');
+ log(wasManual?'GATT desconectado pelo usuário.':'GATT desconectado inesperadamente.');
+}
+async function prepareConnectedDevice(selected,retries=2){
+ if(connecting)return false;connecting=true;
+ try{
+  for(let attempt=1;attempt<=retries+1;attempt++){
+   try{
+    setStatus((attempt===1?'Conectando':'Reconectando')+' ao robô... tentativa '+attempt+'/'+(retries+1));
+    if(selected.gatt.connected)selected.gatt.disconnect();
+    await new Promise(r=>setTimeout(r,attempt===1?180:650));
+    server=await selected.gatt.connect();log('GATT conectado: sim (tentativa '+attempt+')');
+    if(!server.connected)throw new Error('GATT não permaneceu conectado');
+    const api=await server.getPrimaryService(SERVICE_API);log('Serviço API Sphero: OK');
+    apiChar=await api.getCharacteristic(CHAR_API);log('Canal API v2: OK');
+    await apiChar.startNotifications();
+    apiChar.addEventListener('characteristicvaluechanged',onApiValue);
+    log('Respostas API v2: escutando na característica 00010002');
+    const init=await server.getPrimaryService(SERVICE_INIT);log('Serviço de inicialização: OK');
+    const hs=await init.getCharacteristic(CHAR_HANDSHAKE);
+    await hs.writeValue(new TextEncoder().encode('usetheforce...band'));log('Handshake BLE: enviado');
+    setStatus('✅ CONECTADO: '+(selected.name||'Sphero BOLT/BOLT+'),'ok');
+    bCon.disabled=true;bDis.disabled=false;bRec.style.display='none';
+    document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';document.getElementById('calPanel').style.display='block';document.getElementById('dirPanel').style.display='block';document.getElementById('programPanel').style.display='block';
+    setTimeout(readBattery,250);return true;
+   }catch(e){
+    apiChar=null;server=null;
+    log('Tentativa '+attempt+' falhou: '+e.name+' — '+e.message);
+    if(attempt>retries){resetUiDisconnected('Não foi possível manter a conexão GATT.');return false}
+    setStatus('GATT caiu. Nova tentativa automática em instantes...');
+    await new Promise(r=>setTimeout(r,700*attempt));
+   }
+  }
+ }finally{connecting=false}
+}
+function onApiValue(e){
+ const a=new Uint8Array(e.target.value.buffer);
+ log('RX ← '+[...a].map(x=>x.toString(16).padStart(2,'0')).join(' '));handleRx(a);
+}
+async function connect(){
+ diag.textContent='';
+ if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
+ try{
+  setStatus('Procurando Sphero próximo...');
+  const selected=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE_API]}],optionalServices:[SERVICE_INIT]});
+  if(device&&device!==selected)device.removeEventListener('gattserverdisconnected',disconnected);
+  device=selected;log('Dispositivo escolhido: '+(device.name||'sem nome'));
+  device.removeEventListener('gattserverdisconnected',disconnected);device.addEventListener('gattserverdisconnected',disconnected);
+  await prepareConnectedDevice(device,2);
+ }catch(e){
+  if(e.name==='NotFoundError'){setStatus('Conexão cancelada ou nenhum robô selecionado.','no');log('Seleção cancelada.')}
+  else{resetUiDisconnected('Não foi possível concluir a conexão.');log('Erro: '+e.name+' — '+e.message)}
+ }
+}
+async function reconnect(){
+ if(!device){return connect()}
+ diag.textContent='';log('Reconexão solicitada para '+(device.name||'Sphero selecionado'));
+ await prepareConnectedDevice(device,2);
+}
+
+function escByte(b,out){if(b===0xAB){out.push(0xAB,0x23)}else if(b===0x8D){out.push(0xAB,0x05)}else if(b===0xD8){out.push(0xAB,0x50)}else out.push(b)}
+function packet(did,cid,data=[],targetId=null){
+ let flags=0x0A; // solicita resposta + reinicia timeout de inatividade
+ if(targetId!==null) flags|=0x10; // pacote contém Target ID
+ const s=seq++&255;
+ const body=[flags];
+ if(targetId!==null) body.push(targetId);
+ body.push(did,cid,s,...data);
+ const chk=0xFF-(body.reduce((a,b)=>a+b,0)&0xFF);
+ const out=[0x8D];for(const b of [...body,chk])escByte(b,out);out.push(0xD8);return new Uint8Array(out)
+}
+
+function unescapePacket(a){
+ const out=[];for(let i=0;i<a.length;i++){let b=a[i];if(b===0xAB&&i+1<a.length){b=a[++i]|0x88}out.push(b)}return out
+}
+function handleRx(a){
+ try{
+  for(const b of a){
+   if(b===0x8D)rxFrame=[0x8D];
+   else if(rxFrame.length)rxFrame.push(b);
+   if(b===0xD8&&rxFrame.length){
+    const raw=Uint8Array.from(rxFrame);rxFrame=[];
+    const p=unescapePacket(raw);
+    log('RX pacote ← '+[...p].map(x=>x.toString(16).padStart(2,'0')).join(' '));
+    if(p[0]!==0x8D||p[p.length-1]!==0xD8)continue;
+    const flags=p[1];let i=2;
+    if(flags&0x10)i++;
+    if(flags&0x20)i++;
+    const did=p[i++],cid=p[i++],s=p[i++],data=p.slice(i,p.length-2);
+    const waiter=pending.get(s);
+    if(waiter){pending.delete(s);waiter.resolve({did,cid,data})}
+   }
+  }
+ }catch(e){log('Parser RX: '+e.message)}
+}
+async function requestPacket(did,cid,data=[],targetId=null,timeout=1800){
+ const s=seq&255,p=packet(did,cid,data,targetId);
+ return new Promise(async(resolve,reject)=>{
+  const timer=setTimeout(()=>{pending.delete(s);reject(new Error('Sem resposta do Sphero'))},timeout);
+  pending.set(s,{resolve:v=>{clearTimeout(timer);resolve(v)}});
+  try{await sendPacket(p)}catch(e){clearTimeout(timer);pending.delete(s);reject(e)}
+ })
+}
+async function readBattery(){
+ try{
+  const vr=await requestPacket(0x13,0x03);
+  const vd=[...vr.data];
+  if(vd.length<2)throw new Error('Resposta de tensão incompleta');
+  let raw=0;for(const b of vd)raw=(raw<<8)|b;
+  const volts=raw/100;
+  const sr=await requestPacket(0x13,0x17);
+  const sd=[...sr.data];
+  if(!sd.length)throw new Error('Resposta de estado incompleta');
+  const code=sd[sd.length-1];
+  const labels={1:'OK',2:'BAIXA',3:'CRÍTICA'};
+  const label=labels[code]||('CÓDIGO '+code);
+  document.getElementById('batteryText').textContent=label;
+  document.getElementById('batteryVoltage').textContent='Tensão: '+volts.toFixed(2).replace('.',',')+' V';
+  log('Bateria: estado '+label+' / '+volts.toFixed(2)+' V');
+ }catch(e){
+  document.getElementById('batteryText').textContent='indisponível';
+  document.getElementById('batteryVoltage').textContent='Tensão: —';
+  log('Bateria: '+e.message);
+ }
+}
+
+async function calibrate(){
+ try{
+  if(!apiChar)throw new Error('Conecte o Sphero primeiro');
+  await requestPacket(0x16,0x06,[],0x12);
+  document.getElementById('calStatus').textContent='Frente definida. Agora faça o teste curto.';
+  document.getElementById('bMove').disabled=false;
+  document.getElementById('dirStatus').textContent='Calibrado. Teste uma direção por vez.';
+  log('Calibração: BOLT confirmou reset_yaw');
+ }catch(e){
+  document.getElementById('calStatus').textContent='Calibração não confirmada.';
+  log('Calibração: '+e.message);
+ }
+}
+async function driveHeading(speed,heading=0,direction=0){
+ const h=Math.max(0,Math.min(360,heading|0));
+ return requestPacket(0x16,0x07,[speed&255,(h>>8)&255,h&255,direction&255],0x12);
+}
+
+
+let programRunning=false,programCancelled=false,programHeading=0;
+const waitProgram=ms=>new Promise(r=>setTimeout(r,ms));
+let editorProgram=[];let directionBlockAdded=false;
+const cmdDefaults={speed:{type:'speed',value:40,label:'⚡ Velocidade'},move:{type:'move',value:1,label:'⬆ Mover'},right:{type:'right',value:90,label:'↱ Direita'},left:{type:'left',value:90,label:'↰ Esquerda'},diagRight:{type:'diagRight',value:45,label:'↗ Diagonal direita'},diagLeft:{type:'diagLeft',value:45,label:'↖ Diagonal esquerda'},wait:{type:'wait',value:1,label:'⏱ Esperar'},stop:{type:'stop',label:'■ Parar'}};
+function opts(a,b,v){let s='';for(let n=a;n<=b;n++)s+='<option value="'+n+'" '+(n==v?'selected':'')+'>'+n+'</option>';return s}
+function addProgramCmd(k){editorProgram.push({...cmdDefaults[k]});if(['right','left','diagRight','diagLeft'].includes(k))directionBlockAdded=true;renderProgramNew();updateDirectionPreview()}
+function clearProgram(){if(programRunning)return;editorProgram=[];directionBlockAdded=false;renderProgramNew();updateDirectionPreview();setProgStatus('Programa limpo.')}
+function removeProgramCmd(i){if(programRunning)return;editorProgram.splice(i,1);directionBlockAdded=editorProgram.some(x=>['right','left','diagRight','diagLeft'].includes(x.type));renderProgramNew();updateDirectionPreview()}
+function moveProgramCmd(i,d){if(programRunning)return;let j=i+d;if(j<0||j>=editorProgram.length)return;[editorProgram[i],editorProgram[j]]=[editorProgram[j],editorProgram[i]];renderProgramNew();updateDirectionPreview()}
+function setCmd(i,v){editorProgram[i].value=Number(v);renderProgramNew()}
+function renderProgramNew(){const box=document.getElementById('programListNew');if(!box)return;if(!editorProgram.length){box.innerHTML='<div class="empty">Clique nos comandos para montar sua sequência.</div>';return}
+ box.innerHTML=editorProgram.map((x,i)=>{let cls=x.type==='move'?'move':x.type==='stop'?'stop':x.type==='wait'?'wait':x.type.startsWith('diag')?'diag':(x.type==='right'||x.type==='left')?'turn':'';
+ let cfg='';if(x.type==='speed')cfg='<select onchange="setCmd('+i+',this.value)">'+opts(1,100,x.value)+'</select>';
+ if(x.type==='move'||x.type==='wait')cfg='<select onchange="setCmd('+i+',this.value)">'+opts(1,10,x.value)+'</select><span>seg.</span>';
+ if(x.type==='right'||x.type==='left')cfg='<span>'+x.value+'°</span>';if(x.type.startsWith('diag'))cfg='<span>45°</span>';
+ return '<div class="cmdrow '+cls+'"><span>'+(i+1)+'.</span><span>'+x.label+'</span><span class="cmdcfg">'+cfg+' <button class="secondary tiny" onclick="moveProgramCmd('+i+',-1)">↑</button><button class="secondary tiny" onclick="moveProgramCmd('+i+',1)">↓</button><button class="secondary tiny" onclick="removeProgramCmd('+i+')">×</button></span></div>'}).join('')}
+function setProgStatus(t){document.getElementById('programStatusNew').textContent=t;const old=document.getElementById('programStatus');if(old)old.textContent=t}
+function updateDirectionPreview(){const a=document.getElementById('simArrow');if(!a)return;const first=editorProgram.find(x=>['right','left','diagRight','diagLeft'].includes(x.type));if(!first){a.style.display='none';document.getElementById('simDirection').textContent='Direção: aguardando comando';return}let h=first.type==='right'?90:first.type==='left'?270:first.type==='diagRight'?45:315;a.style.display='block';a.style.left=simX+'%';a.style.top=simY+'%';a.style.transform='translate(-50%,-48px) rotate('+h+'deg)';document.getElementById('simDirection').textContent='Prévia: '+h+'°'}
+let simX=50,simY=50;
+function resetSim(){simX=50;simY=50;programHeading=0;paintSim()}
+function paintSim(){const r=document.getElementById('simRobot'),a=document.getElementById('simArrow');r.style.left=simX+'%';r.style.top=simY+'%';a.style.left=simX+'%';a.style.top=simY+'%';if(programRunning){a.style.display='block';a.style.transform='translate(-50%,-48px) rotate('+programHeading+'deg)';document.getElementById('simDirection').textContent=programHeading+'°'}else updateDirectionPreview()}
+function simMove(sec){const step=8*sec,rad=programHeading*Math.PI/180;simX=Math.max(6,Math.min(94,simX+Math.sin(rad)*step));simY=Math.max(8,Math.min(92,simY-Math.cos(rad)*step));paintSim()}
+async function emergencyStop(){programCancelled=true;try{await driveHeading(0,programHeading,0)}catch(_){}programRunning=false;document.getElementById('bRunProgramNew').disabled=false;setProgStatus('Programa interrompido.');log('Editor: PARADA solicitada')}
+async function runEditorProgram(){if(programRunning)return;if(!apiChar){setProgStatus('Conecte o Sphero primeiro.');return}if(!editorProgram.length){setProgStatus('Adicione pelo menos um comando.');return}
+ programRunning=true;programCancelled=false;resetSim();let speed=40;const b=document.getElementById('bRunProgramNew');b.disabled=true;
+ try{for(let i=0;i<editorProgram.length;i++){if(programCancelled)return;const x=editorProgram[i];setProgStatus((i+1)+'/'+editorProgram.length+' — '+x.label);
+ if(x.type==='speed'){speed=x.value;document.getElementById('simSpeed').textContent=speed;log('Editor: velocidade '+speed)}
+ else if(x.type==='right'){programHeading=(programHeading+x.value)%360;paintSim();log('Editor: direção '+programHeading+'°')}
+ else if(x.type==='left'){programHeading=(programHeading-x.value+360)%360;paintSim();log('Editor: direção '+programHeading+'°')}
+ else if(x.type==='diagRight'){programHeading=(programHeading+45)%360;paintSim();log('Editor: diagonal direita '+programHeading+'°')}
+ else if(x.type==='diagLeft'){programHeading=(programHeading+315)%360;paintSim();log('Editor: diagonal esquerda '+programHeading+'°')}
+ else if(x.type==='wait'){await waitProgram(x.value*1000)}
+ else if(x.type==='move'){await driveHeading(speed,programHeading,0);await waitProgram(x.value*1000);await driveHeading(0,programHeading,0);simMove(x.value)}
+ else if(x.type==='stop'){await driveHeading(0,programHeading,0)}
+ }if(!programCancelled){await driveHeading(0,programHeading,0);setProgStatus('Programa concluído!');log('Editor: PROGRAMA CONCLUÍDO — '+editorProgram.map(x=>x.type).join(' > '))}
+ }catch(e){try{await driveHeading(0,programHeading,0)}catch(_){}setProgStatus('Falha durante o programa.');log('Editor: '+e.name+' — '+e.message)}finally{programRunning=false;b.disabled=false}}
+setTimeout(()=>{renderProgramNew();paintSim();updateDirectionPreview()},0);
+
+async function stopRobot(){
+ try{
+  await driveHeading(0,0,0);
+  document.getElementById('dirStatus').textContent='Robô parado.';
+  log('Direções: PARAR');
+ }catch(e){log('Direções PARAR: '+e.message)}
+}
+async function testDirection(heading,label){
+ if(!apiChar){document.getElementById('dirStatus').textContent='Conecte o Sphero primeiro.';return}
+ const speed=parseInt(document.getElementById('speedTest').value,10)||35;
+ try{
+  document.getElementById('dirStatus').textContent='Testando '+label+'...';
+  await driveHeading(speed,heading,0);
+  await new Promise(r=>setTimeout(r,500));
+  await driveHeading(0,heading,0);
+  document.getElementById('dirStatus').textContent=label+' concluído. A direção física correspondeu?';
+  log('Direções: '+label+' / heading '+heading+' / velocidade '+speed+' / 500 ms');
+ }catch(e){
+  try{await driveHeading(0,heading,0)}catch(_){}
+  document.getElementById('dirStatus').textContent='Falha em '+label+'.';
+  log('Direções '+label+': '+e.message);
+ }
+}
+
+async function testForward(){
+ const b=document.getElementById('bMove');b.disabled=true;
+ try{
+  document.getElementById('calStatus').textContent='Movimento curto em execução...';
+  await driveHeading(35,0,0);
+  await new Promise(r=>setTimeout(r,450));
+  await driveHeading(0,0,0);
+  document.getElementById('calStatus').textContent='Teste concluído. Verifique se ele foi para a frente.';
+  log('Movimento: frente / velocidade 35 / 450 ms / heading 0');
+ }catch(e){
+  try{await driveHeading(0,0,0)}catch(_){}
+  document.getElementById('calStatus').textContent='Falha no teste de movimento.';
+  log('Movimento: '+e.message);
+ }finally{b.disabled=false}
+}
+
+async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indisponível.');if(apiChar.properties.writeWithoutResponse)await apiChar.writeValueWithoutResponse(p);else await apiChar.writeValue(p)}
+async function setLed(r,g,b){
+ try{
+  // IO device: define LEDs RGB principais. Teste deliberadamente isolado antes de movimento.
+  const p=packet(0x1A,0x1C,[0x3F,r,g,b,r,g,b],0x11);
+  await sendPacket(p);log('TX LED BOLT → TID 0x11 / DID 0x1A / CID 0x1C / RGB('+r+','+g+','+b+')');
+  setStatus('🧪 Pacote de teste enviado. Verifique o robô e o Diagnóstico.','ok');
+ }catch(e){setStatus('Não foi possível enviar o comando de LED.','no');log('LED: '+e.name+' — '+e.message)}
+}
+
+function disconnect(){stopKeepAlive('encerrado por desconexão');manualDisconnect=true;if(device?.gatt?.connected)device.gatt.disconnect();else disconnected()}
+bCon.addEventListener('click',connect);bRec.addEventListener('click',reconnect);bDis.addEventListener('click',disconnect);
+
+const _setStatus=setStatus;setStatus=function(t,k=''){_setStatus(t,k);const e=document.getElementById('topStatus');e.textContent=t;e.className='pill '+(k==='ok'?'ok':'')};
+document.getElementById('connectTop').onclick=()=>document.getElementById('connect').click();
+document.getElementById('reconnectTop').onclick=()=>document.getElementById('reconnect').click();
+document.getElementById('disconnectTop').onclick=()=>document.getElementById('disconnect').click();
+const _resetUiDisconnected=resetUiDisconnected;resetUiDisconnected=function(m){_resetUiDisconnected(m);document.getElementById('connectTop').disabled=false;document.getElementById('disconnectTop').disabled=true;document.getElementById('reconnectTop').style.display=device?'inline-block':'none';document.getElementById('topBattery').textContent='🔋 —'};
+const _prepare=prepareConnectedDevice;prepareConnectedDevice=async function(s,r=2){const ok=await _prepare(s,r);if(ok){document.getElementById('connectTop').disabled=true;document.getElementById('disconnectTop').disabled=false;document.getElementById('reconnectTop').style.display='none'}return ok};
+const _readBattery=readBattery;readBattery=async function(){await _readBattery();setTimeout(()=>{const st=document.getElementById('batteryText').textContent||'—';const vv=document.getElementById('batteryVoltage').textContent.replace('Tensão:','').trim();document.getElementById('topBattery').textContent='🔋 '+st+(vv?' · '+vv:'')},30)};
+const _calibrate=calibrate;calibrate=async function(){await _calibrate();document.getElementById('bMoveTop').disabled=document.getElementById('bMove').disabled;document.getElementById('calStatusTop').textContent=document.getElementById('calStatus').textContent};
+
+
+let keepAliveEnabled=false,keepAliveTimer=null,keepAliveCount=0,keepAliveBusy=false;
+function updateKeepAliveUi(){
+ const b=document.getElementById('keepAliveToggle'); if(!b)return;
+ b.textContent=keepAliveEnabled?'♥ KEEP-ALIVE ON':'♡ KEEP-ALIVE OFF';
+ b.style.background=keepAliveEnabled?'#dcfce7':'';
+ b.style.borderColor=keepAliveEnabled?'#86efac':'';
+}
+async function keepAlivePulse(){
+ if(!keepAliveEnabled||!device?.gatt?.connected||!apiChar||programRunning||keepAliveBusy)return;
+ keepAliveBusy=true;
+ try{
+   keepAliveCount++;
+   await readBattery();
+   log('♥ Keep-alive #'+keepAliveCount+' — OK');
+ }catch(e){
+   log('♥ Keep-alive #'+keepAliveCount+' — FALHOU: '+e.name+' — '+e.message);
+ }finally{keepAliveBusy=false}
+}
+function startKeepAlive(){
+ keepAliveEnabled=true;keepAliveCount=0;updateKeepAliveUi();
+ if(keepAliveTimer)clearInterval(keepAliveTimer);
+ keepAliveTimer=setInterval(keepAlivePulse,30000);
+ log('♥ Keep-alive experimental ATIVADO — intervalo 30 s; pausado durante execução de programa.');
+}
+function stopKeepAlive(reason='desativado'){
+ keepAliveEnabled=false;updateKeepAliveUi();
+ if(keepAliveTimer){clearInterval(keepAliveTimer);keepAliveTimer=null}
+ log('♡ Keep-alive '+reason+'.');
+}
+document.getElementById('keepAliveToggle').addEventListener('click',()=>keepAliveEnabled?stopKeepAlive():startKeepAlive());
+
+let diagWindow=null,diagRefresh=null;
+function diagText(){return document.getElementById('diag')?.textContent||'Nenhum diagnóstico disponível.'}
+function renderDiagPopup(){
+ if(!diagWindow||diagWindow.closed){if(diagRefresh){clearInterval(diagRefresh);diagRefresh=null}return}
+ const pre=diagWindow.document.getElementById('diagContent');if(pre)pre.textContent=diagText();
+}
+function openDiagnosticWindow(){
+ diagWindow=window.open('','LabPCDiagnostico','width=900,height=700,resizable=yes,scrollbars=yes');
+ if(!diagWindow){alert('O navegador bloqueou a janela de diagnóstico. Permita pop-ups para esta página.');return}
+ diagWindow.document.open();
+ diagWindow.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>LabPC Robótica — Diagnóstico técnico</title><style>body{font-family:Arial,sans-serif;margin:0;background:#f4f7fa;color:#102d4f}header{position:sticky;top:0;background:white;border-bottom:1px solid #dbe5ee;padding:14px 18px;display:flex;align-items:center;gap:10px}h1{font-size:20px;margin:0;flex:1}button{border:0;border-radius:8px;padding:9px 13px;font-weight:800;cursor:pointer;background:#2563eb;color:#fff}pre{margin:14px 18px 24px;background:#fff;border:1px solid #dbe5ee;border-radius:10px;padding:14px;white-space:pre-wrap;word-break:break-word;font:13px/1.45 Consolas,monospace;min-height:520px}</style></head><body><header><h1>⚙ Diagnóstico técnico — LabPC Robótica</h1><button id="copyBtn">📋 COPIAR TUDO</button><button onclick="window.close()">FECHAR</button></header><pre id="diagContent"></pre><script>document.getElementById("copyBtn").onclick=async()=>{const t=document.getElementById("diagContent").textContent;try{await navigator.clipboard.writeText(t);document.getElementById("copyBtn").textContent="✓ COPIADO";setTimeout(()=>document.getElementById("copyBtn").textContent="📋 COPIAR TUDO",1200)}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById("diagContent"));const s=window.getSelection();s.removeAllRanges();s.addRange(r)}};<\/script></body></html>');
+ diagWindow.document.close();renderDiagPopup();
+ if(diagRefresh)clearInterval(diagRefresh);diagRefresh=setInterval(renderDiagPopup,400);
+}
+document.getElementById('openDiag').addEventListener('click',openDiagnosticWindow);
+</script></body></html>
+<!-- republicacao-pages-2026-10-03 -->
