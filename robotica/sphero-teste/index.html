@@ -10,7 +10,7 @@ main{max-width:1240px;margin:auto;padding:8px 18px}.card{background:#fff;border-
 .robot{font-size:52px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:14px;align-items:start}.steps{line-height:1.38;font-size:13px}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:68px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
-<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03.1 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
+<header><div class="head"><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Protótipo 03.2 — conexão com Sphero BOLT / BOLT+</p></div></div></div></header>
 <main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
@@ -38,7 +38,7 @@ const SERVICE_API='00010001-574f-4f20-5370-6865726f2121';
 const SERVICE_INIT='00020001-574f-4f20-5370-6865726f2121';
 const CHAR_HANDSHAKE='00020005-574f-4f20-5370-6865726f2121';
 const CHAR_API='00010002-574f-4f20-5370-6865726f2121';
-let apiChar=null,seq=0;const pending=new Map();
+let apiChar=null,seq=0;const pending=new Map();let rxFrame=[];
 let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
@@ -97,14 +97,22 @@ function unescapePacket(a){
 }
 function handleRx(a){
  try{
-  const p=unescapePacket(a);
-  if(p[0]!==0x8D||p[p.length-1]!==0xD8)return;
-  const flags=p[1];let i=2;
-  if(flags&0x10)i++; // target
-  if(flags&0x20)i++; // source
-  const did=p[i++],cid=p[i++],s=p[i++],data=p.slice(i,p.length-2);
-  const waiter=pending.get(s);
-  if(waiter){pending.delete(s);waiter.resolve({did,cid,data})}
+  for(const b of a){
+   if(b===0x8D)rxFrame=[0x8D];
+   else if(rxFrame.length)rxFrame.push(b);
+   if(b===0xD8&&rxFrame.length){
+    const raw=Uint8Array.from(rxFrame);rxFrame=[];
+    const p=unescapePacket(raw);
+    log('RX pacote ← '+[...p].map(x=>x.toString(16).padStart(2,'0')).join(' '));
+    if(p[0]!==0x8D||p[p.length-1]!==0xD8)continue;
+    const flags=p[1];let i=2;
+    if(flags&0x10)i++;
+    if(flags&0x20)i++;
+    const did=p[i++],cid=p[i++],s=p[i++],data=p.slice(i,p.length-2);
+    const waiter=pending.get(s);
+    if(waiter){pending.delete(s);waiter.resolve({did,cid,data})}
+   }
+  }
  }catch(e){log('Parser RX: '+e.message)}
 }
 async function requestPacket(did,cid,data=[],targetId=null,timeout=1800){
@@ -120,7 +128,7 @@ async function readBattery(){
   const res=await requestPacket(0x13,0x10);
   // Resposta V2 traz status API como primeiro byte; percentual vem em seguida.
   const d=res.data;let pct=null;
-  if(d.length>=2&&d[0]===0x00)pct=d[1];else if(d.length>=1&&d[0]<=100)pct=d[0];
+  if(d.length>=1&&d[d.length-1]<=100)pct=d[d.length-1];
   if(pct===null||pct<0||pct>100)throw new Error('Resposta de bateria não reconhecida: '+d.join(','));
   document.getElementById('batteryText').textContent=pct+'%';
   document.getElementById('batteryBar').style.width=pct+'%';
