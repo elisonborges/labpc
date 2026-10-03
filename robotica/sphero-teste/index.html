@@ -6,7 +6,7 @@
 header{background:#fff;padding:14px 22px;box-shadow:0 2px 12px #0001}header .head{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px}header .brand{display:flex;align-items:center;gap:10px}header .brandicon{font-size:34px}header h1{margin:0;font-size:clamp(24px,3vw,34px)}header p{margin:3px 0 0;font-size:13px}
 main{max-width:1240px;margin:auto;padding:20px 24px}.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 26px #0002;margin-bottom:14px}
 .status{padding:18px;border-radius:16px;background:#eef5fb;font-size:18px;font-weight:800;text-align:center;margin:18px 0}.ok{background:#e8fff3;color:#12633c}.no{background:#fff0eb;color:#a33b24}
-.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.btn{border:0;border-radius:14px;padding:14px 20px;font-size:17px;font-weight:800;cursor:pointer;background:#2563eb;color:#fff}.btn.alt{background:#fff;color:#18324b;border:2px solid #cbd8e5}.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}.connect-row{flex-wrap:nowrap}.led-row{flex-wrap:nowrap}.led-row .btn{padding:12px 14px;font-size:15px}@media(max-width:560px){.connect-row,.led-row{flex-wrap:wrap}}.btn{border:0;border-radius:14px;padding:14px 20px;font-size:17px;font-weight:800;cursor:pointer;background:#2563eb;color:#fff}.btn.alt{background:#fff;color:#18324b;border:2px solid #cbd8e5}.btn:disabled{opacity:.45;cursor:not-allowed}
 .robot{font-size:78px;text-align:center}.workspace{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:18px;align-items:start}.steps{line-height:1.65}.tech{font-family:monospace;background:#f7f9fb;padding:12px;border-radius:12px;white-space:pre-wrap;font-size:13px;min-height:90px}.side .card{margin-bottom:14px}@media(max-width:850px){.workspace{grid-template-columns:1fr}}
 footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 </style></head><body>
@@ -14,10 +14,15 @@ footer{text-align:center;padding:20px;color:#66788a;font-size:12px}
 <main><div class="workspace"><div><section class="card">
 <div class="robot">🔵</div>
 <div id="status" class="status">Aguardando conexão.</div>
-<div class="row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
+<div id="battery" style="display:none;margin:10px auto 16px;max-width:360px">
+ <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>🔋 Bateria do Sphero</span><span id="batteryText">conectado</span></div>
+ <div style="height:14px;background:#e7edf3;border-radius:99px;overflow:hidden;margin-top:6px"><div id="batteryBar" style="height:100%;width:100%;background:#72b67a"></div></div>
+ <div style="font-size:11px;color:#66788a;margin-top:4px">Percentual real será ativado após validarmos a leitura de energia do BOLT/BOLT+.</div>
+</div>
+<div class="row connect-row"><button id="connect" class="btn">🔵 CONECTAR SPHERO</button><button id="disconnect" class="btn alt" disabled>DESCONECTAR</button></div>
 <div id="ledPanel" style="display:none;margin-top:18px;border-top:2px solid #eef2f6;padding-top:16px">
  <div style="font-weight:900;text-align:center;margin-bottom:10px">💡 TESTE DE LED</div>
- <div class="row">
+ <div class="row led-row">
   <button class="btn" onclick="setLed(255,0,0)">🔴 VERMELHO</button>
   <button class="btn" onclick="setLed(0,255,0)">🟢 VERDE</button>
   <button class="btn" onclick="setLed(0,0,255)">🔵 AZUL</button>
@@ -38,7 +43,7 @@ let device=null,server=null;
 const statusEl=document.getElementById('status'),diag=document.getElementById('diag'),bCon=document.getElementById('connect'),bDis=document.getElementById('disconnect');
 function setStatus(t,kind=''){statusEl.textContent=t;statusEl.className='status '+kind}
 function log(t){diag.textContent+=(diag.textContent==='Nenhum teste executado.'?'':"\n")+t}
-function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';apiChar=null;server=null}
+function disconnected(){setStatus('Sphero desconectado.');bCon.disabled=false;bDis.disabled=true;document.getElementById('ledPanel').style.display='none';document.getElementById('battery').style.display='none';apiChar=null;server=null}
 async function connect(){
  diag.textContent='';
  if(!navigator.bluetooth){setStatus('Este navegador não disponibilizou Web Bluetooth. Use Chrome ou Edge compatível.','no');log('Web Bluetooth indisponível.');return}
@@ -59,7 +64,7 @@ async function connect(){
    log('Handshake BLE: enviado');
   }catch(e){log('Inicialização/handshake: '+e.message)}
   setStatus('✅ CONECTADO: '+(device.name||'Sphero BOLT/BOLT+'),'ok');
-  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';
+  bCon.disabled=true;bDis.disabled=false;document.getElementById('ledPanel').style.display='block';document.getElementById('battery').style.display='block';
  }catch(e){
   setStatus(e.name==='NotFoundError'?'Conexão cancelada ou nenhum robô selecionado.':'Não foi possível concluir a conexão.','no');
   log('Erro: '+e.name+' — '+e.message);
@@ -77,9 +82,9 @@ async function sendPacket(p){if(!apiChar)throw new Error('Canal de comandos indi
 async function setLed(r,g,b){
  try{
   // IO device: define LEDs RGB principais. Teste deliberadamente isolado antes de movimento.
-  const p=packet(0x1A,0x0E,[0x00,0x00,0x00,0x07,r,g,b]);
+  const p=packet(0x1A,0x1A,[0x00,0x00,0x00,0x03,r,g,b,r,g,b]);
   await sendPacket(p);log('Comando LED enviado: RGB('+r+','+g+','+b+')');
-  setStatus('💡 Comando de LED enviado ao Sphero.','ok');
+  setStatus('💡 Comando enviado. Confirme visualmente a cor no Sphero.','ok');
  }catch(e){setStatus('Não foi possível enviar o comando de LED.','no');log('LED: '+e.name+' — '+e.message)}
 }
 
