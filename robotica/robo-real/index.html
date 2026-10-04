@@ -1,5 +1,5 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LabPC Robótica — Robô Real — Aula com Sphero BOLT / BOLT+</title>
+<title>LabPC Robótica — Robô Real</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f2f7fb;color:#102d4f;min-height:100vh;overflow-x:hidden}
 button,select,input{font:inherit}header{height:64px;background:#fff;border-bottom:1px solid #dce7f0;display:flex;align-items:center;padding:7px 20px;gap:18px}
@@ -232,7 +232,7 @@ body.sim-mode .simMissionTop .missionIcon{font-size:28px!important}
 .simObstacle{display:none;position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;align-items:center;justify-content:center;font-size:19px;background:#fff2e8;border:2px solid #e36b2c;border-radius:5px;z-index:4;box-sizing:border-box}
 body.sim-mode .simObstacle{display:flex}
 .simMapFeedback.collision{display:block;background:#fff3e8;border:3px solid #ee7b35;color:#8b3e0a}
-body:not(.sim-mode) .simMissionTop{display:none!important}</style></head><body>
+body:not(.sim-mode) .simMissionTop{display:none!important}.repeatCmd{background:#eef9ff!important;border:2px solid #60a5fa!important;color:#075985!important}.cmdrow.repeat{background:#eaf7ff;border-color:#93c5fd}</style></head><body>
 <header><div class="brand"><span class="brandicon">🤖</span><div><h1>LabPC Robótica</h1><p>Programação com Sphero BOLT / BOLT+</p></div><div class="brandModes"><button id="modeReal" class="modebtn active" onclick="setLabMode('real')">🤖 ROBÔ REAL</button></div></div>
 <div class="topstate"><button id="openDiag" class="secondary" style="white-space:nowrap">↗ ⚙ DIAGNÓSTICO</button><span id="topStatus" class="pill">⚪ Aguardando conexão</span><span id="topBattery" class="pill">🔋 —</span><button id="connectTop" class="btn">CONECTAR</button><button id="reconnectTop" class="btn" style="display:none">↻ RECONECTAR</button><button id="disconnectTop" class="btn alt" disabled>DESCONECTAR</button></div></header>
 <main>
@@ -244,7 +244,7 @@ body:not(.sim-mode) .simMissionTop{display:none!important}</style></head><body>
 <section class="card editor"><div class="simMissionTop"><div class="missionText"><span class="missionIcon">🎯</span><span>DESAFIO: leve o robô do <b>INÍCIO</b> até a <b>🏁 BANDEIRA</b>.</span></div><div class="missionHint">👀 Observe o mapa → 🧩 monte o programa → ▶ execute</div></div><div class="editorTitle"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2>🧩 Editor de Programa</h2><span class="editorModeNote">🟢 SIMULAÇÃO — SEM ROBÔ</span><p style="margin:0">Monte a sequência e configure cada comando antes de executar.</p></div></div>
 <div class="editorGrid">
  <div class="panel"><div class="panelTitle">🧱 COMANDOS</div><div class="commands">
-  <button onclick="addProgramCmd('speed')">⚡ VELOCIDADE</button><button onclick="addProgramCmd('move')">⬆ MOVER</button><button onclick="addProgramCmd('right')">↱ DIREITA</button><button onclick="addProgramCmd('left')">↰ ESQUERDA</button><button class="purple" onclick="addProgramCmd('diagRight')">↗ DIAGONAL DIREITA</button><button class="purple" onclick="addProgramCmd('diagLeft')">↖ DIAGONAL ESQUERDA</button><button onclick="addProgramCmd('wait')">⏱ ESPERAR</button><button onclick="addProgramCmd('stop')">■ PARAR</button>
+  <button onclick="addProgramCmd('speed')">⚡ VELOCIDADE</button><button onclick="addProgramCmd('move')">⬆ MOVER</button><button onclick="addProgramCmd('right')">↱ DIREITA</button><button onclick="addProgramCmd('left')">↰ ESQUERDA</button><button class="purple" onclick="addProgramCmd('diagRight')">↗ DIAGONAL DIREITA</button><button class="purple" onclick="addProgramCmd('diagLeft')">↖ DIAGONAL ESQUERDA</button><button onclick="addProgramCmd('wait')">⏱ ESPERAR</button><button class="repeatCmd" onclick="addProgramCmd('repeat')">🔁 REPITA MOVER</button><button onclick="addProgramCmd('stop')">■ PARAR</button>
  </div></div>
  <div class="panel"><div class="programHead"><span class="panelTitle">✨ MEU PROGRAMA</span><button class="secondary tiny" onclick="clearProgram()">🗑 LIMPAR</button></div><div id="programListNew" class="programList"></div></div>
  <div class="panel visual"><div class="panelTitle">🌐 VISUALIZAÇÃO DO ROBÔ</div><div id="simGrid" class="gridWrap"><div id="simMapFeedback" class="simMapFeedback"></div><div class="simStart">INÍCIO</div><div id="simObstacle" class="simObstacle" title="Obstáculo">🧱</div><div id="simGoal" class="simGoal" title="Objetivo">🏁</div><div id="simArrow" class="heading" style="display:none">↑</div><div id="simRobot" class="robotDot">🤖</div></div><div class="visualInfo"><span id="simDirection">Frente (0°)</span><span class="simChallenge">🎯 OBJETIVO: chegue à bandeira</span><span>⚡ Velocidade atual: <b id="simSpeed">40</b></span></div><div class="runrow"><button id="bRunProgramNew" class="btn run" onclick="runEditorProgram()">▶ EXECUTAR</button><button class="btn stopbtn" onclick="emergencyStop()">■ PARAR</button><button class="secondary simRestart" onclick="restartSimulation()">↻ RECOMEÇAR</button></div><div id="programStatusNew" style="font-size:10px;color:#66788a;margin-top:4px">Monte um programa para começar.</div></div>
@@ -431,7 +431,7 @@ function setLabMode(mode){
  document.getElementById('programStatusNew').classList.remove('simSuccess','simRetry');document.getElementById('programStatusNew').textContent=labMode==='sim'?'🎯 Desafio: leve o robô do INÍCIO até a bandeira.':'Monte um programa para começar.';
 }
 let editorProgram=[];let directionBlockAdded=false;
-const cmdDefaults={speed:{type:'speed',value:40,label:'⚡ Velocidade'},move:{type:'move',value:1,label:'⬆ Mover'},right:{type:'right',value:90,label:'↱ Direita'},left:{type:'left',value:90,label:'↰ Esquerda'},diagRight:{type:'diagRight',value:45,label:'↗ Diagonal direita'},diagLeft:{type:'diagLeft',value:45,label:'↖ Diagonal esquerda'},wait:{type:'wait',value:1,label:'⏱ Esperar'},stop:{type:'stop',label:'■ Parar'}};
+const cmdDefaults={speed:{type:'speed',value:40,label:'⚡ Velocidade'},move:{type:'move',value:1,label:'⬆ Mover'},right:{type:'right',value:90,label:'↱ Direita'},left:{type:'left',value:90,label:'↰ Esquerda'},diagRight:{type:'diagRight',value:45,label:'↗ Diagonal direita'},diagLeft:{type:'diagLeft',value:45,label:'↖ Diagonal esquerda'},wait:{type:'wait',value:1,label:'⏱ Esperar'},repeat:{type:'repeat',value:3,label:'🔁 Repita MOVER'},stop:{type:'stop',label:'■ Parar'}};
 function setFrontOffset(deg,btn){
  if(programRunning)return;
  frontOffset=((Number(deg)||0)%360+360)%360;
@@ -448,10 +448,10 @@ function removeProgramCmd(i){if(programRunning)return;editorProgram.splice(i,1);
 function moveProgramCmd(i,d){if(programRunning)return;let j=i+d;if(j<0||j>=editorProgram.length)return;[editorProgram[i],editorProgram[j]]=[editorProgram[j],editorProgram[i]];renderProgramNew();updateDirectionPreview()}
 function setCmd(i,v){editorProgram[i].value=Number(v);renderProgramNew()}
 function renderProgramNew(){const box=document.getElementById('programListNew');if(!box)return;if(!editorProgram.length){box.innerHTML='<div class="empty">Clique nos comandos para montar sua sequência.</div>';return}
- box.innerHTML=editorProgram.map((x,i)=>{let cls=x.type==='move'?'move':x.type==='stop'?'stop':x.type==='wait'?'wait':x.type.startsWith('diag')?'diag':(x.type==='right'||x.type==='left')?'turn':'';
+ box.innerHTML=editorProgram.map((x,i)=>{let cls=x.type==='move'?'move':x.type==='stop'?'stop':x.type==='wait'?'wait':x.type.startsWith('diag')?'diag':x.type==='repeat'?'repeat':(x.type==='right'||x.type==='left')?'turn':'';
  let cfg='';if(x.type==='speed')cfg='<select onchange="setCmd('+i+',this.value)">'+opts(1,100,x.value)+'</select>';
  if(x.type==='move'||x.type==='wait')cfg='<select onchange="setCmd('+i+',this.value)">'+opts(1,10,x.value)+'</select><span>seg.</span>';
- if(x.type==='right'||x.type==='left')cfg='<span>'+x.value+'°</span>';if(x.type.startsWith('diag'))cfg='<span>45°</span>';
+ if(x.type==='right'||x.type==='left')cfg='<span>'+x.value+'°</span>';if(x.type.startsWith('diag'))cfg='<span>45°</span>';if(x.type==='repeat')cfg='<select onchange="setCmd('+i+',this.value)">'+opts(2,5,x.value)+'</select><span> vezes</span>';
  return '<div class="cmdrow '+cls+'" draggable="true" data-index="'+i+'" ondragstart="programDragStart(event)" ondragover="programDragOver(event)" ondragleave="programDragLeave(event)" ondrop="programDrop(event)" ondragend="programDragEnd(event)"><span class="draghandle" title="Arraste para mudar a ordem">⠿ '+(i+1)+'.</span><span>'+x.label+'</span><span class="cmdcfg">'+cfg+' <button class="secondary tiny" onclick="moveProgramCmd('+i+',-1)" title="Mover para cima">↑</button><button class="secondary tiny" onclick="moveProgramCmd('+i+',1)" title="Mover para baixo">↓</button><button class="secondary tiny" onclick="removeProgramCmd('+i+')">×</button></span></div>'}).join('')}
 let draggedProgramIndex=null;
 function programDragStart(e){if(programRunning){e.preventDefault();return}draggedProgramIndex=Number(e.currentTarget.dataset.index);e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(draggedProgramIndex))}
@@ -531,6 +531,17 @@ async function runEditorProgram(){
     if(labMode==='real'){await driveHeading(speed,physicalHeading(programHeading),0);await waitProgram(x.value*1000);await driveHeading(0,physicalHeading(programHeading),0)}
     else await waitProgram(220);
     simMove(x.value)
+   }
+   else if(x.type==='repeat'){
+    const times=Math.max(2,Math.min(5,Number(x.value)||2));
+    for(let r=0;r<times;r++){
+     if(programCancelled)return;
+     setProgStatus((i+1)+'/'+editorProgram.length+' — 🔁 REPITA MOVER '+(r+1)+'/'+times);
+     await driveHeading(speed,physicalHeading(programHeading),0);
+     await waitProgram(1000);
+     await driveHeading(0,physicalHeading(programHeading),0);
+     if(r<times-1)await waitProgram(120);
+    }
    }
    else if(x.type==='stop'){if(labMode==='real')await driveHeading(0,physicalHeading(programHeading),0);else await waitProgram(120)}
   }
