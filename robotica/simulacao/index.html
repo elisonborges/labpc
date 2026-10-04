@@ -469,15 +469,15 @@ async function driveHeading(speed,heading=0,direction=0){
 }
 
 
-let programRunning=false,programCancelled=false,programHeading=0,frontOffset=0,labMode='real';
+let programRunning=false,programCancelled=false,programHeading=0,frontOffset=0,labMode='sim';
 let simHeading=0; // exclusivo do modo Simulação
 const waitProgram=ms=>new Promise(r=>setTimeout(r,ms));
 function setLabMode(mode){
  if(programRunning)return;
  labMode=mode==='sim'?'sim':'real';document.body.classList.remove('sim-needs-restart','sim-challenge-complete');if(labMode==='sim')simChallenge=1;
  document.body.classList.toggle('sim-mode',labMode==='sim');
- document.getElementById('modeReal').classList.toggle('active',labMode==='real');
- document.getElementById('modeSim').classList.toggle('active',labMode==='sim');
+ const modeRealBtn=document.getElementById('modeReal');if(modeRealBtn)modeRealBtn.classList.toggle('active',labMode==='real');
+ const modeSimBtn=document.getElementById('modeSim');if(modeSimBtn)modeSimBtn.classList.toggle('active',labMode==='sim');
  resetSim();if(labMode==='sim')applySimChallenge();
  document.getElementById('programStatusNew').classList.remove('simSuccess','simRetry');document.getElementById('programStatusNew').textContent=labMode==='sim'?'🎯 Desafio: leve o robô do INÍCIO até a bandeira.':'Monte um programa para começar.';
 }
@@ -652,7 +652,7 @@ async function runEditorProgram(){
   setProgStatus(labMode==='sim'?'Falha durante a simulação.':'Falha durante o programa.')
  }finally{programRunning=false;b.disabled=false}
 }
-setTimeout(()=>{renderProgramNew();paintSim();updateDirectionPreview()},0);
+setTimeout(()=>{setLabMode('sim');renderProgramNew();paintSim();updateDirectionPreview()},0);
 
 async function stopRobot(){
  try{
