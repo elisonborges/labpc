@@ -1,22 +1,70 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LabPC — Lab Pensamento Computacional</title>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>Central LabPC — Tecnologia, aprendizagem e projetos</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#183153}
-header{background:#1769aa;color:white;padding:28px 20px;text-align:center}header h1{margin:0 0 7px;font-size:32px}header p{margin:0;opacity:.95}
-main{max-width:1100px;margin:26px auto;padding:0 18px}.notice{background:white;border-left:5px solid #1769aa;padding:14px 16px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 8px #0001}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}.card{background:white;border-radius:16px;padding:20px;text-decoration:none;color:#183153;box-shadow:0 3px 12px #0001;transition:.15s}
-.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px #0002}.ico{font-size:34px}h2{margin:10px 0 8px}.card p{min-height:48px;color:#50627a}.card span{font-weight:bold;color:#1769aa}
-.card-sphero{position:relative;border:2px solid #6d5dfc;background:linear-gradient(145deg,#ffffff 0%,#f4f2ff 100%);box-shadow:0 5px 18px #6d5dfc22}
-.card-sphero:before{content:"ROBÓTICA";position:absolute;right:14px;top:14px;background:#6d5dfc;color:#fff;font-size:11px;font-weight:900;letter-spacing:.5px;padding:5px 8px;border-radius:999px}
-.card-sphero h2{color:#4436c9}.card-sphero span{color:#4436c9}
-footer{text-align:center;padding:30px 15px;color:#64748b;font-size:13px}
-</style></head><body>
-<header><h1>LabPC</h1><p>Lab Pensamento Computacional — 2º Ano</p></header>
-<main><div class="notice"><b>Versão Web V1.1</b><br>Funciona sem o servidor do professor. Todas as atividades estão disponíveis diretamente nesta página. O Painel do Professor, comandos remotos e telemetria de rede não fazem parte desta versão.</div>
-<div class="grid"><a class="card" href="atividades/jornada/index.html"><div class="ico">⌨️</div><h2>Jornada do Teclado</h2><p>Explore letras, palavras, frases e precisão na digitação.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/caca-letras/index.html"><div class="ico">🔤</div><h2>Caça-Letras</h2><p>Encontre e digite as letras nos desafios progressivos.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/missao-computador/index.html"><div class="ico">🖥️</div><h2>Missão Computador</h2><p>Conheça hardware, software e como o computador funciona.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/eventos/index.html"><div class="ico">⚡</div><h2>Missão Eventos</h2><p>Descubra como eventos fazem programas reagirem.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/cobra/index.html"><div class="ico">🐍</div><h2>Jogo da Cobra</h2><p>Capture as letras na ordem correta usando o teclado.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/makey/index.html"><div class="ico">🎮</div><h2>Missão Makey</h2><p>Controle personagens com comandos e Makey Makey.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/missao-mouse/index.html"><div class="ico">🖱️</div><h2>Missão Mouse</h2><p>Pratique movimento, clique, precisão, arrastar, encaixar e duplo clique com o Nexo.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/programacao-em-par/index.html"><div class="ico">👥</div><h2>Programação em Par</h2><p>Trabalhe como Piloto e Navegador para prever, programar, testar e depurar.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/missao-algoritmo/index.html"><div class="ico">🧩</div><h2>Missão Algoritmo</h2><p>Crie sequências, planeje, teste, depure e ensine o Nexo passo a passo.</p><span>Abrir atividade →</span></a><a class="card" href="atividades/missao-repeticao/index.html"><div class="ico">🔁</div><h2>Missão Repetição</h2><p>Descubra padrões de repetição, use REPITA, preveja, depure e crie soluções com o Nexo.</p><span>Abrir atividade →</span></a><a class="card card-sphero" href="robotica/index.html"><div class="ico">🤖</div><h2>Missão Sphero</h2><p>Escolha entre programar o Sphero real ou praticar desafios no simulador.</p><span>Abrir LabPC Robótica →</span></a></div></main>
-<footer class="labpc-authorship" style="text-align:center;padding:18px 10px 24px;color:#66788a;font-size:12px;line-height:1.5">
-<div><strong>LabPC — Lab Pensamento Computacional</strong></div>
+*{box-sizing:border-box}
+:root{--bg:#07111f;--panel:#0e1b2d;--text:#eef6ff;--muted:#9fb2c9;--line:#20344d;--accent:#4fb3ff}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(160deg,#07111f 0%,#0c1830 52%,#101b2d 100%);color:var(--text);min-height:100vh}
+header{max-width:1180px;margin:auto;padding:64px 22px 34px}
+.brand{display:inline-flex;align-items:center;gap:10px;border:1px solid #29435f;background:#0b1728cc;border-radius:999px;padding:8px 13px;color:#bfe4ff;font-weight:800;font-size:13px;letter-spacing:.4px}
+h1{font-size:clamp(38px,6vw,68px);line-height:1;margin:24px 0 18px;max-width:850px}
+.lead{font-size:clamp(17px,2vw,21px);line-height:1.6;color:var(--muted);max-width:780px;margin:0}
+main{max-width:1180px;margin:auto;padding:12px 22px 70px}
+.section-title{margin:24px 0 18px;font-size:14px;text-transform:uppercase;letter-spacing:1.6px;color:#7fc9ff}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.card{position:relative;min-height:250px;padding:28px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(145deg,#102039dd,#0b1729dd);text-decoration:none;color:var(--text);overflow:hidden;transition:.2s}
+.card:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-70px;top:-70px;background:var(--glow,#4fb3ff);filter:blur(80px);opacity:.18}
+.card:hover{transform:translateY(-4px);border-color:#456887;box-shadow:0 18px 45px #0005}
+.icon{font-size:42px}.tag{position:absolute;right:22px;top:22px;font-size:11px;font-weight:900;letter-spacing:.7px;border:1px solid #ffffff22;background:#ffffff0d;padding:6px 9px;border-radius:999px;color:#c9ddf0}
+.card h2{font-size:25px;margin:20px 0 10px}.card p{color:var(--muted);line-height:1.55;max-width:480px;margin:0 0 24px}.go{font-weight:850;color:#8dd2ff}
+.aprender{--glow:#22c55e}.robotica{--glow:#8b5cf6}.projetos{--glow:#f59e0b}.manager{--glow:#38bdf8}
+.coming{cursor:default}.coming:hover{transform:none}.coming .go{color:#f8c96b}
+footer{border-top:1px solid #ffffff10;text-align:center;padding:26px 18px;color:#7288a1;font-size:12px;line-height:1.6}
+@media(max-width:720px){header{padding-top:42px}.grid{grid-template-columns:1fr}.card{min-height:220px}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">⚡ LABPC · CENTRAL</div>
+<h1>Um ponto de partida para aprender, criar e explorar.</h1>
+<p class="lead">Acesse os ambientes do ecossistema LabPC. Atividades de aprendizagem, robótica, projetos escolares e ferramentas de gestão reunidos em uma única central.</p>
+</header>
+<main>
+<div class="section-title">Escolha um ambiente</div>
+<div class="grid">
+<a class="card aprender" href="aprender/index.html">
+<div class="tag">APRENDER</div><div class="icon">🎮</div>
+<h2>Portal do 2º Ano</h2>
+<p>Jogos, missões e atividades de Pensamento Computacional para desenvolver habilidades de teclado, mouse, algoritmos, eventos e programação.</p>
+<div class="go">Entrar no portal →</div>
+</a>
+<a class="card robotica" href="robotica/index.html">
+<div class="tag">ROBÓTICA</div><div class="icon">🤖</div>
+<h2>LabPC Robótica</h2>
+<p>Ambiente Sphero com acesso ao robô real e às experiências de simulação e desafios de programação.</p>
+<div class="go">Explorar Robótica →</div>
+</a>
+<a class="card projetos coming" href="javascript:void(0)" aria-label="Projetos Escolares em construção">
+<div class="tag">NOVO</div><div class="icon">📚</div>
+<h2>Projetos Escolares</h2>
+<p>Portal de entregas, acompanhamento e Biblioteca Digital para transformar produções dos alunos em trabalhos publicados.</p>
+<div class="go">Em construção · próximo módulo</div>
+</a>
+<a class="card manager coming" href="javascript:void(0)" aria-label="LabManager módulo do ecossistema">
+<div class="tag">GESTÃO</div><div class="icon">🖥️</div>
+<h2>LabManager</h2>
+<p>Gerenciamento dos computadores do laboratório, modos de aula, comunicação, telas e recursos administrativos.</p>
+<div class="go">Módulo do ecossistema LabPC</div>
+</a>
+</div>
+</main>
+<footer>
+<div><strong>LabPC — Tecnologia, aprendizagem e projetos</strong></div>
 <div>Idealização e desenvolvimento: Prof. Elison Borges · © 2026</div>
 </footer>
-</body></html>
+</body>
+</html>
