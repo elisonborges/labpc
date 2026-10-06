@@ -19,7 +19,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 <header><div class="head"><strong>⚙️ Administração · Projetos Escolares</strong><div class="session"><span id="sessionEmail"></span><button id="logoutBtn" class="logout" style="display:none" onclick="logout()">Sair</button><a href="../index.html">← Voltar</a></div></div></header>
 <section id="auth" class="auth-shell"><div class="auth-card"><h1>🔐 Acesso administrativo</h1><p>Entre com sua conta para acessar o Painel Administrativo de Projetos Escolares.</p><label>E-mail</label><input id="authEmail" type="email" autocomplete="email" value="francisco.borges@dombarreto.g12.br"><label>Senha</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="Sua senha"><button class="btn primary" onclick="login()">Entrar</button><button class="btn soft" onclick="signup()">Criar primeiro acesso</button><div id="authStatus" class="auth-status"></div><div class="auth-help">A senha é processada pelo Supabase Auth e não fica armazenada no código do site.</div></div></section>
 <div id="app"><main><div class="title"><div><h1>Painel Administrativo</h1><p>Gerencie a estrutura escolar e os projetos disponíveis para entrega.</p></div><span class="proto">SUPABASE · LOGIN REAL</span></div>
-<div class="note">Autenticação já conectada ao Supabase. Nesta etapa de teste, os cadastros exibidos no painel ainda são locais; a persistência real será ativada após validarmos o primeiro acesso.</div>
+<div class="note">Autenticação e Estrutura Escolar já estão conectadas ao Supabase. Alterações em unidades e turmas são persistidas no banco. A aba Projetos ainda será conectada na próxima etapa.</div>
 <nav class="tabs"><button class="tab on" data-tab="estrutura">🏫 Estrutura escolar</button><button class="tab" data-tab="projetos">📚 Projetos</button><button class="tab" data-tab="usuarios">👥 Usuários</button></nav>
 <section class="panel on" id="estrutura">
 <div class="stats"><div class="stat"><b id="sUnits">1</b><span>Unidade</span></div><div class="stat"><b>2</b><span>Turnos</span></div><div class="stat"><b>1</b><span>Ano cadastrado</span></div><div class="stat"><b id="sClasses">8</b><span>Turmas</span></div></div>
@@ -105,7 +105,7 @@ async function saveUnit(){
  else{const up=await sb.from('units').update({name:unit}).eq('id',unitId);if(up.error)return alert('Erro ao atualizar unidade: '+up.error.message)}
  if(editingSchool>=0){const old=schools[editingSchool];const del=await sb.from('school_classes').delete().in('id',old.classRows.map(x=>x.id));if(del.error)return alert('Erro ao atualizar turmas: '+del.error.message)}
  const ins=await sb.from('school_classes').insert(cs.map(name=>({unit_id:unitId,shift,grade,class_name:name,active:true})));if(ins.error)return alert('Erro ao salvar turmas: '+ins.error.message);
- closeModal('unitModal');editingSchool=-1;await loadSchools();
+ closeModal('unitModal');editingSchool=-1;await loadSchools();alert('Estrutura escolar salva no banco com sucesso.');
 }
 function saveProject(){
  let name=document.getElementById('pName').value.trim();if(!name)return alert('Informe o nome do projeto.');
