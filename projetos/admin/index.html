@@ -31,19 +31,69 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 </section>
 <section class="panel" id="usuarios"><div class="card"><div class="toolbar"><h2>Usuários e permissões</h2></div><div class="empty">🔐 Esta área será ativada junto com a autenticação.<br><small>Perfis previstos: Administrador e Professor.</small></div></div></section>
 </main>
-<div class="modal" id="unitModal"><div class="box"><h2>Nova unidade / conjunto de turmas</h2><div class="row"><div><label>Unidade</label><input id="uName" placeholder="Ex.: Centro"></div><div><label>Turno</label><select id="uShift"><option>Manhã</option><option>Tarde</option></select></div></div><div class="row"><div><label>Ano</label><input id="uGrade" placeholder="Ex.: 6º Ano"></div><div><label>Turmas</label><input id="uClasses" placeholder="Ex.: A, B, C"></div></div><div class="modal-actions"><button class="btn soft" onclick="closeModal('unitModal')">Cancelar</button><button class="btn primary" onclick="addUnit()">Adicionar</button></div></div></div>
-<div class="modal" id="projectModal"><div class="box"><h2>Novo projeto</h2><label>Nome do projeto</label><input id="pName" placeholder="Ex.: Meu primeiro e-book"><div class="row"><div><label>Formato</label><select id="pType"><option>PDF</option></select></div><div><label>Máximo de integrantes</label><select id="pMembers"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div></div><div class="modal-actions"><button class="btn soft" onclick="closeModal('projectModal')">Cancelar</button><button class="btn primary" onclick="addProject()">Adicionar</button></div></div></div>
+<div class="modal" id="unitModal"><div class="box"><h2 id="unitModalTitle">Nova unidade / conjunto de turmas</h2><div class="row"><div><label>Unidade</label><input id="uName" placeholder="Ex.: Centro"></div><div><label>Turno</label><select id="uShift"><option>Manhã</option><option>Tarde</option></select></div></div><div class="row"><div><label>Ano</label><input id="uGrade" placeholder="Ex.: 6º Ano"></div><div><label>Turmas</label><input id="uClasses" placeholder="Ex.: A, B, C"></div></div><div class="modal-actions"><button class="btn soft" onclick="closeModal('unitModal')">Cancelar</button><button class="btn primary" id="unitSaveBtn" onclick="saveUnit()">Adicionar</button></div></div></div>
+<div class="modal" id="projectModal"><div class="box"><h2 id="projectModalTitle">Novo projeto</h2><label>Nome do projeto</label><input id="pName" placeholder="Ex.: Meu primeiro e-book"><div class="row"><div><label>Formato</label><select id="pType"><option>PDF</option></select></div><div><label>Máximo de integrantes</label><select id="pMembers"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div></div><div class="modal-actions"><button class="btn soft" onclick="closeModal('projectModal')">Cancelar</button><button class="btn primary" id="projectSaveBtn" onclick="saveProject()">Adicionar</button></div></div></div>
 <script>
 let schools=[{unit:'Centro',shift:'Manhã',grade:'6º Ano',classes:['A','B','C','D','E'],active:true},{unit:'Centro',shift:'Tarde',grade:'6º Ano',classes:['F','G','H'],active:true}];
 let projects=[{name:'Meu primeiro e-book',type:'PDF',members:4,active:true}];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab,.panel').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.tab).classList.add('on')}));
-function render(){document.getElementById('schoolRows').innerHTML=schools.map((x,i)=>'<tr><td><b>'+esc(x.unit)+'</b></td><td>'+esc(x.shift)+'</td><td>'+esc(x.grade)+'</td><td>'+x.classes.map(esc).join(', ')+'</td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="toggleSchool('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeSchool('+i+')">Excluir</button></div></td></tr>').join('');
-document.getElementById('projectRows').innerHTML=projects.map((x,i)=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.type)+'</td><td>Até '+x.members+'</td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="toggleProject('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeProject('+i+')">Excluir</button></div></td></tr>').join('');
+function render(){document.getElementById('schoolRows').innerHTML=schools.map((x,i)=>'<tr><td><b>'+esc(x.unit)+'</b></td><td>'+esc(x.shift)+'</td><td>'+esc(x.grade)+'</td><td>'+x.classes.map(esc).join(', ')+'</td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="editSchool('+i+')">Editar</button><button class="mini" onclick="toggleSchool('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeSchool('+i+')">Excluir</button></div></td></tr>').join('');
+document.getElementById('projectRows').innerHTML=projects.map((x,i)=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.type)+'</td><td>Até '+x.members+'</td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="editProject('+i+')">Editar</button><button class="mini" onclick="toggleProject('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeProject('+i+')">Excluir</button></div></td></tr>').join('');
 document.getElementById('sUnits').textContent=new Set(schools.map(x=>x.unit)).size;document.getElementById('sClasses').textContent=schools.reduce((a,x)=>a+x.classes.length,0);document.getElementById('sProjects').textContent=projects.length}
-function openUnit(){document.getElementById('unitModal').classList.add('on')}function openProject(){document.getElementById('projectModal').classList.add('on')}function closeModal(id){document.getElementById(id).classList.remove('on')}
-function addUnit(){let unit=document.getElementById('uName').value.trim(),grade=document.getElementById('uGrade').value.trim(),cs=document.getElementById('uClasses').value.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean);if(!unit||!grade||!cs.length)return alert('Preencha unidade, ano e turmas.');schools.push({unit,shift:document.getElementById('uShift').value,grade,classes:cs,active:true});closeModal('unitModal');render()}
-function addProject(){let name=document.getElementById('pName').value.trim();if(!name)return alert('Informe o nome do projeto.');projects.push({name,type:document.getElementById('pType').value,members:+document.getElementById('pMembers').value,active:true});closeModal('projectModal');render()}
+let editingSchool=-1,editingProject=-1;
+function openUnit(){
+ editingSchool=-1;
+ document.getElementById('uName').value='';
+ document.getElementById('uShift').value='Manhã';
+ document.getElementById('uGrade').value='';
+ document.getElementById('uClasses').value='';
+ document.getElementById('unitModalTitle').textContent='Nova unidade / conjunto de turmas';
+ document.getElementById('unitSaveBtn').textContent='Adicionar';
+ document.getElementById('unitModal').classList.add('on');
+}
+function editSchool(i){
+ editingSchool=i;const x=schools[i];
+ document.getElementById('uName').value=x.unit;
+ document.getElementById('uShift').value=x.shift;
+ document.getElementById('uGrade').value=x.grade;
+ document.getElementById('uClasses').value=x.classes.join(', ');
+ document.getElementById('unitModalTitle').textContent='Editar unidade / conjunto de turmas';
+ document.getElementById('unitSaveBtn').textContent='Salvar alterações';
+ document.getElementById('unitModal').classList.add('on');
+}
+function openProject(){
+ editingProject=-1;
+ document.getElementById('pName').value='';
+ document.getElementById('pType').value='PDF';
+ document.getElementById('pMembers').value='4';
+ document.getElementById('projectModalTitle').textContent='Novo projeto';
+ document.getElementById('projectSaveBtn').textContent='Adicionar';
+ document.getElementById('projectModal').classList.add('on');
+}
+function editProject(i){
+ editingProject=i;const x=projects[i];
+ document.getElementById('pName').value=x.name;
+ document.getElementById('pType').value=x.type;
+ document.getElementById('pMembers').value=String(x.members);
+ document.getElementById('projectModalTitle').textContent='Editar projeto';
+ document.getElementById('projectSaveBtn').textContent='Salvar alterações';
+ document.getElementById('projectModal').classList.add('on');
+}
+function closeModal(id){document.getElementById(id).classList.remove('on')}
+function saveUnit(){
+ let unit=document.getElementById('uName').value.trim(),grade=document.getElementById('uGrade').value.trim(),cs=document.getElementById('uClasses').value.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean);
+ if(!unit||!grade||!cs.length)return alert('Preencha unidade, ano e turmas.');
+ const data={unit,shift:document.getElementById('uShift').value,grade,classes:cs,active:editingSchool>=0?schools[editingSchool].active:true};
+ if(editingSchool>=0)schools[editingSchool]=data;else schools.push(data);
+ closeModal('unitModal');editingSchool=-1;render();
+}
+function saveProject(){
+ let name=document.getElementById('pName').value.trim();if(!name)return alert('Informe o nome do projeto.');
+ const data={name,type:document.getElementById('pType').value,members:+document.getElementById('pMembers').value,active:editingProject>=0?projects[editingProject].active:true};
+ if(editingProject>=0)projects[editingProject]=data;else projects.push(data);
+ closeModal('projectModal');editingProject=-1;render();
+}
 function toggleSchool(i){schools[i].active=!schools[i].active;render()}function removeSchool(i){if(confirm('Excluir este cadastro?')){schools.splice(i,1);render()}}function toggleProject(i){projects[i].active=!projects[i].active;render()}function removeProject(i){if(confirm('Excluir este projeto?')){projects.splice(i,1);render()}}
 render();
 </script></body></html>
