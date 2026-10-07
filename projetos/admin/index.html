@@ -67,7 +67,7 @@ async function openAssignments(i){assignmentTeacher=teachers[i];document.getElem
 async function loadAssignments(){if(!assignmentTeacher)return;const projectId=document.getElementById('aProject').value;const [{data:cls,error:ce},{data:plans,error:pe}]=await Promise.all([sb.from('school_classes').select('id,shift,grade,class_name,units(name)').eq('active',true).order('grade').order('class_name'),sb.from('teacher_assignment_plans').select('class_id').eq('teacher_email',assignmentTeacher.email).eq('project_id',projectId)]);if(ce||pe)return alert('Erro ao carregar atribuições: '+(ce?.message||pe?.message));const selected=new Set((plans||[]).map(x=>x.class_id));const groups={};(cls||[]).forEach(x=>{const key=(x.units?.name||'Unidade')+' · '+x.shift+' · '+x.grade;(groups[key]??=[]).push(x)});document.getElementById('assignmentClasses').innerHTML=Object.entries(groups).map(([g,rows])=>'<div style="margin-bottom:12px"><b>'+esc(g)+'</b><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:7px">'+rows.map(x=>'<label style="display:flex;align-items:center;gap:5px;font-weight:600"><input type="checkbox" class="aclass" value="'+x.id+'" '+(selected.has(x.id)?'checked':'')+'> Turma '+esc(x.class_name)+'</label>').join('')+'</div></div>').join('')}
 async function saveAssignments(){if(!assignmentTeacher)return;const projectId=document.getElementById('aProject').value,ids=[...document.querySelectorAll('.aclass:checked')].map(x=>x.value);const del=await sb.from('teacher_assignment_plans').delete().eq('teacher_email',assignmentTeacher.email).eq('project_id',projectId);if(del.error)return alert('Erro ao atualizar atribuições: '+del.error.message);if(ids.length){const ins=await sb.from('teacher_assignment_plans').insert(ids.map(class_id=>({teacher_email:assignmentTeacher.email,project_id:projectId,class_id})));if(ins.error)return alert('Erro ao salvar atribuições: '+ins.error.message)}alert('Atribuições salvas no banco com sucesso.');closeModal('assignmentModal')}
 function slugify(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
-function render(){document.getElementById('schoolRows').innerHTML=schools.map((x,i)=>'<tr><td><b>'+esc(x.unit)+'</b></td><td>'+esc(x.shift)+'</td><td>'+esc(x.grade)+'</td><td>'+x.classes.map(esc).join(', ')+'</td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="editSchool('+i+')">Editar</button><button class="mini" onclick="toggleSchool('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeSchool('+i+')">Excluir</button></div></td></tr>').join('');
+function render(){document.getElementById('schoolRows').innerHTML=schools.map((x,i)=>'<tr><td><b>'+esc(x.unit)+'</b></td><td>'+esc(x.shift)+'</td><td>'+esc(x.grade)+'</td><td>'+x.classes.map(esc).join(', ')+'</td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="editSchool('+i+')">Editar</button><button class="mini" onclick="toggleSchool('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeSchool('+i+')">Desativar</button></div></td></tr>').join('');
 document.getElementById('projectRows').innerHTML=projects.map((x,i)=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.type)+'</td><td>Até '+x.members+'</td><td><span class="pill">'+(x.publicLibrary?'HABILITADA':'DESABILITADA')+'</span></td><td><span class="pill">'+(x.active?'ATIVO':'INATIVO')+'</span></td><td><div class="actions"><button class="mini" onclick="editProject('+i+')">Editar</button><button class="mini" onclick="toggleProject('+i+')">'+(x.active?'Desativar':'Ativar')+'</button><button class="mini" onclick="removeProject('+i+')">Excluir</button></div></td></tr>').join('');
 document.getElementById('sUnits').textContent=new Set(schools.map(x=>x.unit)).size;document.getElementById('sClasses').textContent=schools.reduce((a,x)=>a+x.classes.length,0);document.getElementById('sProjects').textContent=projects.length}
 let editingSchool=-1,editingProject=-1;
@@ -117,11 +117,37 @@ async function saveUnit(){
  if(!unit||!grade||!cs.length)return alert('Preencha unidade, ano e turmas.');
  const shift=document.getElementById('uShift').value;
  let unitId=editingSchool>=0?schools[editingSchool].unitId:null;
- if(!unitId){const existing=await sb.from('units').select('id').ilike('name',unit).maybeSingle();if(existing.error)return alert('Erro ao consultar unidade: '+existing.error.message);if(existing.data)unitId=existing.data.id;else{const created=await sb.from('units').insert({name:unit,active:true}).select('id').single();if(created.error)return alert('Erro ao criar unidade: '+created.error.message);unitId=created.data.id}}
- else{const up=await sb.from('units').update({name:unit}).eq('id',unitId);if(up.error)return alert('Erro ao atualizar unidade: '+up.error.message)}
- if(editingSchool>=0){const old=schools[editingSchool];const del=await sb.from('school_classes').delete().in('id',old.classRows.map(x=>x.id));if(del.error)return alert('Erro ao atualizar turmas: '+del.error.message)}
- const ins=await sb.from('school_classes').insert(cs.map(name=>({unit_id:unitId,shift,grade,class_name:name,active:true})));if(ins.error)return alert('Erro ao salvar turmas: '+ins.error.message);
- closeModal('unitModal');editingSchool=-1;await loadSchools();alert('Estrutura escolar salva no banco com sucesso.');
+ if(!unitId){
+  const existing=await sb.from('units').select('id').ilike('name',unit).maybeSingle();
+  if(existing.error)return alert('Erro ao consultar unidade: '+existing.error.message);
+  if(existing.data)unitId=existing.data.id;
+  else{const created=await sb.from('units').insert({name:unit,active:true}).select('id').single();if(created.error)return alert('Erro ao criar unidade: '+created.error.message);unitId=created.data.id}
+ }else{
+  const up=await sb.from('units').update({name:unit}).eq('id',unitId);
+  if(up.error)return alert('Erro ao atualizar unidade: '+up.error.message);
+ }
+ if(editingSchool>=0){
+  const old=schools[editingSchool],byName=new Map(old.classRows.map(r=>[r.name.toUpperCase(),r]));
+  for(const name of cs){
+   const current=byName.get(name);
+   if(current){
+    const up=await sb.from('school_classes').update({unit_id:unitId,shift,grade,class_name:name,active:true}).eq('id',current.id);
+    if(up.error)return alert('Erro ao atualizar a turma '+name+': '+up.error.message);
+   }else{
+    const ins=await sb.from('school_classes').insert({unit_id:unitId,shift,grade,class_name:name,active:true});
+    if(ins.error)return alert('Erro ao adicionar a turma '+name+': '+ins.error.message);
+   }
+  }
+  const removed=old.classRows.filter(r=>!cs.includes(r.name.toUpperCase()));
+  if(removed.length){
+   const off=await sb.from('school_classes').update({active:false}).in('id',removed.map(r=>r.id));
+   if(off.error)return alert('Erro ao desativar turmas removidas: '+off.error.message);
+  }
+ }else{
+  const ins=await sb.from('school_classes').insert(cs.map(name=>({unit_id:unitId,shift,grade,class_name:name,active:true})));
+  if(ins.error)return alert('Erro ao salvar turmas: '+ins.error.message);
+ }
+ closeModal('unitModal');editingSchool=-1;await loadSchools();alert('Estrutura escolar salva com segurança. Os vínculos existentes foram preservados.');
 }
 async function saveProject(){
  let name=document.getElementById('pName').value.trim();if(!name)return alert('Informe o nome do projeto.');
@@ -130,6 +156,6 @@ async function saveProject(){
  if(r.error)return alert('Erro ao salvar projeto: '+r.error.message);
  closeModal('projectModal');editingProject=-1;await loadProjects();alert('Projeto salvo no banco com sucesso.');
 }
-async function toggleSchool(i){const x=schools[i],next=!x.active;const r=await sb.from('school_classes').update({active:next}).in('id',x.classRows.map(v=>v.id));if(r.error)return alert('Erro ao alterar status: '+r.error.message);await loadSchools()}async function removeSchool(i){if(!confirm('Excluir este conjunto de turmas do banco?'))return;const x=schools[i];const r=await sb.from('school_classes').delete().in('id',x.classRows.map(v=>v.id));if(r.error)return alert('Erro ao excluir: '+r.error.message);await loadSchools()}async function toggleProject(i){const x=projects[i],r=await sb.from('projects').update({active:!x.active}).eq('id',x.id);if(r.error)return alert('Erro ao alterar projeto: '+r.error.message);await loadProjects()}async function removeProject(i){if(!confirm('Excluir este projeto do banco?'))return;const x=projects[i],r=await sb.from('projects').delete().eq('id',x.id);if(r.error)return alert('Erro ao excluir projeto: '+r.error.message);await loadProjects()}
+async function toggleSchool(i){const x=schools[i],next=!x.active;const r=await sb.from('school_classes').update({active:next}).in('id',x.classRows.map(v=>v.id));if(r.error)return alert('Erro ao alterar status: '+r.error.message);await loadSchools()}async function removeSchool(i){const x=schools[i];if(!confirm('Desativar este conjunto de turmas? Os vínculos e históricos serão preservados.'))return;const r=await sb.from('school_classes').update({active:false}).in('id',x.classRows.map(v=>v.id));if(r.error)return alert('Erro ao desativar: '+r.error.message);await loadSchools();alert('Conjunto desativado. Nenhum vínculo ou histórico foi excluído.')}async function toggleProject(i){const x=projects[i],r=await sb.from('projects').update({active:!x.active}).eq('id',x.id);if(r.error)return alert('Erro ao alterar projeto: '+r.error.message);await loadProjects()}async function removeProject(i){if(!confirm('Excluir este projeto do banco?'))return;const x=projects[i],r=await sb.from('projects').delete().eq('id',x.id);if(r.error)return alert('Erro ao excluir projeto: '+r.error.message);await loadProjects()}
 render();restoreSession();
 </script></body></html>
