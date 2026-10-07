@@ -40,14 +40,17 @@ const q=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>(
 async function loadData(){
  const [{data:cs,error:ce},{data:ps,error:pe},{data:links,error:le}]=await Promise.all([
   sb.from('school_classes').select('id,shift,grade,class_name,units(id,name,active)').eq('active',true),
-  sb.from('projects').select('id,name,max_members,max_file_mb,active').eq('active',true),
+  sb.from('projects').select('id,name,slug,max_members,max_file_mb,active').eq('active',true),
   sb.from('project_classes').select('project_id,class_id')
  ]);
  if(ce||pe||le){q('e0').textContent='Não foi possível carregar os projetos e turmas. Atualize a página.';return}
  classes=(cs||[]).filter(x=>x.units?.active);projects=ps||[];projectLinks=links||[];
  const eligible=projects.filter(p=>projectLinks.some(l=>l.project_id===p.id&&classes.some(x=>x.id===l.class_id)));
  q('project').innerHTML='<option value="">Selecione...</option>'+eligible.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
- if(eligible.length===1){q('project').value=eligible[0].id;updateProjectClasses()}
+ const directSlug=new URLSearchParams(location.search).get('projeto');
+ const directProject=directSlug?eligible.find(p=>p.slug===directSlug):null;
+ if(directProject){q('project').value=directProject.id;updateProjectClasses();q('project').closest('.field')?.classList.add('direct-project')}
+ else if(eligible.length===1){q('project').value=eligible[0].id;updateProjectClasses()}
  else resetSchoolSelectors();
 }
 function selectedProject(){return projects.find(x=>x.id===q('project').value)}
