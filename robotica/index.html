@@ -1,19 +1,36 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LabPC Robótica</title>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LabPC Robótica</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#183153;min-height:100vh}
-header{background:#4436c9;color:#fff;padding:30px 20px;text-align:center}header h1{margin:0 0 7px;font-size:32px}header p{margin:0;opacity:.95}
-main{max-width:900px;margin:34px auto;padding:0 18px}.intro{text-align:center;margin-bottom:25px}.intro h2{margin:0 0 8px;font-size:24px}.intro p{margin:0;color:#50627a;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.card{background:#fff;border:2px solid #e2e8f0;border-radius:18px;padding:28px 24px;text-decoration:none;color:#183153;box-shadow:0 5px 18px #0001;transition:.15s;min-height:245px;display:flex;flex-direction:column}.card:hover{transform:translateY(-3px);box-shadow:0 9px 24px #0002}.ico{font-size:52px}.card h2{margin:14px 0 9px;font-size:25px}.card p{margin:0 0 18px;color:#50627a;line-height:1.45;flex:1}.card span{font-weight:900;color:#4436c9;font-size:17px}.real{border-color:#8b82ee}.sim{border-color:#66b7e8}.back{display:block;width:max-content;margin:26px auto 0;color:#50627a;text-decoration:none;font-weight:700}
-footer{text-align:center;padding:28px 15px;color:#64748b;font-size:13px}
-@media(max-width:650px){.grid{grid-template-columns:1fr}header h1{font-size:27px}.card{min-height:210px}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f4f7fb;color:#183153;min-height:100vh}
+header{background:#4436c9;color:white;text-align:center;padding:18px 12px}header h1{margin:0 0 5px;font-size:27px}header p{margin:0;font-size:14px}
+main{max-width:1020px;margin:20px auto;padding:0 16px}.intro{text-align:center;margin-bottom:17px}.intro h2{font-size:21px;margin:0 0 5px}.intro p{font-size:14px;margin:0;color:#52627a}
+.platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.platform{background:white;border:1px solid #dbe4f1;border-radius:17px;padding:16px;box-shadow:0 5px 18px #0000000c}
+.platform h2{margin:0 0 12px;font-size:21px}.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mode{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:#183153;border:1px solid #b8c9e2;background:#f8fbff;border-radius:12px;padding:13px;min-height:145px}
+.mode strong{font-size:16px}.mode p{margin:0;font-size:13px;line-height:1.4;color:#52627a;flex:1}.mode span{font-size:13px;font-weight:700;color:#4436c9}
+.mode[href]:hover{background:#eef1ff;border-color:#4436c9}.mode.disabled{background:#f8fafc;border-color:#e2e8f0}.mode.disabled span{color:#64748b}
+.littlebits{grid-column:1/-1;width:calc(50% - 8px);justify-self:center}
+.back{display:block;text-align:center;margin:21px auto;color:#4436c9;font-weight:700;text-decoration:none}
+footer{text-align:center;padding:16px;color:#64748b;font-size:12px}
+@media(max-width:760px){.platforms{grid-template-columns:1fr}.littlebits{grid-column:auto;width:100%}}
+@media(max-width:390px){.modes{grid-template-columns:1fr}.mode{min-height:100px}}
 </style></head><body>
-<header><h1>🤖 LabPC Robótica</h1><p>Escolha como você quer programar.</p></header>
-<main><div class="intro"><h2>Qual será sua aventura?</h2><p>Escolha seu robô ou explore nossas próximas experiências de robótica.</p></div>
-<h2 style="margin:20px 0 12px">🔵 Sphero BOLT</h2><div class="grid">
-<a class="card real" href="robo-real/"><div class="ico">🤖</div><h2>Robô Real</h2><p>Conecte o Sphero BOLT / BOLT+, defina a frente, monte seu programa e execute os comandos no robô.</p><span>Abrir Robô Real →</span></a>
-<a class="card sim" href="simulacao/"><div class="ico">🗺️</div><h2>Simulação</h2><p>Programe no mapa, supere obstáculos e avance pelos desafios mesmo sem um robô conectado.</p><span>Abrir Simulação →</span></a>
-</div><h2 style="margin:28px 0 12px">🚗 mBot v1.1</h2><div class="grid"><div class="card sim coming" style="cursor:default"><div class="ico">🚗</div><h2>Simulação — 10 níveis</h2><p>Versão 1.5.3 aprovada. Publicação do simulador em preparação.</p><span>Em preparação</span></div><div class="card real coming" style="cursor:default"><div class="ico">🎮</div><h2>Robô Real</h2><p>Controle Bluetooth, sensores e garra em desenvolvimento.</p><span>Em desenvolvimento</span></div></div><h2 style="margin:28px 0 12px">🧩 littleBits</h2><div class="grid"><div class="card coming" style="cursor:default"><div class="ico">🧩</div><h2>Circuitos e invenções</h2><p>Atividades com módulos eletrônicos magnéticos em planejamento.</p><span>Em desenvolvimento</span></div></div><a class="back" href="../">← Voltar ao LabPC</a></main>
+<header><h1>🤖 LabPC Robótica</h1><p>Escolha sua plataforma e comece a explorar!</p></header>
+<main><div class="intro"><h2>Qual será sua aventura?</h2><p>Experiências com robôs, circuitos e programação.</p></div>
+<div class="platforms">
+<section class="platform"><h2>🔵 Sphero BOLT</h2><div class="modes">
+<a class="mode" href="robo-real/"><strong>🤖 Robô Real</strong><p>Conecte e programe seu Sphero.</p><span>Abrir →</span></a>
+<a class="mode" href="simulacao/"><strong>🗺️ Simulação</strong><p>Supere desafios no mapa.</p><span>Abrir →</span></a>
+</div></section>
+<section class="platform"><h2>🚗 mBot v1.1</h2><div class="modes">
+<div class="mode disabled"><strong>🗺️ Simulação</strong><p>10 missões com sensores e garra.</p><span>Publicação em preparação</span></div>
+<div class="mode disabled"><strong>🎮 Robô Real</strong><p>Controle Bluetooth e sensores.</p><span>Em desenvolvimento</span></div>
+</div></section>
+<section class="platform littlebits"><h2>🧩 littleBits</h2><div class="modes">
+<div class="mode disabled"><strong>💡 Simulação</strong><p>Monte circuitos e experimente.</p><span>Em desenvolvimento</span></div>
+<div class="mode disabled"><strong>🔌 Kit Real</strong><p>Explore módulos eletrônicos.</p><span>Em desenvolvimento</span></div>
+</div></section>
+</div><a class="back" href="../">← Voltar à Central LabPC</a></main>
 <footer>LabPC — Lab Pensamento Computacional • © 2026 Elison Borges</footer>
 </body></html>
