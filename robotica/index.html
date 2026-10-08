@@ -2,7 +2,7 @@
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LabPC Robótica</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f4f7fb;color:#183153;min-height:100vh}
-header{background:#4436c9;color:white;text-align:center;padding:11px 12px}header h1{margin:0 0 3px;font-size:25px}header p{margin:0;font-size:14px}
+header{position:relative;background:#4436c9;color:white;text-align:center;padding:11px 12px} .header-back{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:white;text-decoration:none;font-weight:700;font-size:13px;padding:8px 10px;border:1px solid #ffffff65;border-radius:9px;background:#ffffff14} .header-back:hover{background:#ffffff2c}header h1{margin:0 0 3px;font-size:25px}header p{margin:0;font-size:14px}
 main{max-width:1020px;margin:12px auto;padding:0 16px}.intro{text-align:center;margin-bottom:10px}.intro h2{font-size:21px;margin:0 0 5px}.intro p{font-size:14px;margin:0;color:#52627a}
 .platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
 .platform{background:white;border:1px solid #dbe4f1;border-radius:15px;padding:12px;box-shadow:0 5px 18px #0000000c}
@@ -13,10 +13,10 @@ main{max-width:1020px;margin:12px auto;padding:0 16px}.intro{text-align:center;m
 .littlebits{grid-column:1/-1;width:calc(50% - 6px);justify-self:center}
 .back{display:block;text-align:center;margin:13px auto;color:#4436c9;font-weight:700;text-decoration:none}
 footer{text-align:center;padding:8px;color:#64748b;font-size:12px}
-@media(max-width:760px){.platforms{grid-template-columns:1fr}.littlebits{grid-column:auto;width:100%}}
+@media(max-width:760px){header{padding-top:48px}.header-back{top:9px;left:12px;transform:none}.platforms{grid-template-columns:1fr}.littlebits{grid-column:auto;width:100%}}
 @media(max-width:390px){.modes{grid-template-columns:1fr}.mode{min-height:100px}}
 </style></head><body>
-<header><h1>🤖 LabPC Robótica</h1><p>Escolha sua plataforma e comece a explorar!</p></header>
+<header><a class="header-back" href="../">← Voltar à Central LabPC</a><h1>🤖 LabPC Robótica</h1><p>Escolha sua plataforma e comece a explorar!</p></header>
 <main><div class="intro"><h2>Qual será sua aventura?</h2><p>Experiências com robôs, circuitos e programação.</p></div>
 <div class="platforms">
 <section class="platform"><h2>🔵 Sphero BOLT</h2><div class="modes">
@@ -31,6 +31,6 @@ footer{text-align:center;padding:8px;color:#64748b;font-size:12px}
 <div class="mode disabled"><strong>🔌 Kit Real</strong><p>Explore módulos eletrônicos.</p><span>Em desenvolvimento</span></div>
 <div class="mode disabled"><strong>💡 Simulação</strong><p>Monte circuitos e experimente.</p><span>Em desenvolvimento</span></div>
 </div></section>
-</div><a class="back" href="../">← Voltar à Central LabPC</a></main>
+</div></main>
 <footer>LabPC — Lab Pensamento Computacional • © 2026 Elison Borges</footer>
 </body></html>
