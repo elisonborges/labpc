@@ -1,37 +1,30 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LabRobótica — AnnA One | LabPC</title>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#092a50"><title>LabRobótica | AnnA One — Central LabPC</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Segoe UI,sans-serif;background:#f4f7fb;color:#183153;min-height:100vh}
-header{position:relative;background:linear-gradient(110deg,#092a50,#0759a8);color:white;text-align:center;padding:13px 12px} .header-back{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:white;text-decoration:none;font-weight:700;font-size:13px;padding:8px 10px;border:1px solid #ffffff65;border-radius:9px;background:#ffffff14} .header-back:hover{background:#ffffff2c}header h1{margin:0 0 3px;font-size:24px}header p{margin:0;font-size:14px}
-main{max-width:1020px;margin:12px auto;padding:0 16px}.intro{text-align:center;margin-bottom:10px}.intro h2{font-size:21px;margin:0 0 5px}.intro p{font-size:14px;margin:0;color:#52627a}
-.platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
-.platform{background:white;border:1px solid #dbe4f1;border-radius:15px;padding:14px;box-shadow:0 5px 18px #0000000c}
-.platform h2{margin:0 0 9px;font-size:20px}.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.mode{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:#183153;border:1px solid #b8c9e2;background:#f8fbff;border-radius:11px;padding:10px;min-height:112px}
-.mode strong{font-size:16px}.mode p{margin:0;font-size:13px;line-height:1.4;color:#52627a;flex:1}.mode span{font-size:13px;font-weight:700;color:#087cff}
-.mode[href]:hover{background:#eef1ff;border-color:#087cff}.mode.disabled{background:#f8fafc;border-color:#e2e8f0}.mode.disabled span{color:#64748b}
-.littlebits{grid-column:1/-1;width:calc(50% - 6px);justify-self:center}
-.back{display:block;text-align:center;margin:13px auto;color:#4436c9;font-weight:700;text-decoration:none}
-footer{text-align:center;padding:8px;color:#64748b;font-size:12px}
-@media(max-width:760px){header{padding-top:48px}.header-back{top:9px;left:12px;transform:none}.platforms{grid-template-columns:1fr}.littlebits{grid-column:auto;width:100%}}
-@media(max-width:390px){.modes{grid-template-columns:1fr}.mode{min-height:100px}}
-.institution{display:flex;justify-content:center;align-items:center;gap:9px;margin:0 auto 6px;font-size:13px;font-weight:800}.institution svg{display:block;width:32px;height:32px;flex:0 0 32px}.institution span{display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap;line-height:1.1}.institution small{font-size:8px;font-weight:650;display:block;letter-spacing:.1px;white-space:nowrap}.institution strong{font-size:16px}.institution em{font-style:normal;color:#b7e7ff}.header-back:focus-visible,.mode:focus-visible,.back:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}
-</style></head><body>
-<header><a class="header-back" href="../index.html">← Voltar à Central LabPC</a><div class="institution"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t"><title id="t">Símbolo AnnA One</title><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#a)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg><span><strong>AnnA <em>One</em></strong><small>TECNOLOGIA E EDUCAÇÃO JUNTAS</small></span></div><h1>🤖 LabRobótica</h1><p>Escolha sua plataforma e comece a explorar!</p></header>
-<main><div class="intro"><h2>Qual será sua aventura?</h2><p>Experiências com robôs, circuitos e programação.</p></div>
+:root{--navy:#092a50;--blue:#087cff;--ink:#09224a;--muted:#52627a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#edf6ff;color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.45;min-height:100vh;display:flex;flex-direction:column}
+a:focus-visible{outline:3px solid #ffbd36;outline-offset:3px}.wrap{max-width:1180px;width:100%;margin:0 auto;padding:0 22px}
+.top{background:linear-gradient(110deg,#092a50,#0759a8);color:#fff}.top-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:70px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;flex-shrink:0}.brand svg{display:block;width:42px;height:42px;flex:0 0 42px}.brand-text{display:flex;flex-direction:column;white-space:nowrap;line-height:1.1}.brand-text strong{font-size:24px;letter-spacing:-.7px}.brand-text em{color:#55baff;font-style:normal}.brand-text small{font-size:8px;font-weight:750;letter-spacing:.15px;margin-top:4px}
+.top-links{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.top-links a{color:white;text-decoration:none;font-size:13px;font-weight:750}.top-links a:hover{text-decoration:underline}.back{display:inline-flex;align-items:center;border:1px solid #ffffff80;border-radius:9px;padding:9px 12px;background:#ffffff15}
+.hero{background:linear-gradient(110deg,#e7f5ff,#f9fcff 60%,#d9edff);border-bottom:1px solid #d9e9fa}.hero-inner{padding-top:22px;padding-bottom:24px}.eyebrow{margin:0 0 4px;color:#087cff;font-size:12px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}.hero h1{font-size:clamp(30px,4.5vw,46px);letter-spacing:-1.5px;line-height:1.1;margin:0 0 7px}.hero h1 span{color:#087cff}.hero p:last-child{margin:0;color:#3f5e80;font-size:15px}
+main{flex:1;padding-top:20px;padding-bottom:24px}.section-title{font-size:24px;margin:0 0 5px}.section-intro{color:var(--muted);font-size:14px;margin:0 0 17px}
+.platforms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.platform{border:1px solid #dbe8f8;border-radius:18px;overflow:hidden;background:white;box-shadow:0 8px 26px #092c5016;display:flex;flex-direction:column}
+.platform-head{padding:15px 17px;min-height:95px}.sphero .platform-head{background:linear-gradient(130deg,#e1f3ff,#b4ddff)}.mbot .platform-head{background:linear-gradient(130deg,#e9edff,#cfd8ff)}.littlebits .platform-head{background:linear-gradient(130deg,#fff1d8,#ffe1ae)}
+.platform-head h2{font-size:22px;margin:0 0 3px}.platform-head p{margin:0;font-size:12px;color:#415775;font-weight:700}.platform-body{padding:14px;display:grid;grid-template-columns:1fr;gap:9px;flex:1}
+.mode{display:flex;flex-direction:column;gap:5px;border:1px solid #c6d8ef;background:#f8fbff;border-radius:12px;padding:11px 12px;text-decoration:none;color:var(--ink);min-height:106px}.mode strong{font-size:15px}.mode p{font-size:12px;color:#52627a;margin:0;flex:1}.mode span{font-size:12px;color:#087cff;font-weight:850}.mode[href]:hover{background:#eaf4ff;border-color:#087cff;transform:translateY(-1px)}.mode.disabled{background:#f7f9fc;border-color:#e0e8f2;cursor:default}.mode.disabled span{color:#6c7787}
+.notice{margin-top:16px;font-size:12px;color:#536782}.notice strong{color:#183153}
+footer{background:linear-gradient(110deg,#092a50,#061c38);color:#d8e8f9;padding:16px 0;font-size:12px}.foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.foot p{margin:2px 0}
+@media(max-width:900px){.platforms{grid-template-columns:repeat(2,minmax(0,1fr))}.littlebits{grid-column:1/-1}.littlebits .platform-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.wrap{padding-left:16px;padding-right:16px}.top-inner{align-items:flex-start}.top-links{width:100%;justify-content:flex-start}.platforms{grid-template-columns:1fr}.littlebits{grid-column:auto}.littlebits .platform-body{grid-template-columns:1fr}.hero-inner{padding-top:18px;padding-bottom:19px}.platform-head{min-height:0}.mode{min-height:90px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head>
+<body><header class="top"><div class="wrap top-inner"><a class="brand" href="../index.html" aria-label="AnnA One — Central LabPC"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t"><title id="t">Símbolo AnnA One</title><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#a)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg><span class="brand-text"><strong>AnnA <em>One</em></strong><small>TECNOLOGIA E EDUCAÇÃO JUNTAS</small></span></a><nav class="top-links" aria-label="Navegação"><a href="../index.html">Início</a><a class="back" href="../index.html">← Voltar à Central LabPC</a></nav></div></header>
+<section class="hero"><div class="wrap hero-inner"><p class="eyebrow">Central LabPC / Laboratórios</p><h1>🤖 <span>LabRobótica</span></h1><p>Explore os ambientes de robótica e escolha como deseja aprender.</p></div></section>
+<main class="wrap"><h2 class="section-title">Escolha sua plataforma</h2><p class="section-intro">Selecione um robô e entre no modo Real ou Simulação.</p>
 <div class="platforms">
-<section class="platform"><h2>🔵 Sphero BOLT</h2><div class="modes">
-<a class="mode" href="robo-real/"><strong>🤖 Robô Real</strong><p>Conecte e programe seu Sphero.</p><span>Abrir →</span></a>
-<a class="mode" href="simulacao/"><strong>🗺️ Simulação</strong><p>Supere desafios no mapa.</p><span>Abrir →</span></a>
-</div></section>
-<section class="platform"><h2>🚗 mBot v1.1</h2><div class="modes">
-<a class="mode" href="mbot/real/"><strong>🎮 Robô Real</strong><p>Diagnóstico Bluetooth BLE v0.1.</p><span>Testar conexão →</span></a>
-<a class="mode" href="mbot/simulacao/"><strong>🗺️ Simulação</strong><p>10 missões com sensores e garra.</p><span>Abrir →</span></a>
-</div></section>
-<section class="platform littlebits"><h2>🧩 littleBits</h2><div class="modes">
-<div class="mode disabled"><strong>🔌 Kit Real</strong><p>Explore módulos eletrônicos.</p><span>Em desenvolvimento</span></div>
-<div class="mode disabled"><strong>💡 Simulação</strong><p>Monte circuitos e experimente.</p><span>Em desenvolvimento</span></div>
-</div></section>
-</div></main>
-<footer>AnnA One · Tecnologia e Educação Juntas — LabPC<br>Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges · Todos os direitos reservados.</footer>
-</body></html>
+<section class="platform sphero"><div class="platform-head"><h2>🔵 Sphero BOLT</h2><p>Movimento, programação e desafios</p></div><div class="platform-body"><a class="mode" href="robo-real/"><strong>🤖 Robô Real</strong><p>Conecte e programe seu Sphero.</p><span>Explorar →</span></a><a class="mode" href="simulacao/"><strong>🗺️ Simulação</strong><p>Supere desafios no mapa.</p><span>Explorar →</span></a></div></section>
+<section class="platform mbot"><div class="platform-head"><h2>🚗 mBot v1.1</h2><p>Robótica, sensores e programação</p></div><div class="platform-body"><a class="mode" href="mbot/real/"><strong>🎮 Robô Real</strong><p>Ambiente de conexão e diagnóstico BLE.</p><span>Explorar →</span></a><a class="mode" href="mbot/simulacao/"><strong>🗺️ Simulação</strong><p>Missões com sensores e garra.</p><span>Explorar →</span></a></div></section>
+<section class="platform littlebits"><div class="platform-head"><h2>🧩 littleBits</h2><p>Circuitos e experimentação</p></div><div class="platform-body"><div class="mode disabled"><strong>🔌 Kit Real</strong><p>Exploração de módulos eletrônicos.</p><span>Em desenvolvimento</span></div><div class="mode disabled"><strong>💡 Simulação</strong><p>Montagem de circuitos e desafios.</p><span>Em desenvolvimento</span></div></div></section>
+</div><p class="notice"><strong>Observação:</strong> alguns recursos dos modos reais dependem de dispositivos e navegadores compatíveis. O littleBits ainda está em desenvolvimento.</p></main>
+<footer><div class="wrap foot"><div><p><strong>AnnA One · Tecnologia e Educação Juntas</strong> — Central LabPC</p><p>Idealização e desenvolvimento: Prof. Elison Borges</p></div><p>© 2026 Elison Borges · Todos os direitos reservados.</p></div></footer></body></html>
