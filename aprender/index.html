@@ -71,6 +71,12 @@ body{background:#f2f7ff}.top{border-bottom:1px solid #e5edfa}.nav{min-height:70p
 .content{padding-top:20px}.section-top h2{font-size:25px}.grid{gap:14px}.art{height:125px}.art img{object-fit:cover}.card-body{padding:12px}.card h3{font-size:15px}.card p{font-size:12px}.start{font-size:13px;padding:9px 12px}
 @media(max-width:1450px){.pc-banner{margin-left:28px;margin-right:28px}}
 @media(max-width:650px){.hero,.hero-inner{min-height:235px}.hero-art{opacity:.32}.hero h1{font-size:42px}.hero p{font-size:12px;max-width:290px}.grade-section{padding:17px 14px 0}.grade-card{min-height:110px}.grade-card strong{font-size:19px}.pc-banner{margin:14px 14px 0;gap:10px;flex-wrap:wrap;padding:14px}.pc-brain{font-size:27px}.pc-copy{flex-basis:calc(100% - 45px)}.pc-banner h2{font-size:18px}.pc-banner p{font-size:12px}.pc-banner a{margin-left:35px}.art{height:105px}}
+/* Ajuste fino: título e subtítulo centralizados no espaço livre entre as ilustrações */
+.hero-content{width:min(100%,700px);max-width:700px;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateX(-18px)}
+.hero h1{width:100%;text-align:center;font-size:clamp(38px,4.55vw,62px);letter-spacing:-2.2px;white-space:nowrap}
+.hero p{max-width:600px;text-align:center;margin:10px auto 0}
+@media(max-width:960px){.hero-content{transform:none;width:min(100%,620px)}.hero h1{font-size:clamp(33px,5.2vw,53px);white-space:normal}}
+@media(max-width:650px){.hero-content{padding:0 10px}.hero h1{font-size:clamp(32px,9vw,42px);line-height:1.1}.hero p{max-width:310px}}
 </style></head>
 <body id="topo">
 
