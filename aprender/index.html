@@ -1,27 +1,154 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Universo Aprender | AnnA One · LabPC</title><style>
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f3f8ff;color:#103e79;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}a{color:inherit}.anna-top{background:linear-gradient(105deg,#064982,#075eb0);color:#fff}.anna-top-inner{max-width:1500px;margin:auto;padding:11px 25px;min-height:67px;display:flex;align-items:center;justify-content:space-between;gap:12px}.anna-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}.anna-brand svg{width:44px;height:44px}.anna-brand-name{display:flex;flex-direction:column;line-height:1.1}.anna-brand-name strong{font-size:22px}.anna-brand-name em{color:#5dc7ff;font-style:normal}.anna-brand-name small{font-size:8px;font-weight:800}.anna-back{border:1px solid #9ac7f3;padding:9px 14px;border-radius:10px;text-decoration:none;font-weight:800;font-size:13px;color:#fff}
-.hero{position:relative;min-height:260px;background:linear-gradient(180deg,#8dd4ff,#d4f2ff);overflow:hidden}.hero:before,.hero:after{content:"";position:absolute;bottom:-40px;width:310px;height:145px;border-radius:50%;background:#7ed29d;opacity:.65}.hero:before{left:-100px}.hero:after{right:-100px}.hero-inner{position:relative;z-index:1;max-width:1500px;margin:auto;min-height:260px;display:grid;grid-template-columns:1fr 1.35fr 1fr;align-items:end;gap:8px;padding:10px 26px 0}.scene{display:flex;align-items:flex-end;justify-content:center;gap:7px;font-size:clamp(40px,5vw,85px);line-height:1.25;filter:drop-shadow(0 6px 4px #296a9a25)}.scene span:nth-child(2){font-size:clamp(55px,7vw,112px)}.hero-title{text-align:center;align-self:center;padding:15px 0 26px}.hero-title h1{font-size:clamp(42px,5vw,76px);line-height:.95;letter-spacing:-3px;margin:0 0 16px;color:#084f9e;text-shadow:2px 3px 0 white;font-weight:1000}.hero-title h1 span{display:block;color:#ffbb25;text-shadow:2px 3px 0 #084f9e}.hero-title p{display:inline-block;margin:0;background:#fff;border-radius:999px;padding:10px 17px;font-size:clamp(12px,1.4vw,17px);font-weight:850;box-shadow:0 5px 16px #25649a23}
-.container{max-width:1500px;padding:0 26px;margin:auto}.quick{position:relative;z-index:2;margin:-5px auto 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.quick a{display:flex;align-items:center;gap:13px;min-height:72px;background:#fff;text-decoration:none;border-radius:17px;padding:12px 18px;box-shadow:0 7px 18px #15477913}.quick .quick-icon{font-size:29px}.quick strong{display:block;font-size:18px}.quick small{display:block;color:#567197;font-size:12px}.quick .arrow{margin-left:auto;font-size:20px}
-.years{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}.year-card{display:flex;align-items:center;gap:15px;min-height:90px;border:2px dashed #dbe5f3;border-radius:17px;background:#fff;padding:14px 18px}.year-card .year-icon{font-size:37px}.year-card strong{display:block;font-size:21px}.year-card small{display:block;color:#63758c;margin-top:3px}.year-card.available{border:2px solid #8340ff;background:linear-gradient(105deg,#f1edff,#e9f6ff);text-decoration:none}.year-card.available strong{color:#273e8a}.year-card .arrow{margin-left:auto;font-size:23px;color:#6d37d6}
-.pc{display:flex;align-items:center;gap:18px;background:linear-gradient(105deg,#1952aa,#7136d5);color:white;border-radius:18px;padding:18px 22px;margin:15px 0 24px;box-shadow:0 10px 24px #244f9925}.pc .brain{font-size:43px}.pc .copy{flex:1}.pc .eyebrow{font-size:11px;font-weight:850;letter-spacing:1px}.pc h2{font-size:clamp(18px,2vw,25px);margin:2px 0 5px}.pc p{font-size:13px;margin:0;line-height:1.4}.pc a{background:white;border-radius:11px;padding:12px 16px;color:#4d26a2;text-decoration:none;font-weight:850;font-size:13px;white-space:nowrap}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:16px}.section-head h2{font-size:26px;margin:0}.section-head p{margin:4px 0;color:#526b8a;font-size:14px}.tip{background:#e8ebff;border-radius:15px;padding:13px 16px;max-width:350px;font-size:12px;line-height:1.4}.tip strong{display:block;font-size:14px;margin-bottom:4px}.activities{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:30px}.activity{background:#fff;border-radius:16px;overflow:hidden;text-decoration:none;box-shadow:0 6px 17px #153d7815;transition:transform .15s}.activity:hover{transform:translateY(-4px)}.art{height:115px;background:var(--tile);display:flex;align-items:center;justify-content:center;position:relative}.art-icon{font-size:64px;filter:drop-shadow(0 4px 3px #0002)}.num{position:absolute;top:8px;left:8px;border-radius:50%;background:#1377d4;color:white;font-weight:900;width:27px;height:27px;display:grid;place-items:center;font-size:13px}.activity strong{display:block;padding:11px 11px 3px;font-size:14px;min-height:44px}.activity-go{display:block;padding:0 11px 13px;font-size:11px;color:#7540d4;font-weight:800}
-.anna-footer{background:#082e5a;color:#d7e8f8;text-align:center;padding:20px 12px;font-size:12px;line-height:1.6}.anna-footer p{margin:0}a:focus-visible{outline:3px solid #ffbc2c;outline-offset:3px}
-@media(max-width:950px){.quick,.years{grid-template-columns:repeat(2,1fr)}.activities{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-inner{grid-template-columns:1fr 2fr 1fr}.scene{font-size:42px}.scene span:nth-child(2){font-size:55px}.tip{max-width:280px}}
-@media(max-width:600px){.anna-top-inner{padding:10px 14px}.anna-brand-name strong{font-size:18px}.anna-brand-name small{font-size:7px}.anna-back{font-size:11px;padding:8px}.container{padding:0 12px}.hero,.hero-inner{min-height:210px}.hero-inner{grid-template-columns:45px 1fr 45px;padding:10px 7px 0}.scene{font-size:0}.scene span{display:none}.scene span:nth-child(2){display:block;font-size:32px;align-self:center}.hero-title{padding:8px 0 20px}.hero-title h1{font-size:clamp(35px,9vw,48px);letter-spacing:-1.5px}.hero-title p{padding:8px 12px;font-size:12px}.quick{gap:9px;margin-top:10px}.quick a{padding:10px;min-height:65px;gap:7px}.quick .quick-icon{font-size:23px}.quick strong{font-size:14px}.quick small{font-size:10px}.quick .arrow{display:none}.years{gap:9px}.year-card{min-height:85px;padding:10px;gap:8px}.year-card .year-icon{font-size:25px}.year-card strong{font-size:17px}.year-card small{font-size:10px}.pc{padding:13px;gap:9px;flex-wrap:wrap}.pc .brain{font-size:30px}.pc .copy{flex-basis:calc(100% - 45px)}.pc a{margin-left:40px}.section-head{display:block}.tip{margin-top:12px;max-width:none}.activities{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.art{height:105px}.art-icon{font-size:56px}.section-head h2{font-size:23px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.activity{transition:none}}
-.scene{filter:none}.scene img{display:block;width:100%;height:auto;max-height:250px;object-fit:contain;object-position:bottom}.hero-title{position:relative}.hero-robot{position:absolute;width:72px;height:94px;left:-25px;top:12px;transform:rotate(-8deg)}@media(max-width:950px){.hero-robot{width:50px;height:70px;left:-18px}}@media(max-width:600px){.scene img{max-height:130px;min-width:75px;position:relative}.scene-left img{left:-30px}.scene-right img{right:-30px}.hero-robot{display:none}} 
-/* Refinamento das miniaturas e adaptação à referência aprovada */
-.hero{isolation:isolate}.hero-inner{max-width:1440px}.hero-title{z-index:2}.hero-title h1{font-weight:950}.scene{align-self:end;overflow:visible}.scene img{max-height:245px;filter:drop-shadow(0 8px 8px #226ca02b)}
-.quick a{border:1px solid #eaf0f9;transition:transform .15s,box-shadow .15s}.quick a:hover,.year-card.available:hover{transform:translateY(-3px);box-shadow:0 10px 22px #15477925}.quick a:focus-visible,.year-card:focus-visible,.activity:focus-visible,.pc a:focus-visible{outline:3px solid #ffbf36;outline-offset:3px}
-.art{isolation:isolate;overflow:hidden}.art:before{content:"";position:absolute;width:150px;height:150px;left:-45px;top:-85px;border-radius:50%;background:#fff6}.art:after{content:"";position:absolute;width:110px;height:110px;right:-40px;bottom:-65px;border-radius:50%;background:#ffffff55}.art-icon{position:relative;z-index:2;transform:rotate(-5deg);font-size:67px;transition:transform .2s}.activity:hover .art-icon{transform:rotate(0) scale(1.08)}.art-decor{position:absolute;color:#fff;opacity:.9;z-index:1}.decor-a{top:13px;right:20px;font-size:27px}.decor-b{bottom:14px;left:18px;font-size:16px}.num{z-index:3}.activity strong{line-height:1.3}
-@media(min-width:1200px){.activities{grid-template-columns:repeat(10,minmax(0,1fr));gap:10px}.art{height:98px}.art-icon{font-size:52px}.activity strong{font-size:12px;padding:9px 7px 2px;min-height:48px}.activity-go{padding:0 7px 10px;font-size:10px}.num{width:23px;height:23px;font-size:12px}.decor-a{font-size:19px;right:10px}.decor-b{font-size:12px;left:9px}}
-@media(min-width:950px) and (max-width:1199px){.activities{grid-template-columns:repeat(5,minmax(0,1fr))}}
-@media(max-width:600px){.hero{min-height:185px}.hero-inner{min-height:185px}.scene img{min-width:80px;max-height:128px}.hero-title h1{font-size:clamp(33px,8.8vw,46px)}.hero-title p{line-height:1.35}.quick a{border-radius:13px}.art-icon{font-size:60px}.activity strong{min-height:0}.activity-go{padding-top:6px}}
-@media(prefers-reduced-motion:reduce){.art-icon,.quick a{transition:none}}
-</style></head><body><header class="anna-top"><div class="anna-top-inner"><a class="anna-brand" href="https://elisonborges.github.io/anna-one/app/" aria-label="Abrir AnnA One"><svg class="brand-logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t"><title id="t">Símbolo AnnA One</title><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#a)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg><span class="anna-brand-name"><strong>AnnA <em>One</em></strong><small>TECNOLOGIA E EDUCAÇÃO JUNTAS</small></span></a><a class="anna-back" href="../index.html">← Central LabPC</a></div></header>
-<section class="hero" aria-labelledby="page-title"><div class="hero-inner"><div class="scene scene-left" aria-hidden="true"><img src="assets/hero-menino.svg" alt=""></div><div class="hero-title"><img class="hero-robot" src="assets/hero-robo.svg" alt="" aria-hidden="true"><h1 id="page-title">Universo <span>Aprender</span></h1><p>Um mundo de descobertas, jogos e desafios!</p></div><div class="scene scene-right" aria-hidden="true"><img src="assets/hero-menina.svg" alt=""></div></div></section>
-<main class="container"><nav class="quick" aria-label="Explorar o Universo Aprender"><a href="#atividades-2ano"><span class="quick-icon">🎮</span><span><strong>Jogos</strong><small>Aprender brincando</small></span><span class="arrow">›</span></a><a href="#atividades-2ano"><span class="quick-icon">💡</span><span><strong>Atividades</strong><small>Desafios interativos</small></span><span class="arrow">›</span></a><a href="#atividades-2ano"><span class="quick-icon">✅</span><span><strong>Desafios</strong><small>Teste seus conhecimentos</small></span><span class="arrow">›</span></a><a href="#atividades-2ano"><span class="quick-icon">⭐</span><span><strong>Projetos</strong><small>Explore e crie</small></span><span class="arrow">›</span></a></nav>
-<section class="years" aria-label="Escolha seu ano"><a class="year-card available" href="#atividades-2ano"><span class="year-icon">📖</span><span><strong>2º Ano</strong><small>10 atividades disponíveis</small></span><span class="arrow">›</span></a><div class="year-card"><span class="year-icon">📚</span><span><strong>3º Ano</strong><small>Em desenvolvimento</small></span></div><div class="year-card"><span class="year-icon">✏️</span><span><strong>4º Ano</strong><small>Em desenvolvimento</small></span></div><div class="year-card"><span class="year-icon">🎓</span><span><strong>5º Ano</strong><small>Em desenvolvimento</small></span></div></section>
-<section class="pc" aria-labelledby="pc-title"><span class="brain" aria-hidden="true">🧠</span><div class="copy"><span class="eyebrow">APRENDER A PENSAR</span><h2 id="pc-title">Descubra o Pensamento Computacional</h2><p>Aprenda a resolver problemas, criar soluções e usar sua criatividade em desafios do dia a dia.</p></div><a href="../pensamento-computacional/index.html">Explorar agora →</a></section>
-<section id="atividades-2ano" aria-labelledby="activity-title"><div class="section-head"><div><h2 id="activity-title">🎮 Atividades do 2º ano</h2><p>Escolha uma atividade e comece a aprender brincando!</p></div><aside class="tip"><strong>💡 Dica para os professores</strong>As atividades desenvolvem raciocínio lógico, criatividade e resolução de problemas.</aside></div><div class="activities"><a class="activity" href="../atividades/jornada/index.html"><div class="art" style="--tile:#9ad3ff"><span class="num">1</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">⌨️</span></div><strong>Jornada do Teclado</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/caca-letras/index.html"><div class="art" style="--tile:#ffe58c"><span class="num">2</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🔤</span></div><strong>Caça-Letras</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/missao-computador/index.html"><div class="art" style="--tile:#91e8bb"><span class="num">3</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🖥️</span></div><strong>Missão Computador</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/eventos/index.html"><div class="art" style="--tile:#d5b3ff"><span class="num">4</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">⚡</span></div><strong>Missão Eventos</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/cobra/index.html"><div class="art" style="--tile:#ffbbd6"><span class="num">5</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🐍</span></div><strong>Jogo da Cobra</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/makey/index.html"><div class="art" style="--tile:#8fe5e4"><span class="num">6</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🎮</span></div><strong>Missão Makey</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/missao-mouse/index.html"><div class="art" style="--tile:#ffc394"><span class="num">7</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🖱️</span></div><strong>Missão Mouse</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/programacao-em-par/index.html"><div class="art" style="--tile:#9ed5ff"><span class="num">8</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">👥</span></div><strong>Programação em Par</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/missao-algoritmo/index.html"><div class="art" style="--tile:#eab5ff"><span class="num">9</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🧩</span></div><strong>Missão Algoritmo</strong><span class="activity-go">Abrir atividade →</span></a><a class="activity" href="../atividades/missao-repeticao/index.html"><div class="art" style="--tile:#9de7b0"><span class="num">10</span><span class="art-decor decor-a" aria-hidden="true">✦</span><span class="art-decor decor-b" aria-hidden="true">●</span><span class="art-icon" aria-hidden="true">🔁</span></div><strong>Missão Repetição</strong><span class="activity-go">Abrir atividade →</span></a></div></section></main>
-<footer class="anna-footer"><p><strong>AnnA One · Tecnologia e Educação Juntas</strong> — Universo Aprender</p><p>Idealização e desenvolvimento: Prof. Elison Borges · © 2026 Elison Borges · Todos os direitos reservados.</p></footer></body></html>
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#074d9c">
+<title>Universo Aprender | AnnA One · LabPC</title>
+<style>
+:root{--ink:#103b7b;--blue:#084caa;--purple:#783cf2;--light:#f5f9ff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--light);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+a{color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #ffbd2e;outline-offset:3px}
+.top{background:#fff;box-shadow:0 2px 14px #103b7b16;position:relative;z-index:2}
+.nav{max-width:1470px;margin:auto;min-height:74px;padding:12px 28px;display:flex;align-items:center;gap:24px;justify-content:space-between}
+.branding{display:flex;align-items:center;gap:18px;text-decoration:none;min-width:0}
+.anna-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#0dd6f1,#073fd5);color:white;font-weight:950;font-size:25px}
+.anna{font-weight:900;font-size:23px;line-height:1.1;white-space:nowrap}.anna small{display:block;font-weight:600;font-size:10px}
+.separator{height:42px;width:1px;background:#d1dfff}
+.labpc{font-weight:950;font-size:34px;letter-spacing:-2px;line-height:1;background:linear-gradient(90deg,#063b80 45%,#8728ed);background-clip:text;color:transparent;white-space:nowrap}
+.portal-title{font-size:23px;font-weight:900;line-height:1.05;white-space:nowrap}.portal-title small{display:block;font-size:12px;font-weight:500;margin-top:6px}
+.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.actions a{text-decoration:none;border:1px solid #cbd9f3;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:750;background:white;white-space:nowrap}
+.actions a:first-child{background:#074da4;color:white;border-color:#074da4}.actions .grade{background:linear-gradient(100deg,#6632d8,#8c50fa);color:white;border:0;padding:11px 20px;font-size:16px}
+.hero{min-height:282px;position:relative;overflow:hidden;background:linear-gradient(100deg,#0c9df5 0%,#d8f2ff 34%,#eefaff 55%,#1ba6f8 100%);border-bottom:4px solid #d7e6ff}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 47% 35%,#fff9,transparent 38%);pointer-events:none}
+.hero-inner{max-width:1470px;margin:auto;min-height:282px;display:grid;place-items:center;position:relative;padding:20px 20px}
+.hero-art{position:absolute;bottom:0;max-height:277px;height:100%;object-fit:contain;pointer-events:none}
+.hero-left{left:0;object-position:bottom left}.hero-right{right:0;object-position:bottom right}
+.hero-content{position:relative;z-index:1;text-align:center;max-width:750px;margin:0 auto;text-shadow:0 1px 3px #fff9}
+.hero h1{font-size:clamp(35px,4.2vw,66px);line-height:1.04;letter-spacing:-2.5px;margin:0 0 12px;font-weight:950;color:#083e83}
+.hero h1 em{font-style:normal;color:#8329e9}.year{display:inline-block;background:#7437e7;color:#fff;padding:7px 24px;border-radius:99px;font-weight:900;font-size:19px}
+.hero p{font-size:17px;font-weight:700;max-width:660px;margin:16px auto 14px}
+.chips{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.chips span{background:#fffdf0eb;padding:8px 12px;border:1px solid #ffffffd9;border-radius:12px;font-weight:800;font-size:12px;box-shadow:0 3px 8px #084caa12}
+.content{max-width:1470px;margin:auto;padding:28px 28px 34px}.section-top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}
+.section-top h2{font-size:28px;margin:0;font-weight:950;letter-spacing:-.5px}.section-top p{margin:2px 0 0}
+.teacher-tip{padding:12px 16px;border-radius:16px;background:#e9e9ff;font-size:12px;max-width:340px}.teacher-tip strong{display:block;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}
+.card{min-width:0;background:white;border-radius:17px;overflow:hidden;box-shadow:0 6px 18px #0a39741a;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;border:1px solid #e7eef9}
+.card:hover{transform:translateY(-5px);box-shadow:0 12px 24px #0a39742b}.art{position:relative;background:var(--accent);height:120px;overflow:hidden}
+.art img{width:100%;height:100%;object-fit:cover}.number{position:absolute;left:12px;top:10px;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;background:white;color:var(--accent);font-size:20px;font-weight:950;box-shadow:0 3px 9px #0002}
+.card-body{padding:12px 16px 16px;display:flex;flex:1;flex-direction:column;text-align:center}.card h3{font-size:17px;margin:0 0 6px;font-weight:900;line-height:1.25}
+.card p{font-size:13px;line-height:1.3;margin:0 0 12px;flex:1}.start{display:flex;justify-content:center;align-items:center;gap:12px;background:#7a40f0;color:white;border-radius:10px;padding:10px 16px;text-decoration:none;font-weight:900;box-shadow:0 5px 10px #783cf230}.start span{font-size:24px;line-height:0}
+footer{border-top:1px solid #dce6f5;background:white;padding:23px 28px;color:#355787}
+.footer-inner{max-width:1470px;margin:auto;display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}footer strong{font-size:18px}footer p{margin:4px 0;font-size:12px}footer a{text-decoration:none;font-weight:700;font-size:13px}
+.preview-note{background:#fff7db;color:#7c5300;padding:9px 16px;text-align:center;font-size:13px;border-bottom:1px solid #f2d791}
+@media(max-width:1250px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.portal-title{display:none}.hero-art{opacity:.7}}
+@media(max-width:960px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.nav{flex-wrap:wrap}.actions{margin-left:auto}.hero-art{opacity:.35}}
+@media(max-width:650px){.nav{padding:12px 16px;gap:10px}.separator,.labpc{display:none}.anna{font-size:19px}.actions a:not(:first-child){display:none}.hero-inner{min-height:290px}.hero-art{opacity:.2}.hero h1{font-size:40px}.hero p{font-size:14px}.year{font-size:15px}.chips span{font-size:11px}.content{padding:20px 14px}.section-top{display:block}.teacher-tip{margin-top:12px;max-width:none}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.art{height:100px}.card-body{padding:11px}.card h3{font-size:14px}.card p{font-size:12px}.start{font-size:13px;padding:9px 6px}}
+@media(max-width:390px){.grid{grid-template-columns:1fr}.art{height:140px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Seleção de anos escolares */
+.grade-section{max-width:1470px;margin:0 auto;padding:27px 28px 4px}
+.grade-section h2{text-align:center;font-size:29px;margin:0 0 5px;font-weight:950}
+.grade-section>p{text-align:center;margin:0 0 18px;color:#51678b}
+.grade-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.grade-card{min-width:0;min-height:154px;border-radius:20px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;border:2px solid #e4eafa;box-shadow:0 5px 16px #0a39741a;background:#fff}
+.grade-card .grade-emoji{font-size:32px}.grade-card strong{font-size:25px;line-height:1.1}
+.grade-card .grade-status{font-size:13px;font-weight:900;padding:5px 12px;border-radius:99px;background:#e9edf3;color:#64728a}
+.grade-card small{font-size:12px;color:#6b7890}
+.grade-card.available{border-color:#8450ec;background:linear-gradient(140deg,#f2eaff,#e7f6ff);text-decoration:none;transition:transform .2s,box-shadow .2s}
+.grade-card.available:hover{transform:translateY(-4px);box-shadow:0 12px 24px #6736bf32}
+.grade-card.available .grade-status{background:#dff8e9;color:#087a48}
+.grade-card.pending{background:#f6f8fc;border-style:dashed}
+@media(max-width:850px){.grade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.grade-section{padding:23px 14px 2px}.grade-section h2{font-size:24px}.grade-grid{gap:11px}.grade-card{min-height:138px;padding:12px 8px}.grade-card strong{font-size:21px}}
+
+/* Prévia V4 — composição ilustrada e cartões com arte verdadeira */
+body{background:#f2f7ff}.top{border-bottom:1px solid #e5edfa}.nav{min-height:70px}
+.hero,.hero-inner{min-height:260px}.hero{background:linear-gradient(105deg,#50b6f9 0%,#d6f2ff 32%,#f2fbff 52%,#58b8f5 100%)}
+.hero-art{max-height:260px}.hero-content{max-width:620px}.hero h1{font-size:clamp(41px,5vw,66px);margin:0 0 10px}.hero p{font-size:clamp(14px,1.5vw,18px);background:#fffdf4df;padding:9px 18px;border-radius:999px;box-shadow:0 4px 14px #0a4a7b1c;display:inline-block}
+.grade-section{padding-top:20px}.grade-section h2{font-size:25px}.grade-section>p{font-size:14px}.grade-grid{gap:12px}.grade-card{min-height:116px;padding:12px}.grade-card strong{font-size:24px}.grade-emoji{font-size:28px}
+.pc-banner{max-width:1414px;margin:18px auto 2px;padding:15px 20px;display:flex;align-items:center;gap:18px;background:linear-gradient(110deg,#1353a7,#7138d9);color:white;border-radius:18px;box-shadow:0 8px 20px #253f8d25}.pc-brain{font-size:35px}.pc-copy{flex:1}.pc-overline{font-size:10px;font-weight:850;letter-spacing:1.3px}.pc-banner h2{margin:2px 0 4px;font-size:22px}.pc-banner p{margin:0;font-size:13px}.pc-banner a{color:#5632aa;background:white;padding:11px 16px;border-radius:11px;font-weight:850;font-size:13px;text-decoration:none;white-space:nowrap}
+.content{padding-top:20px}.section-top h2{font-size:25px}.grid{gap:14px}.art{height:125px}.art img{object-fit:cover}.card-body{padding:12px}.card h3{font-size:15px}.card p{font-size:12px}.start{font-size:13px;padding:9px 12px}
+@media(max-width:1450px){.pc-banner{margin-left:28px;margin-right:28px}}
+@media(max-width:650px){.hero,.hero-inner{min-height:235px}.hero-art{opacity:.32}.hero h1{font-size:42px}.hero p{font-size:12px;max-width:290px}.grade-section{padding:17px 14px 0}.grade-card{min-height:110px}.grade-card strong{font-size:19px}.pc-banner{margin:14px 14px 0;gap:10px;flex-wrap:wrap;padding:14px}.pc-brain{font-size:27px}.pc-copy{flex-basis:calc(100% - 45px)}.pc-banner h2{font-size:18px}.pc-banner p{font-size:12px}.pc-banner a{margin-left:35px}.art{height:105px}}
+</style></head>
+<body id="topo">
+
+<header class="top"><nav class="nav" aria-label="Navegação principal">
+<a class="branding" href="../index.html" target="_blank" rel="noopener" aria-label="AnnA One">
+<span class="anna-mark" aria-hidden="true">A</span><span class="anna">AnnA One<small>Tecnologia a serviço da educação</small></span><span class="separator"></span><span class="labpc">LabPC</span><span class="separator"></span><span class="portal-title">Universo Aprender<small>Atividades interativas</small></span></a>
+<div class="actions"><a href="../index.html" target="_blank" rel="noopener">⌂ Início LabPC</a><a href="#atividades">🎮 Atividades</a><a href="#rodape">ⓘ Sobre</a><a class="grade" href="#anos">🎓 Anos escolares</a></div>
+</nav></header>
+<section class="hero" aria-labelledby="titulo"><div class="hero-inner">
+<img class="hero-art hero-left" src="assets/hero-esquerda.webp" alt="" aria-hidden="true">
+<img class="hero-art hero-right" src="assets/hero-direita.webp" alt="" aria-hidden="true">
+<div class="hero-content"><h1 id="titulo">Universo <em>Aprender</em></h1>
+
+<p>Jogos, desafios e atividades interativas para desenvolver habilidades digitais, criatividade e pensamento computacional.</p>
+
+</div></div></section>
+<section class="grade-section" id="anos" aria-labelledby="grades-title">
+<h2 id="grades-title">🎓 Escolha seu ano</h2><p>O 2º ano já tem atividades disponíveis. Estamos preparando novidades para os demais anos!</p>
+<div class="grade-grid">
+<a class="grade-card available" href="#atividades" aria-label="2º ano disponível: ver dez atividades"><span class="grade-emoji" aria-hidden="true">📘</span><strong>2º ano</strong><span class="grade-status">✓ Disponível</span><small>Explorar 10 atividades ↓</small></a>
+<div class="grade-card pending" aria-label="3º ano em desenvolvimento"><span class="grade-emoji" aria-hidden="true">📗</span><strong>3º ano</strong><span class="grade-status">Em desenvolvimento</span><small>Em breve</small></div>
+<div class="grade-card pending" aria-label="4º ano em desenvolvimento"><span class="grade-emoji" aria-hidden="true">📙</span><strong>4º ano</strong><span class="grade-status">Em desenvolvimento</span><small>Em breve</small></div>
+<div class="grade-card pending" aria-label="5º ano em desenvolvimento"><span class="grade-emoji" aria-hidden="true">📕</span><strong>5º ano</strong><span class="grade-status">Em desenvolvimento</span><small>Em breve</small></div>
+</div></section>
+<section class="pc-banner" aria-labelledby="pc-title"><span class="pc-brain" aria-hidden="true">🧠</span><div class="pc-copy"><span class="pc-overline">APRENDER A PENSAR</span><h2 id="pc-title">Pensamento Computacional</h2><p>Crie soluções, explore padrões e descubra novas formas de aprender.</p></div><a href="../pensamento-computacional/index.html" target="_blank" rel="noopener">Explorar agora →</a></section>
+<main class="content" id="atividades">
+<div class="section-top"><div><h2>🎮 Atividades do 2º ano</h2><p>Clique em um dos cartões para começar. As dez atividades disponíveis são destinadas ao 2º ano.</p></div>
+<aside class="teacher-tip"><strong>💡 Dica para os professores</strong>As atividades podem ser utilizadas em sala de aula ou no laboratório de informática.</aside></div>
+<div class="grid"><article class="card" style="--accent:#279af7">
+ <div class="art"><img src="assets/atividade-01.webp" alt="" loading="lazy"><span class="number">1</span></div>
+ <div class="card-body"><h3>Jornada do Teclado</h3><p>Aprenda a usar o teclado de forma divertida e interativa.</p>
+ <a class="start" href="../atividades/jornada/index.html" target="_blank" rel="noopener" aria-label="Iniciar Jornada do Teclado">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#47c972">
+ <div class="art"><img src="assets/atividade-02.webp" alt="" loading="lazy"><span class="number">2</span></div>
+ <div class="card-body"><h3>Caça-Letras</h3><p>Encontre letras e amplie seu vocabulário digital.</p>
+ <a class="start" href="../atividades/caca-letras/index.html" target="_blank" rel="noopener" aria-label="Iniciar Caça-Letras">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#ffca3a">
+ <div class="art"><img src="assets/atividade-03.webp" alt="" loading="lazy"><span class="number">3</span></div>
+ <div class="card-body"><h3>Missão Computador</h3><p>Conheça as partes do computador e suas funções.</p>
+ <a class="start" href="../atividades/missao-computador/index.html" target="_blank" rel="noopener" aria-label="Iniciar Missão Computador">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#ff626f">
+ <div class="art"><img src="assets/atividade-04.webp" alt="" loading="lazy"><span class="number">4</span></div>
+ <div class="card-body"><h3>Missão Eventos</h3><p>Descubra como ações e acontecimentos funcionam.</p>
+ <a class="start" href="../atividades/eventos/index.html" target="_blank" rel="noopener" aria-label="Iniciar Missão Eventos">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#9962ee">
+ <div class="art"><img src="assets/atividade-05.webp" alt="" loading="lazy"><span class="number">5</span></div>
+ <div class="card-body"><h3>Jogo da Cobra</h3><p>Controle a cobrinha e desenvolva coordenação e estratégia.</p>
+ <a class="start" href="../atividades/cobra/index.html" target="_blank" rel="noopener" aria-label="Iniciar Jogo da Cobra">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#02c8cc">
+ <div class="art"><img src="assets/atividade-06.webp" alt="" loading="lazy"><span class="number">6</span></div>
+ <div class="card-body"><h3>Missão Makey</h3><p>Crie comandos usando objetos do dia a dia.</p>
+ <a class="start" href="../atividades/makey/index.html" target="_blank" rel="noopener" aria-label="Iniciar Missão Makey">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#f96aa2">
+ <div class="art"><img src="assets/atividade-07.webp" alt="" loading="lazy"><span class="number">7</span></div>
+ <div class="card-body"><h3>Missão Mouse</h3><p>Pratique clique, duplo clique e arrastar.</p>
+ <a class="start" href="../atividades/missao-mouse/index.html" target="_blank" rel="noopener" aria-label="Iniciar Missão Mouse">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#448bff">
+ <div class="art"><img src="assets/atividade-08.webp" alt="" loading="lazy"><span class="number">8</span></div>
+ <div class="card-body"><h3>Programação em Par</h3><p>Resolva desafios trabalhando em equipe.</p>
+ <a class="start" href="../atividades/programacao-em-par/index.html" target="_blank" rel="noopener" aria-label="Iniciar Programação em Par">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#4ac77a">
+ <div class="art"><img src="assets/atividade-09.webp" alt="" loading="lazy"><span class="number">9</span></div>
+ <div class="card-body"><h3>Missão Algoritmo</h3><p>Organize passos e resolva desafios de forma lógica.</p>
+ <a class="start" href="../atividades/missao-algoritmo/index.html" target="_blank" rel="noopener" aria-label="Iniciar Missão Algoritmo">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article>
+<article class="card" style="--accent:#ff9b28">
+ <div class="art"><img src="assets/atividade-10.webp" alt="" loading="lazy"><span class="number">10</span></div>
+ <div class="card-body"><h3>Missão Repetição</h3><p>Use repetições para resolver desafios com eficiência.</p>
+ <a class="start" href="../atividades/missao-repeticao/index.html" target="_blank" rel="noopener" aria-label="Iniciar Missão Repetição">▶ Iniciar <span aria-hidden="true">›</span></a></div>
+ </article></div>
+</main>
+<footer id="rodape"><div class="footer-inner"><div><strong>AnnA One <span style="color:#7934eb">· LabPC</span></strong><p>Universo Aprender — Idealização e desenvolvimento: Prof. Elison Borges · © 2026</p></div><a href="#topo">↑ Voltar ao topo</a></div></footer>
+</body></html>
