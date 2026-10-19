@@ -2,70 +2,61 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1220">
-<title>Central LabPC — Tecnologia, aprendizagem e projetos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#08294c">
+<meta name="description" content="Central LabPC — laboratórios Maker, Programação e Robótica do ecossistema AnnA One.">
+<title>Central LabPC | AnnA One</title>
 <style>
-*{box-sizing:border-box}
-:root{--bg:#07111f;--panel:#0e1b2d;--text:#eef6ff;--muted:#9fb2c9;--line:#20344d;--accent:#4fb3ff}
-body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(160deg,#07111f 0%,#0c1830 52%,#101b2d 100%);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
-header{max-width:1180px;margin:auto;padding:10px 22px 6px}
-.brand{display:inline-flex;align-items:center;gap:10px;border:1px solid #29435f;background:#0b1728cc;border-radius:999px;padding:6px 11px;color:#bfe4ff;font-weight:800;font-size:13px;letter-spacing:.4px}
-h1{font-size:clamp(28px,3.4vw,40px);line-height:1.04;margin:7px 0 4px;max-width:850px}
-.lead{font-size:14px;line-height:1.35;color:var(--muted);max-width:780px;margin:0}
-main{width:100%;max-width:1180px;margin:0 auto;padding:3px 22px 8px;flex:1}
-.section-title{margin:8px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:1.6px;color:#7fc9ff}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.card{position:relative;min-height:0;padding:11px 15px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(145deg,#102039dd,#0b1729dd);text-decoration:none;color:var(--text);overflow:hidden;transition:.2s}
-.card:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-70px;top:-70px;background:var(--glow,#4fb3ff);filter:blur(80px);opacity:.18}
-.card:hover{transform:translateY(-4px);border-color:#456887;box-shadow:0 18px 45px #0005}
-.icon{font-size:23px}.tag{position:absolute;right:13px;top:11px;font-size:11px;font-weight:900;letter-spacing:.7px;border:1px solid #ffffff22;background:#ffffff0d;padding:6px 9px;border-radius:999px;color:#c9ddf0}
-.card h2{font-size:18px;margin:5px 0 3px}.card p{font-size:12.5px;color:var(--muted);line-height:1.32;max-width:500px;margin:0 0 6px}.go{font-weight:850;color:#8dd2ff}
-.programacao{--glow:#ec4899}.aprender{--glow:#22c55e}.robotica{--glow:#8b5cf6}.projetos{--glow:#f59e0b}.manager{--glow:#38bdf8}
-.coming{cursor:default}.coming:hover{transform:none}.coming .go{color:#f8c96b}
-footer{border-top:1px solid #ffffff10;text-align:center;padding:5px 18px;color:#7288a1;font-size:12px;line-height:1.6}
-@media(max-width:720px){header{padding-top:18px}.grid{grid-template-columns:1fr}.card{min-height:150px}}
+:root{--navy:#09294c;--deep:#061c38;--blue:#087cff;--ink:#09224a;--muted:#47627f;--orange:#f58a11;--purple:#6733ed;--cyan:#087cff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#edf6ff;line-height:1.5}
+a{color:inherit}.skip-link{position:absolute;left:12px;top:-100px;z-index:10;background:#fff;color:#09294c;padding:10px 16px;border-radius:8px;font-weight:800}.skip-link:focus{top:12px}a:focus-visible,button:focus-visible{outline:3px solid #ffbd36;outline-offset:4px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.top{background:linear-gradient(115deg,#092a50,#062342);color:white}.nav{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:22px}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;min-width:0}.brand img{width:40px;height:40px;flex:none}.brand-text{display:flex;flex-direction:column;line-height:1.05}.brand-text strong{font-size:clamp(19px,2.5vw,26px);letter-spacing:-1px}.brand-text strong span{color:#299fff}.brand-text small{font-size:9px;letter-spacing:.5px;margin-top:5px;font-weight:700}
+.nav-links{display:flex;gap:22px;align-items:center}.nav-links a{text-decoration:none;font-size:14px;font-weight:650;padding:10px 0;border-bottom:2px solid transparent}.nav-links a:hover,.nav-links a[aria-current]{border-color:#22b6ff}
+.hero{background:radial-gradient(circle at 80% 20%,#a8d9ff 0%,transparent 36%),linear-gradient(110deg,#e7f5ff,#f9fcff 55%,#d9edff);overflow:hidden}
+.hero-inner{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;min-height:250px;gap:22px;padding-top:24px;padding-bottom:24px}
+.eyebrow{font-size:15px;font-weight:800;color:#087cff;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px}
+.hero h1{font-size:clamp(36px,5vw,62px);line-height:1;letter-spacing:-3px;margin:0 0 12px;color:#071b53}.hero h1 span{color:#087cff}
+.hero p{font-size:clamp(14px,1.6vw,17px);margin:0 0 14px}.hero .motto{color:#0d59ad;font-size:clamp(16px,2vw,22px);font-weight:800;font-style:italic}
+.hero-art{min-height:210px;display:grid;place-items:center;position:relative}.hero-art:before{content:"";position:absolute;width:min(78%,230px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 28% 26%,#84e8ff,#178dff 55%,#123fc4 80%);box-shadow:0 0 0 18px #ffffff55,0 24px 70px #1167c53d}
+.hero-art:after{content:"";position:absolute;width:82%;height:42%;border:12px solid #ffcb52;border-radius:50%;transform:rotate(-24deg);box-shadow:0 9px 15px #0002}
+.hero-art .art-label{position:relative;z-index:1;background:#ffffffeb;border-radius:20px;padding:14px 20px;box-shadow:0 10px 30px #07376a35;text-align:center;font-weight:850;font-size:clamp(15px,2vw,21px);color:#093d83}.hero-art .art-label span{display:block;color:#2676ce;font-size:14px;font-weight:600}
+.section{padding:18px 0 22px}.section h2{font-size:clamp(21px,2.6vw,27px);margin:0 0 4px}.section-intro{color:var(--muted);margin:0 0 20px}
+.labs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.lab{background:white;border-radius:20px;overflow:hidden;box-shadow:0 8px 26px #092c5016;display:flex;flex-direction:column;border:1px solid #dbe8f8}
+.lab-head{min-height:125px;padding:14px 17px 12px;position:relative;overflow:hidden}.lab-head:after{position:absolute;right:-16px;bottom:-48px;font-size:125px;opacity:.13;transform:rotate(-15deg)}
+.lab-maker .lab-head{background:linear-gradient(130deg,#fff1d8,#ffe1ae)}.lab-maker .lab-head:after{content:"⚙"}
+.lab-code .lab-head{background:linear-gradient(130deg,#eee8ff,#d6c7ff)}.lab-code .lab-head:after{content:"⌘"}
+.lab-robot .lab-head{background:linear-gradient(130deg,#e1f3ff,#b4ddff)}.lab-robot .lab-head:after{content:"⚙"}
+.lab-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:16px;color:white;font-size:24px;margin-bottom:7px}.lab-maker .lab-icon{background:var(--orange)}.lab-code .lab-icon{background:var(--purple)}.lab-robot .lab-icon{background:var(--blue)}
+.lab h3{font-size:22px;letter-spacing:-.6px;margin:0;position:relative}.lab-maker h3{color:#a9490b}.lab-code h3{color:#4720a8}.lab-robot h3{color:#0759c8}.lab-sub{font-size:13px;font-weight:750;margin:3px 0 0;position:relative}
+.lab-body{padding:15px 17px;display:flex;flex-direction:column;gap:10px;flex:1}.lab-body p{margin:0;color:#304968;flex:1;min-height:70px}.status{font-size:12px;font-weight:800;letter-spacing:.04em;color:#77541c}
+.lab-action{display:flex;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:42px;border-radius:12px;padding:12px;font-size:15px;font-weight:800;color:white;text-decoration:none}
+.lab-maker .lab-action{background:#b46d18}.lab-code .lab-action{background:#6042ad}.lab-robot .lab-action{background:var(--blue)}a.lab-action:hover{filter:brightness(.92);transform:translateY(-1px)}.lab-action.disabled{cursor:default;opacity:.8}.lab-action.disabled::before{content:"●";font-size:9px;opacity:.75}.status{display:inline-flex;align-items:center;gap:6px}.lab-robot .status{color:#087047}
+.benefits{background:white;border:1px solid #dce9f7;border-radius:18px;padding:14px;margin:0 0 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.benefit{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700}.benefit b{font-size:26px}
+footer{background:linear-gradient(115deg,#092a50,#061c38);color:#e7f3ff;padding:20px 0}.foot{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}.foot .brand-logo{width:34px;height:34px}.foot .brand-text strong{font-size:22px}.foot p{font-size:12px;margin:4px 0;color:#c4d7ef}.foot-nav{display:flex;gap:18px;flex-wrap:wrap}.foot-nav a{font-size:13px;text-decoration:none}.foot-nav a:hover{text-decoration:underline}
+@media(max-width:900px){.nav{flex-wrap:wrap;padding-top:12px;padding-bottom:12px}.nav-links{width:100%;justify-content:center;flex-wrap:wrap;gap:12px 22px}.hero-inner{grid-template-columns:1fr 1fr}.labs{gap:12px}.lab h3{font-size:20px}.benefits{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.nav-links a{padding:10px 5px;min-height:44px;display:inline-flex;align-items:center}.wrap{padding-left:16px;padding-right:16px}.nav-links{justify-content:flex-start}.hero-inner{grid-template-columns:1fr;min-height:0;padding-top:34px;padding-bottom:28px}.hero-art{min-height:180px}.hero-art:before{width:165px}.hero-art:after{width:230px;height:105px;border-width:12px}.hero h1{letter-spacing:-1.5px}.labs{grid-template-columns:1fr}.lab-head{min-height:0}.lab-body p{min-height:0}.benefits{grid-template-columns:1fr 1fr;padding:14px}.benefit{font-size:12px}.foot{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 </style>
 </head>
 <body>
-<header>
-<div class="brand">⚡ LABPC · CENTRAL</div>
-<h1>Um ponto de partida para aprender, criar e explorar.</h1>
-<p class="lead">Acesse os ambientes do ecossistema LabPC. Atividades de aprendizagem, programação, robótica e ferramentas educacionais reunidas em uma única central.</p>
-</header>
-<main>
-<div class="section-title">Escolha um ambiente</div>
-<div class="grid">
-<a class="card aprender" href="aprender/index.html">
-<div class="tag">APRENDER</div><div class="icon">🎮</div>
-<h2>Portal do 2º Ano</h2>
-<p>Jogos, missões e atividades de Pensamento Computacional para desenvolver habilidades de teclado, mouse, algoritmos, eventos e programação.</p>
-<div class="go">Entrar no portal →</div>
-</a>
-<a class="card robotica" href="robotica/index.html">
-<div class="tag">ROBÓTICA</div><div class="icon">🤖</div>
-<h2>LabPC Robótica</h2>
-<p>Explore Sphero, mBot e littleBits em atividades de robótica, circuitos, simulação e programação.</p>
-<div class="go">Explorar Robótica →</div>
-</a>
-<a class="card programacao coming" href="javascript:void(0)" aria-label="LabPC Programação em desenvolvimento">
-<div class="tag">EM DESENVOLVIMENTO</div><div class="icon">🧩</div>
-<h2>LabPC Programação</h2>
-<p>Explore a programação visual com blocos, desafios progressivos e projetos criativos. Aprenda algoritmos, movimentos, eventos e lógica de programação.</p>
-<div class="go">Novidades em breve</div>
-</a>
-
-<a class="card manager coming" href="javascript:void(0)" aria-label="LabManager módulo do ecossistema">
-<div class="tag">GESTÃO</div><div class="icon">🖥️</div>
-<h2>LabManager</h2>
-<p>Gerenciamento dos computadores do laboratório, modos de aula, comunicação, telas e recursos administrativos.</p>
-<div class="go">Módulo do ecossistema LabPC</div>
-</a>
-</div>
+<a class="skip-link" href="#conteudo">Ir para o conteúdo principal</a>
+<header class="top" id="inicio"><div class="wrap nav">
+<a class="brand" href="#inicio" aria-label="AnnA One — início da Central LabPC"><svg class="brand-logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t"><title id="t">Símbolo AnnA One</title><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#a)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg><span class="brand-text"><strong>AnnA <span>One</span></strong><small>TECNOLOGIA E EDUCAÇÃO JUNTAS</small></span></a>
+<nav class="nav-links" aria-label="Navegação principal"><a href="#inicio" aria-current="page">Início</a><a href="#laboratorios">Laboratórios</a><a href="#sobre">Sobre</a><a href="#rodape">Créditos</a></nav>
+</div></header>
+<section class="hero" aria-labelledby="titulo"><div class="wrap hero-inner">
+<div><p class="eyebrow">Laboratórios educacionais</p><h1 id="titulo">Central <span>LabPC</span></h1><p>Laboratórios de tecnologia, criação e aprendizagem.</p><p class="motto">Tecnologia que inspira aprendizagem!</p></div>
+<div class="hero-art" aria-hidden="true"><div class="art-label">Criar · Programar · Explorar<span>Aprender fazendo</span></div></div>
+</div></section>
+<main id="conteudo"><section class="section wrap" id="laboratorios" aria-labelledby="lab-title"><h2 id="lab-title">Nossos laboratórios</h2><p class="section-intro">Experimente novas ideias e descubra diferentes formas de aprender.</p>
+<div class="labs">
+<article class="lab lab-maker"><div class="lab-head"><div class="lab-icon" aria-hidden="true">💡</div><h3>LabMaker</h3><p class="lab-sub">Criar · Experimentar · Inovar</p></div><div class="lab-body"><p>Projetos Maker, circuitos e prototipagem para transformar ideias em soluções.</p><span class="status">EM PLANEJAMENTO</span><span class="lab-action disabled" aria-label="LabMaker em planejamento">Em planejamento</span></div></article>
+<article class="lab lab-code"><div class="lab-head"><div class="lab-icon" aria-hidden="true">⌘</div><h3>LabProgramação</h3><p class="lab-sub">Pensar · Programar · Criar</p></div><div class="lab-body"><p>Programação visual e desafios de lógica. Integrações previstas com LabPC Code e Scratch autoral e oficial.</p><span class="status">EM DESENVOLVIMENTO</span><span class="lab-action disabled" aria-label="LabProgramação em desenvolvimento">Em desenvolvimento</span></div></article>
+<article class="lab lab-robot"><div class="lab-head"><div class="lab-icon" aria-hidden="true">🤖</div><h3>LabRobótica</h3><p class="lab-sub">Construir · Programar · Explorar</p></div><div class="lab-body"><p>Acesse Sphero e mBot, com opções reais e de simulação. O módulo LittleBits continua em desenvolvimento.</p><span class="status">PORTAL DISPONÍVEL</span><a class="lab-action" href="robotica/index.html">Explorar LabRobótica →</a></div></article>
+</div></section>
+<section class="wrap" id="sobre" aria-label="Sobre a Central"><div class="benefits"><div class="benefit"><b aria-hidden="true">🎓</b><span>Aprendizagem prática</span></div><div class="benefit"><b aria-hidden="true">🧩</b><span>Projetos criativos</span></div><div class="benefit"><b aria-hidden="true">📱</b><span>Interface adaptável</span></div><div class="benefit"><b aria-hidden="true">🔬</b><span>Experiências de laboratório</span></div></div></section>
 </main>
-<footer>
-<div><strong>LabPC — Tecnologia, aprendizagem e projetos</strong></div>
-<div>Idealização e desenvolvimento: Elison Borges · © 2026 · Todos os direitos reservados · UI 2.2</div>
-</footer>
-</body>
-</html>
+<footer id="rodape"><div class="wrap foot"><div><div class="brand"><svg class="brand-logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t"><title id="t">Símbolo AnnA One</title><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#a)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg><span class="brand-text"><strong>AnnA <span>One</span></strong><small>TECNOLOGIA E EDUCAÇÃO JUNTAS</small></span></div><p>Central LabPC — Laboratórios de tecnologia, criação e aprendizagem.</p></div><nav class="foot-nav" aria-label="Navegação do rodapé"><a href="#inicio">Início</a><a href="#laboratorios">Laboratórios</a><a href="#sobre">Sobre</a></nav><div><p>Idealização e desenvolvimento: Prof. Elison Borges</p><p>© 2026 Elison Borges · Todos os direitos reservados.</p></div></div></footer>
+</body></html>
