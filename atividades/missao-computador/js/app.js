@@ -865,7 +865,8 @@ document.getElementById("reset").onclick=()=>{
    state={};
    for(let i=1;i<=8;i++) state["m"+i]={etapa:0,erros:0,dicas:0,concluida:false};
    etapa=etapaM2=etapaM3=etapaM4=etapaM5=etapaM6=etapaM7=etapaM8=0;
-   saveAll(); saveTelemetry(); cards();
+   saveAll(); saveTelemetry(); cards(); go("central");
+   alert("Progresso e registros reiniciados com sucesso!");
  }
 };
 
