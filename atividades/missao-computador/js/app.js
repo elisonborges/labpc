@@ -29,7 +29,6 @@ function cards(){let g=document.getElementById("cards");g.innerHTML="";MISSOES.f
 function placeholder(i){document.getElementById("phTitulo").textContent=`MISSÃO ${i+1} DE 8`;document.getElementById("phEmoji").textContent=MISSOES[i][0];document.getElementById("phNome").textContent=MISSOES[i][1];go("placeholder")}
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{if(b.dataset.go==="central")cards();go(b.dataset.go)});
 document.querySelectorAll(".som").forEach(b=>b.onclick=()=>b.textContent=b.textContent==="🔊"?"🔇":"🔊");
-document.getElementById("reset").onclick=()=>{if(confirm("Reiniciar somente o progresso deste protótipo?")){state={m1:{etapa:0,erros:0,dicas:0,concluida:false},m2:{etapa:0,erros:0,dicas:0,concluida:false},m3:{etapa:0,erros:0,dicas:0,concluida:false},m4:{etapa:0,erros:0,dicas:0,concluida:false},m5:{etapa:0,erros:0,dicas:0,concluida:false},m6:{etapa:0,erros:0,dicas:0,concluida:false},m7:{etapa:0,erros:0,dicas:0,concluida:false},m8:{etapa:0,erros:0,dicas:0,concluida:false}};etapa=0;save();cards()}};
 document.getElementById("sairM1").onclick=()=>document.getElementById("modal").classList.add("open");
 document.getElementById("ficar").onclick=()=>document.getElementById("modal").classList.remove("open");
 document.getElementById("voltar").onclick=()=>{document.getElementById("modal").classList.remove("open");save();cards();go("central")};
