@@ -170,6 +170,26 @@ body{min-height:100vh;min-height:100dvh}
 #screen-game .game-actions button{flex:1 1 150px;margin:0;padding:12px}
 @media(max-width:760px){#screen-game .game-columns{grid-template-columns:1fr;gap:12px}#screen-game canvas{width:min(100%,min(54vh,400px))}#screen-game .game-info-column{gap:10px}#screen-game .game-goal{padding:10px}#screen-game .target-emoji{font-size:36px}#screen-game .target-word{font-size:25px}}
 @media(min-width:761px) and (max-height:750px){#screen-game{padding:10px}#screen-game .topbar{margin-bottom:7px}#screen-game canvas{width:min(100%,min(59vh,470px))}#screen-game .game-info-column{gap:8px}#screen-game .game-goal{padding:8px}#screen-game .target-emoji{font-size:34px}#screen-game .target-word{font-size:25px}#screen-game .speed-control{padding:8px}#screen-game .game-actions button{padding:9px}}
+
+/* Partida horizontal: 30x20 células, sem crescimento vertical */
+body:has(#screen-game:not(.hidden)) #conteudo-principal{max-width:1450px;padding-top:6px;padding-bottom:6px}
+body:has(#screen-game:not(.hidden)) #conteudo-principal > .cobra-hero{padding:7px 12px;margin-bottom:7px;min-height:0;border-radius:14px}
+body:has(#screen-game:not(.hidden)) #conteudo-principal > .cobra-hero h1{font-size:clamp(21px,2.5vw,30px);margin:0 0 2px}
+body:has(#screen-game:not(.hidden)) #conteudo-principal > .cobra-hero p{font-size:clamp(11px,1.2vw,14px)}
+body:has(#screen-game:not(.hidden)) .hero-pixels{display:none}
+#screen-game{max-width:1380px;padding:9px 12px}
+#screen-game .topbar{margin-bottom:7px;padding:7px 12px}
+#screen-game .game-columns{grid-template-columns:minmax(0,1.65fr) minmax(255px,.75fr);gap:clamp(10px,1.5vw,20px)}
+#screen-game .canvas-container{justify-content:center}
+#screen-game canvas{width:min(100%,660px,max(180px,calc((100dvh - 310px)*1.5)));height:auto;aspect-ratio:3/2;max-width:100%}
+#screen-game .game-info-column{gap:8px}
+#screen-game .game-goal{padding:9px}
+#screen-game .target-emoji{font-size:clamp(28px,4vh,43px);margin:0}
+#screen-game .target-word{font-size:clamp(22px,2.5vw,30px);margin:3px 0}
+#screen-game .speed-control{padding:9px}
+#screen-game .game-actions button{padding:9px 11px}
+@media(min-width:761px) and (max-height:750px){#screen-game canvas{width:min(100%,660px,max(180px,calc((100dvh - 310px)*1.5)));aspect-ratio:3/2}}
+@media(max-width:760px){#screen-game .game-columns{grid-template-columns:1fr}#screen-game canvas{width:min(100%,600px);aspect-ratio:3/2}body:has(#screen-game:not(.hidden)) #conteudo-principal > .cobra-hero{padding:10px}}
 </style>
 <script src="../../shared/labpc.js"></script>
 <style id="universo-aprender-institucional">.ua-header{width:100%!important;max-width:none!important;box-shadow:none!important;text-align:left!important;border-radius:0!important;position:relative!important;z-index:10!important;display:flex!important;justify-content:space-between!important;align-items:center!important;flex-wrap:wrap!important;gap:12px!important;background:linear-gradient(110deg,#092a50,#0759a8)!important;color:white!important;padding:10px max(16px,calc((100% - 1160px)/2))!important;min-height:68px!important;box-sizing:border-box!important}.ua-header .ua-brand{display:flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;color:white!important}.ua-header .ua-brand svg{width:42px!important;height:42px!important;flex:0 0 42px!important;display:block!important}.ua-brand-copy{display:flex!important;flex-direction:column!important;line-height:1.1!important;white-space:nowrap!important}.ua-brand-copy strong{font:800 23px Arial,sans-serif!important;color:white!important}.ua-brand-copy em{font-style:normal!important;color:#55baff!important}.ua-brand-copy small{font:700 8px Arial,sans-serif!important;color:white!important;margin-top:4px!important}.ua-header .ua-back{font:700 13px Arial,sans-serif!important;color:white!important;text-decoration:none!important;border:1px solid #ffffff80!important;background:#ffffff15!important;border-radius:9px!important;padding:10px 12px!important}.ua-header .ua-back:hover{background:#ffffff2d!important}.ua-footer{width:100%!important;box-sizing:border-box!important;position:relative!important;z-index:2!important;background:linear-gradient(110deg,#092a50,#061c38)!important;color:#d8e8f9!important;text-align:center!important;padding:18px 14px!important;font:400 12px/1.6 Arial,sans-serif!important}.ua-footer strong{color:white!important}.ua-footer p{margin:0!important}@media(max-width:500px){.ua-header{padding:10px 14px!important}.ua-header .ua-back{font-size:12px!important}}</style></head>
@@ -250,7 +270,7 @@ body{min-height:100vh;min-height:100dvh}
   <div class="game-columns">
     <section class="game-board-column" aria-label="Tabuleiro da cobra">
       <div class="canvas-container">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
       </div>
     </section>
     <section class="game-info-column" aria-label="Objetivo e controles da partida">
@@ -323,7 +343,8 @@ let isPaused = false;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const GRID_SIZE = 20;
-const TILE_COUNT = 20; // 400 / 20
+const TILE_COLS = 30; // 600 / 20 — ampliação horizontal
+const TILE_ROWS = 20; // 400 / 20 — altura original
 
 let snake = [];
 let dir = { x: 1, y: 0 };
@@ -484,7 +505,7 @@ function getFreePos() {
   let pos, collision;
   do {
     collision = false;
-    pos = { x: Math.floor(Math.random() * TILE_COUNT), y: Math.floor(Math.random() * TILE_COUNT) };
+    pos = { x: Math.floor(Math.random() * TILE_COLS), y: Math.floor(Math.random() * TILE_ROWS) };
     if (snake.some(s => s.x === pos.x && s.y === pos.y)) collision = true;
     if (obstacles.some(o => o.x === pos.x && o.y === pos.y)) collision = true;
     if (lettersOnBoard.some(l => l.x === pos.x && l.y === pos.y)) collision = true;
@@ -512,7 +533,7 @@ function updateLogic() {
   const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
   
   // Colisões com Parede
-  if (head.x < 0 || head.x >= TILE_COUNT || head.y < 0 || head.y >= TILE_COUNT) {
+  if (head.x < 0 || head.x >= TILE_COLS || head.y < 0 || head.y >= TILE_ROWS) {
     return handleMistake("Bateu na parede!", 'wall', null);
   }
   
