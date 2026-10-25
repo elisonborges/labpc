@@ -38,6 +38,18 @@ footer{background:linear-gradient(115deg,#092a50,#061c38);color:#e7f3ff;padding:
 @media(max-width:900px){.nav{flex-wrap:wrap;padding-top:12px;padding-bottom:12px}.nav-links{width:100%;justify-content:center;flex-wrap:wrap;gap:12px 22px}.hero-inner{grid-template-columns:1fr 1fr}.labs{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.lab h3{font-size:20px}.benefits{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){.brand-logo{width:38px;height:38px;flex-basis:38px}.brand-text strong{font-size:21px}.brand-text small{font-size:7px}.nav-links a{padding:10px 5px;min-height:44px;display:inline-flex;align-items:center}.wrap{padding-left:16px;padding-right:16px}.nav-links{justify-content:flex-start}.hero-inner{grid-template-columns:1fr;min-height:0;padding-top:34px;padding-bottom:28px}.hero-art{min-height:180px}.hero-art:before{width:165px}.hero-art:after{width:230px;height:105px;border-width:12px}.hero h1{letter-spacing:-1.5px}.labs{grid-template-columns:1fr}.lab-head{min-height:0}.lab-body p{min-height:0}.benefits{grid-template-columns:1fr 1fr;padding:14px}.benefit{font-size:12px}.foot{align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* AnnA Virtual — integração Fase A (isolada para futura incorporação) */
+.hero-inner{grid-template-columns:minmax(0,1.1fr) minmax(0,.85fr) minmax(270px,.9fr)}
+.anna-entry{position:relative;z-index:2;background:linear-gradient(125deg,#f0e8ff,#d9f2ff);border:1px solid #ffffffb8;border-radius:22px;padding:22px;box-shadow:0 12px 30px #092c5024;align-self:center}
+.anna-entry h2{font-size:clamp(23px,2.2vw,29px);margin:0 0 3px;color:#083d85;line-height:1.15}
+.anna-entry .anna-kicker{font-size:13px;color:#475b88;font-weight:750;margin:0 0 14px}
+.anna-entry p{font-size:14px;color:#274268;margin:0 0 18px}
+.anna-entry .anna-open{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:linear-gradient(100deg,#087cff,#168cff);color:white;font-weight:800;padding:13px 16px;min-height:46px;border-radius:13px;text-align:center}
+.anna-entry .anna-open:hover{filter:brightness(.93)}
+.anna-entry .anna-open:focus-visible{outline:3px solid #ffbd36;outline-offset:3px}
+@media(max-width:1050px){.hero-inner{grid-template-columns:1fr 1fr}.anna-entry{grid-column:1/-1;width:100%;max-width:680px;justify-self:center}}
+@media(max-width:680px){.hero-inner{grid-template-columns:1fr}.anna-entry{grid-column:auto;max-width:none}.anna-entry h2{font-size:25px}}
 </style>
 </head>
 <body>
@@ -49,7 +61,7 @@ footer{background:linear-gradient(115deg,#092a50,#061c38);color:#e7f3ff;padding:
 <section class="hero" aria-labelledby="titulo"><div class="wrap hero-inner">
 <div><p class="eyebrow">Laboratórios educacionais</p><h1 id="titulo">Central <span>LabPC</span></h1><p>Laboratórios de tecnologia, criação e aprendizagem.</p><p class="motto">Tecnologia que inspira aprendizagem!</p></div>
 <div class="hero-art" aria-hidden="true"><div class="art-label">Criar · Programar · Explorar<span>Aprender fazendo</span></div></div>
-</div></section>
+<aside class="anna-entry" id="anna-virtual" aria-labelledby="anna-title" data-anna-integration="external-v1"><h2 id="anna-title">🤖 AnnA Virtual</h2><p class="anna-kicker">Sua assistente inteligente</p><p>Apoio a professores e alunos em programação, robótica, projetos Maker e atividades educacionais.</p><a class="anna-open" href="https://anna-virtual-teste.elisonborg.workers.dev/" target="_blank" rel="noopener noreferrer" aria-label="Abrir AnnA Virtual em nova aba">↗ Abrir AnnA Virtual</a></aside></div></section>
 <main id="conteudo"><section class="section wrap" id="laboratorios" aria-labelledby="lab-title"><h2 id="lab-title">Nossos laboratórios</h2><p class="section-intro">Experimente novas ideias e descubra diferentes formas de aprender.</p>
 <div class="labs">
 <article class="lab lab-maker"><div class="lab-head"><div class="lab-icon" aria-hidden="true">💡</div><h3>LabMaker</h3><p class="lab-sub">Criar · Experimentar · Inovar</p></div><div class="lab-body"><p>Projetos Maker, circuitos e prototipagem para transformar ideias em soluções.</p><span class="status">EM PLANEJAMENTO</span><span class="lab-action disabled" aria-label="LabMaker em planejamento">Em planejamento</span></div></article>
