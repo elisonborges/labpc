@@ -760,7 +760,7 @@ function pauseGame() {
 }
 
 function quitGame() {
-  if(confirm("Sair do jogo atual?")) { LabPC.event({activity:"cobra",type:"quit",status:"menu",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:sessionStartedAt?Math.round((Date.now()-sessionStartedAt)/1000):0}); LabPC.presence("cobra","menu"); if (currentMode === "dupla") { showScreen('screen-duo'); } else { renderLevels(); showScreen('screen-levels'); } }
+  if(confirm("Sair do jogo atual?")) { LabPC.event({activity:"cobra",type:"quit",status:"menu",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:sessionStartedAt?Math.round((Date.now()-sessionStartedAt)/1000):0}); LabPC.presence("cobra","menu"); if (currentMode === "dupla") document.getElementById('mode-subtitle').textContent = "Modo Dupla: escolha uma palavra para jogar."; renderLevels(); showScreen('screen-levels'); }
 }
 
 // --- CONTROLES ---
