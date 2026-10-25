@@ -278,6 +278,7 @@ body:has(#screen-game:not(.hidden)) .hero-pixels{display:none}
   <div class="grid" id="levels-container"></div>
   <div class="center" style="margin-top: 20px;">
     <button class="secondary" onclick="showScreen('screen-home')">🏠 Voltar</button>
+    <button class="secondary" onclick="restartActivity()" title="Recomeçar a jornada desde o nível 1">🔄 Reiniciar atividade</button>
   </div>
 </div>
 
@@ -427,6 +428,15 @@ function renderLevels() {
     }
     container.appendChild(div);
   });
+}
+
+// Reinicia a progressão dos níveis sem apagar o diagnóstico do aluno.
+function restartActivity() {
+  if (!confirm("Reiniciar a atividade desde o nível 1? O progresso dos níveis será zerado.")) return;
+  clearTimeout(gameLoopTimeout);
+  unlockedLevel = 1;
+  localStorage.removeItem("cobraUnlocked");
+  renderLevels();
 }
 
 // --- LÓGICA DE DIAGNÓSTICO (I.A. PREP) ---
