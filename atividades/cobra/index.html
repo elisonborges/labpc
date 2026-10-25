@@ -99,6 +99,40 @@ body{background:radial-gradient(circle at 0 90%,#dce9ff,transparent 35%),linear-
 .ua-footer{margin-top:auto;width:100%}
 @media(max-width:720px){#conteudo-principal{padding:12px}#screen-home .grid{grid-template-columns:1fr;gap:10px}#screen-home .mode-box{padding:12px}#screen-home .mode-box p{flex:initial}#conteudo-principal > header{padding:16px 12px}}
 @media(max-height:700px) and (min-width:721px){#conteudo-principal{padding-top:6px;padding-bottom:5px}#conteudo-principal > header{padding:9px 14px;margin-bottom:8px}#screen-home{padding:10px}#screen-home .grid{margin-top:8px!important}#screen-home .mode-box{padding:8px 12px}#screen-home .emoji-large{font-size:28px;margin:0}#screen-home .mode-box p{margin-bottom:5px}#screen-home .mode-action{padding:6px 5px}}
+
+/* Fidelidade à referência aprovada: tela de seleção de modos */
+body{background:radial-gradient(ellipse at -12% 85%,#c5dcff 0,transparent 33%),radial-gradient(ellipse at 110% 55%,#d4e6ff 0,transparent 35%),linear-gradient(145deg,#e7f2ff,#f5faff 58%,#e2eeff)}
+#conteudo-principal{width:100%;max-width:1376px;flex:1 0 auto;padding:clamp(10px,1.8vh,22px) clamp(12px,3vw,32px)}
+#conteudo-principal > .cobra-hero{width:100%;max-width:100%;min-height:clamp(118px,19vh,194px);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:18px 150px;margin-bottom:clamp(10px,2.2vh,23px);border-radius:23px;background:linear-gradient(108deg,#087cff 0%,#3258f8 48%,#8133f5 100%);box-shadow:0 10px 25px #2355ba2b}
+#conteudo-principal > .cobra-hero h1{font-size:clamp(27px,3.6vw,52px);line-height:1.08;font-weight:900;color:white;margin:0 0 10px;text-shadow:0 2px 5px #142a7540}
+#conteudo-principal > .cobra-hero p{font-size:clamp(13px,1.7vw,24px);line-height:1.3;color:white!important;font-weight:650;opacity:1;margin:0}
+.cobra-hero-inner{position:relative;z-index:1;text-align:center}
+.cobra-mascot{font-size:1.16em;vertical-align:middle}
+.hero-pixels{position:absolute;display:grid;grid-template-columns:repeat(3,26px);grid-template-rows:repeat(3,26px);gap:8px;opacity:.92}
+.hero-pixels-left{left:30px;top:35%}.hero-pixels-right{right:30px;top:35%}
+.hero-pixels i{display:block;border-radius:3px;background:#16cbff}.hero-pixels i:nth-child(2){grid-column:2;grid-row:2;background:#7aa3ff}.hero-pixels i:nth-child(3){grid-column:3;grid-row:3;background:#a789ff}.hero-pixels i:nth-child(4){grid-column:3;grid-row:2;background:#4ef58b}
+#screen-home{width:100%;max-width:100%;padding:clamp(15px,2.4vh,29px) clamp(16px,2.5vw,32px);border:0;border-radius:24px;background:#fff;box-shadow:0 12px 30px #1b55aa18;margin-bottom:0}
+#screen-home > .center h2{font-size:clamp(20px,2.35vw,34px);font-weight:900;color:#0d3274;margin:0 0 7px}
+#screen-home > .center p{font-size:clamp(13px,1.35vw,19px);color:#3d5b8c;line-height:1.3;margin:0}
+#screen-home .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.3vw,22px);margin-top:clamp(12px,2.7vh,29px)!important}
+#screen-home .mode-box{display:flex;flex-direction:column;align-items:center;min-width:0;padding:clamp(12px,2vh,20px);border:2px solid #d7e4fa;border-radius:21px;background:linear-gradient(145deg,#fff,#fcfdff);box-shadow:none;cursor:pointer}
+#screen-home .mode-box:hover{border-color:#9fc1ff;transform:translateY(-2px)}
+#screen-home .emoji-large{display:flex;align-items:center;justify-content:center;width:clamp(57px,8vh,96px);height:clamp(57px,8vh,96px);font-size:clamp(29px,4vh,46px);margin:0 0 10px;border-radius:50%}
+#screen-home .icon-treino{color:#0cb778;background:#d2f8e7}
+#screen-home .icon-desafio{color:#ff802b;background:#ffebdd}
+#screen-home .icon-dupla{color:#6728dc;background:#e9ddff;font-size:clamp(18px,3vh,32px);letter-spacing:-7px;padding-right:7px}
+#screen-home .mode-box h3{color:#0d3274;font-size:clamp(18px,1.8vw,26px);font-weight:900;margin:0 0 6px}
+#screen-home .mode-box p{color:#385782!important;font-size:clamp(13px,1.23vw,18px)!important;line-height:1.42;margin:0 0 14px;flex:1}
+#screen-home .mode-action{width:100%;display:block;padding:clamp(9px,1.3vh,15px) 8px;margin-top:auto;border-radius:14px;color:#fff;font-size:clamp(15px,1.55vw,22px);font-weight:900;box-shadow:0 3px 0 #0000000b}
+#screen-home .mode-box:nth-child(1) .mode-action{background:linear-gradient(90deg,#1ccc7c,#00b668)}
+#screen-home .mode-box:nth-child(2) .mode-action{background:linear-gradient(90deg,#ff8d32,#ff5d25)}
+#screen-home .mode-box:nth-child(3) .mode-action{background:linear-gradient(90deg,#8635fb,#6516e9)}
+#screen-home .mode-box:focus-visible{outline:3px solid #226aff;outline-offset:3px}
+#screen-home > .center:last-child:empty{display:none}
+.ua-footer{width:100%;margin-top:auto}
+@media(min-width:800px) and (min-height:730px){#screen-home .mode-box{min-height:clamp(240px,34vh,365px)}}
+@media(min-width:800px) and (max-height:730px){#conteudo-principal{padding-top:8px;padding-bottom:8px}#conteudo-principal > .cobra-hero{min-height:105px;margin-bottom:10px;padding-top:9px;padding-bottom:9px}#screen-home{padding-top:12px;padding-bottom:12px}#screen-home .grid{margin-top:11px!important}#screen-home .mode-box{padding:9px 12px}#screen-home .emoji-large{width:54px;height:54px;margin-bottom:5px}#screen-home .mode-box p{margin-bottom:8px}#screen-home .mode-action{padding:8px}}
+@media(max-width:799px){#conteudo-principal > .cobra-hero{padding:20px 24px}.hero-pixels{display:none}#screen-home .grid{grid-template-columns:1fr;gap:12px}#screen-home .mode-box{padding:14px}#screen-home .mode-box p{flex:initial}#screen-home .emoji-large{width:68px;height:68px}}
 </style>
 <script src="../../shared/labpc.js"></script>
 <style id="universo-aprender-institucional">.ua-header{width:100%!important;max-width:none!important;box-shadow:none!important;text-align:left!important;border-radius:0!important;position:relative!important;z-index:10!important;display:flex!important;justify-content:space-between!important;align-items:center!important;flex-wrap:wrap!important;gap:12px!important;background:linear-gradient(110deg,#092a50,#0759a8)!important;color:white!important;padding:10px max(16px,calc((100% - 1160px)/2))!important;min-height:68px!important;box-sizing:border-box!important}.ua-header .ua-brand{display:flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;color:white!important}.ua-header .ua-brand svg{width:42px!important;height:42px!important;flex:0 0 42px!important;display:block!important}.ua-brand-copy{display:flex!important;flex-direction:column!important;line-height:1.1!important;white-space:nowrap!important}.ua-brand-copy strong{font:800 23px Arial,sans-serif!important;color:white!important}.ua-brand-copy em{font-style:normal!important;color:#55baff!important}.ua-brand-copy small{font:700 8px Arial,sans-serif!important;color:white!important;margin-top:4px!important}.ua-header .ua-back{font:700 13px Arial,sans-serif!important;color:white!important;text-decoration:none!important;border:1px solid #ffffff80!important;background:#ffffff15!important;border-radius:9px!important;padding:10px 12px!important}.ua-header .ua-back:hover{background:#ffffff2d!important}.ua-footer{width:100%!important;box-sizing:border-box!important;position:relative!important;z-index:2!important;background:linear-gradient(110deg,#092a50,#061c38)!important;color:#d8e8f9!important;text-align:center!important;padding:18px 14px!important;font:400 12px/1.6 Arial,sans-serif!important}.ua-footer strong{color:white!important}.ua-footer p{margin:0!important}@media(max-width:500px){.ua-header{padding:10px 14px!important}.ua-header .ua-back{font-size:12px!important}}</style></head>
@@ -106,9 +140,10 @@ body{background:radial-gradient(circle at 0 90%,#dce9ff,transparent 35%),linear-
 <main id="conteudo-principal">
 
 
-<header>
-  <h1>🐍 Jornada da Cobra</h1>
-  <p>Alfabetização, Direcionalidade e Pensamento Computacional</p>
+<header class="cobra-hero">
+  <span class="hero-pixels hero-pixels-left" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <div class="cobra-hero-inner"><h1><span class="cobra-mascot" aria-hidden="true">🐍</span> Jornada da Cobra</h1><p>Alfabetização, Direcionalidade e Pensamento Computacional</p></div>
+  <span class="hero-pixels hero-pixels-right" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
 </header>
 
 <!-- TELA INICIAL: MODOS DE JOGO -->
@@ -120,17 +155,17 @@ body{background:radial-gradient(circle at 0 90%,#dce9ff,transparent 35%),linear-
   
   <div class="grid" style="margin-top: 20px;">
     <div class="mode-box" role="button" tabindex="0" aria-label="Jogar Treino" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="showScreen('screen-levels'); setMode('treino')">
-      <div class="emoji-large">🟢</div>
+      <div class="emoji-large icon-treino" aria-hidden="true">▶</div>
       <h3>Modo Treino</h3>
       <p style="font-size: 14px;">A cobra só anda quando você aperta, sem barreiras e sem perder vidas.</p>
     <span class="mode-action" aria-hidden="true">Jogar Treino</span></div>
     <div class="mode-box" role="button" tabindex="0" aria-label="Jogar Desafio" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="showScreen('screen-levels'); setMode('desafio')">
-      <div class="emoji-large">⚡</div>
+      <div class="emoji-large icon-desafio" aria-hidden="true">⚡</div>
       <h3>Modo Desafio</h3>
       <p style="font-size: 14px;">Movimento contínuo, barreiras ativadas e limite de 3 vidas. Teste seu reflexo!</p>
     <span class="mode-action" aria-hidden="true">Jogar Desafio</span></div>
     <div class="mode-box" role="button" tabindex="0" aria-label="Jogar Dupla" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="showScreen('screen-duo')">
-      <div class="emoji-large">🤝</div>
+      <div class="emoji-large icon-dupla" aria-hidden="true">●●</div>
       <h3>Modo Dupla</h3>
       <p style="font-size: 14px;">Um aluno escolhe a palavra e "programa" a rota, o outro joga no teclado.</p>
     <span class="mode-action" aria-hidden="true">Jogar Dupla</span></div>
