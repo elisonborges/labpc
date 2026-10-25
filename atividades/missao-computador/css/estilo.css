@@ -171,3 +171,32 @@ button:focus-visible,[role="button"]:focus-visible{outline:3px solid #f3b72e;out
 }
 @media(max-width:390px){.m4-pecas,.m4-mesa{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.card:hover{transform:none}.opcao.errada{animation:none}}
+
+
+/* Abertura: ocupa somente a altura útil entre cabeçalho e rodapé */
+body:has(#abertura.ativa) #app{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+#abertura.ativa{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,2vh,18px);padding:clamp(10px,2vh,20px) clamp(12px,2vw,25px)}
+#abertura .marca{flex-shrink:0;font-size:clamp(22px,3.4vh,32px)}
+#abertura .hero{flex:1 1 auto;min-height:0;width:100%;max-width:1050px;margin:0 auto;justify-content:center;gap:clamp(16px,3vw,40px)}
+#abertura .hero h1{font-size:clamp(30px,5.5vh,56px)}
+#abertura .nexo-grande{width:clamp(105px,21vh,170px);height:clamp(105px,21vh,170px);font-size:clamp(70px,13vh,110px);border-radius:28px}
+#abertura .sub{font-size:clamp(15px,2.6vh,20px);margin:8px 0}
+#abertura .fala{padding:clamp(9px,1.7vh,15px) 16px;margin:clamp(8px,1.6vh,14px) 0}
+#abertura .btn{padding:clamp(9px,1.6vh,14px) 18px}
+#abertura>footer{flex-shrink:0;font-size:clamp(12px,1.8vh,15px)}
+@media(max-height:560px) and (min-width:701px){
+ #abertura.ativa{gap:5px;padding:7px 14px}
+ #abertura .marca{font-size:22px}
+ #abertura .hero{gap:20px}
+ #abertura .nexo-grande{width:90px;height:90px;font-size:60px;border-radius:20px}
+ #abertura .hero h1{font-size:30px}
+ #abertura .sub{margin:4px 0}
+ #abertura .fala{padding:7px 12px;margin:6px 0}
+ #abertura>footer{font-size:12px}
+}
+@media(max-width:700px){
+ #abertura.ativa{justify-content:center}
+ #abertura .hero{flex-direction:column;gap:12px}
+ #abertura .nexo-grande{width:95px;height:95px;font-size:63px}
+ #abertura .hero h1{font-size:clamp(30px,7vw,43px)}
+}
