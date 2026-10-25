@@ -74,6 +74,31 @@
 
   /* Diagnóstico */
   .stats-board { background: #fff8e7; border: 1px solid #f5d78c; padding: 15px; border-radius: 12px; margin-top: 15px; text-align: left; }
+
+/* Visual aprovado — Jornada da Cobra */
+body{background:radial-gradient(circle at 0 90%,#dce9ff,transparent 35%),linear-gradient(135deg,#edf5ff,#f8faff 55%,#e5edff)}
+#conteudo-principal{max-width:1100px;padding:clamp(8px,1.5vh,16px) 18px;flex:1 0 auto}
+#conteudo-principal > header{max-width:100%;margin-bottom:clamp(8px,1.4vh,14px);padding:clamp(12px,1.8vh,19px) 20px;background:linear-gradient(105deg,#315ff1,#6653f5);box-shadow:0 8px 24px #345be52a}
+#conteudo-principal > header h1{color:#fff;font-size:clamp(25px,3.4vw,38px);margin:0 0 5px;text-shadow:0 2px 5px #173c8440}
+#conteudo-principal > header p{color:#fff!important;opacity:1;font-weight:650;font-size:clamp(13px,1.5vw,18px);margin:0}
+#conteudo-principal > .card{max-width:100%;margin-bottom:10px}
+#screen-home{padding:clamp(13px,2vh,22px);box-shadow:0 12px 30px #2247a512}
+#screen-home > .center h2{font-size:clamp(20px,2.2vw,27px);margin:0 0 5px;color:#10376f}
+#screen-home > .center p{margin:0;color:#4a658e}
+#screen-home .grid{margin-top:clamp(10px,1.6vh,17px)!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#screen-home .mode-box{display:flex;flex-direction:column;align-items:center;min-height:0;padding:clamp(10px,1.6vh,17px);background:#fff;border:2px solid #d8e3fb;box-shadow:0 3px 10px #153a7d08}
+#screen-home .mode-box h3{color:#10376f;font-size:clamp(17px,1.7vw,21px);margin:3px 0}
+#screen-home .mode-box p{color:#4a658e!important;margin:2px 0 10px;font-size:clamp(12px,1.1vw,14px)!important;line-height:1.45;flex:1}
+#screen-home .emoji-large{font-size:clamp(30px,4vh,43px);margin:0 0 5px}
+#screen-home .mode-action{display:block;width:100%;margin-top:auto;border-radius:11px;padding:9px 6px;color:white;font-weight:800;font-size:clamp(13px,1.2vw,16px)}
+#screen-home .mode-box:nth-child(1) .mode-action{background:linear-gradient(90deg,#29c775,#17a765)}
+#screen-home .mode-box:nth-child(2) .mode-action{background:linear-gradient(90deg,#ff963e,#ff6338)}
+#screen-home .mode-box:nth-child(3) .mode-action{background:linear-gradient(90deg,#8446f9,#6330dc)}
+#screen-home .mode-box:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+#screen-home > .center:last-child:empty{display:none}
+.ua-footer{margin-top:auto;width:100%}
+@media(max-width:720px){#conteudo-principal{padding:12px}#screen-home .grid{grid-template-columns:1fr;gap:10px}#screen-home .mode-box{padding:12px}#screen-home .mode-box p{flex:initial}#conteudo-principal > header{padding:16px 12px}}
+@media(max-height:700px) and (min-width:721px){#conteudo-principal{padding-top:6px;padding-bottom:5px}#conteudo-principal > header{padding:9px 14px;margin-bottom:8px}#screen-home{padding:10px}#screen-home .grid{margin-top:8px!important}#screen-home .mode-box{padding:8px 12px}#screen-home .emoji-large{font-size:28px;margin:0}#screen-home .mode-box p{margin-bottom:5px}#screen-home .mode-action{padding:6px 5px}}
 </style>
 <script src="../../shared/labpc.js"></script>
 <style id="universo-aprender-institucional">.ua-header{width:100%!important;max-width:none!important;box-shadow:none!important;text-align:left!important;border-radius:0!important;position:relative!important;z-index:10!important;display:flex!important;justify-content:space-between!important;align-items:center!important;flex-wrap:wrap!important;gap:12px!important;background:linear-gradient(110deg,#092a50,#0759a8)!important;color:white!important;padding:10px max(16px,calc((100% - 1160px)/2))!important;min-height:68px!important;box-sizing:border-box!important}.ua-header .ua-brand{display:flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;color:white!important}.ua-header .ua-brand svg{width:42px!important;height:42px!important;flex:0 0 42px!important;display:block!important}.ua-brand-copy{display:flex!important;flex-direction:column!important;line-height:1.1!important;white-space:nowrap!important}.ua-brand-copy strong{font:800 23px Arial,sans-serif!important;color:white!important}.ua-brand-copy em{font-style:normal!important;color:#55baff!important}.ua-brand-copy small{font:700 8px Arial,sans-serif!important;color:white!important;margin-top:4px!important}.ua-header .ua-back{font:700 13px Arial,sans-serif!important;color:white!important;text-decoration:none!important;border:1px solid #ffffff80!important;background:#ffffff15!important;border-radius:9px!important;padding:10px 12px!important}.ua-header .ua-back:hover{background:#ffffff2d!important}.ua-footer{width:100%!important;box-sizing:border-box!important;position:relative!important;z-index:2!important;background:linear-gradient(110deg,#092a50,#061c38)!important;color:#d8e8f9!important;text-align:center!important;padding:18px 14px!important;font:400 12px/1.6 Arial,sans-serif!important}.ua-footer strong{color:white!important}.ua-footer p{margin:0!important}@media(max-width:500px){.ua-header{padding:10px 14px!important}.ua-header .ua-back{font-size:12px!important}}</style></head>
@@ -94,21 +119,21 @@
   </div>
   
   <div class="grid" style="margin-top: 20px;">
-    <div class="mode-box" onclick="showScreen('screen-levels'); setMode('treino')">
+    <div class="mode-box" role="button" tabindex="0" aria-label="Jogar Treino" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="showScreen('screen-levels'); setMode('treino')">
       <div class="emoji-large">🟢</div>
       <h3>Modo Treino</h3>
       <p style="font-size: 14px;">A cobra só anda quando você aperta, sem barreiras e sem perder vidas.</p>
-    </div>
-    <div class="mode-box" onclick="showScreen('screen-levels'); setMode('desafio')">
+    <span class="mode-action" aria-hidden="true">Jogar Treino</span></div>
+    <div class="mode-box" role="button" tabindex="0" aria-label="Jogar Desafio" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="showScreen('screen-levels'); setMode('desafio')">
       <div class="emoji-large">⚡</div>
       <h3>Modo Desafio</h3>
       <p style="font-size: 14px;">Movimento contínuo, barreiras ativadas e limite de 3 vidas. Teste seu reflexo!</p>
-    </div>
-    <div class="mode-box" onclick="showScreen('screen-duo')">
+    <span class="mode-action" aria-hidden="true">Jogar Desafio</span></div>
+    <div class="mode-box" role="button" tabindex="0" aria-label="Jogar Dupla" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="showScreen('screen-duo')">
       <div class="emoji-large">🤝</div>
       <h3>Modo Dupla</h3>
       <p style="font-size: 14px;">Um aluno escolhe a palavra e "programa" a rota, o outro joga no teclado.</p>
-    </div>
+    <span class="mode-action" aria-hidden="true">Jogar Dupla</span></div>
   </div>
   
   <div class="center" style="margin-top: 20px;">
