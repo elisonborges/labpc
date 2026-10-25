@@ -82,3 +82,92 @@ background:#eef8ff;border:2px solid #c9e8fa;color:#35546b;font-size:14px;text-al
 /* V3.0.0 — separação visual entre HOME e marca LabPC */
 #abertura .marca{margin-left:125px}
 @media(max-width:700px){#abertura .marca{margin-left:108px}}
+
+
+/* LabPC — padronização visual das 8 missões, sem alterar a lógica */
+html{min-height:100%}
+body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:linear-gradient(145deg,#e9f3ff,#f8fbff);overflow-x:hidden}
+#app{width:100%;max-width:1450px;margin:0 auto;flex:1 0 auto;min-width:0}
+.tela{min-height:0;padding:clamp(10px,1.8vh,22px)}
+.tela.ativa{display:block}
+.ua-footer{flex-shrink:0}
+button{cursor:pointer}
+button:focus-visible,[role="button"]:focus-visible{outline:3px solid #f3b72e;outline-offset:3px}
+#abertura{border-radius:0 0 22px 22px;min-height:clamp(390px,calc(100dvh - 142px),850px)}
+#abertura .hero{max-width:1060px;margin:clamp(25px,7vh,75px) auto;gap:clamp(22px,5vw,55px)}
+#abertura .hero h1{font-size:clamp(38px,5vw,68px)}
+#abertura .nexo-grande{width:clamp(140px,17vw,210px);height:clamp(140px,17vw,210px);font-size:clamp(88px,11vw,130px);border-radius:36px}
+#abertura .fala{margin:clamp(10px,2vh,18px) 0}
+#abertura>footer{margin:0 auto;color:#e9f4ff}
+.topbar{max-width:1250px;border:1px solid #d7e5f8;box-shadow:0 4px 15px #0b3c9112}
+.intro,.cards,.acoes,.dots,.nexobar,.atividade{max-width:1250px}
+.intro{margin:clamp(9px,1.5vh,17px) auto;gap:12px}
+.intro .nexo{width:55px;height:55px;border-radius:17px;font-size:34px}
+.intro h2{font-size:clamp(19px,2vw,25px)}
+.intro p{font-size:clamp(13px,1.2vw,15px);line-height:1.35}
+.cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1vw,13px)}
+.cards .card{min-height:0;padding:clamp(10px,1.4vh,16px);border:2px solid #d8e5f7;border-radius:16px;box-shadow:0 4px 14px #0b3c9112}
+.cards .card.pronta{border-color:#9eddb0}
+.cards .card .emo{font-size:clamp(27px,3.2vh,39px);margin:clamp(5px,1vh,10px) 0}
+.cards .card strong{font-size:clamp(14px,1.3vw,17px);line-height:1.25}
+.cards .card small{font-size:12px}
+.cards .card.pronta:after{font-size:10px;margin-top:6px}
+.acoes{margin:clamp(9px,1.5vh,16px) auto;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.acoes .btn{padding:9px 13px;font-size:12px}
+.telemetria-aviso{margin:8px auto 10px;padding:9px 12px;font-size:12px}
+.dots{margin:clamp(9px,1.3vh,15px) auto 7px}
+.nexobar{margin:8px auto 10px}
+.nexobar .nexo{width:60px;height:60px;font-size:38px;border-radius:17px}
+.nexobar .fala{padding:12px 16px;line-height:1.35}
+.atividade{min-height:0;padding:clamp(14px,2.3vh,25px);border:1px solid #dbe7f8;border-radius:20px;box-shadow:0 5px 20px #0b3c9110}
+.painel-intro{margin:clamp(12px,2vh,25px) auto}
+.painel-intro h2,.pergunta h2{font-size:clamp(22px,2.8vw,31px)}
+.centro{margin:clamp(15px,3vh,40px) auto}
+.computador-cena,.opcoes{margin:clamp(12px,2vh,22px) auto;gap:clamp(9px,1.5vw,18px)}
+.obj,.opcao{min-height:0;padding:clamp(10px,1.7vh,18px);border-radius:17px}
+.m4-bancada{gap:14px;margin-top:14px}
+.m4-pecas,.m4-mesa{gap:10px;padding:12px;border-radius:18px}
+.m4-peca{min-height:110px;padding:8px}
+.m4-slot{min-height:125px;padding:9px}
+.m7-duas,.m7-botoes{gap:12px;margin:14px auto}
+.m7-caixa,.m7-escolha{min-height:0;padding:14px}
+.m7-alvo{margin:12px auto;padding:12px}
+.m5-conceito,.m6-acoes,.m8-regras,.m8-selos{margin:13px auto}
+.m5-hardware,.m6-software{margin:12px auto;padding:12px 20px}
+@media(min-width:850px) and (max-height:680px){
+ .tela{padding:7px 12px}
+ .topbar{padding:6px 11px}
+ .topbar .icon{width:40px;height:40px;border-radius:11px;font-size:20px}
+ .intro{margin:6px auto}
+ .cards .card{padding:8px 10px}
+ .cards .card .emo{font-size:27px;margin:4px 0}
+ .cards .card .num{width:28px;height:28px}
+ .acoes{margin:7px auto}
+ .telemetria-aviso{margin:5px auto;padding:6px}
+ .dots{margin:5px auto}
+ .nexobar{margin:5px auto}
+ .atividade{padding:12px}
+ .ua-footer{padding:7px 12px!important;line-height:1.3!important}
+}
+@media(max-width:850px){
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .hero{flex-wrap:wrap}
+ .m4-bancada{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+ .tela{padding:10px}
+ #abertura{min-height:0}
+ #abertura .hero{margin:20px auto;gap:16px}
+ #abertura .nexo-grande{width:115px;height:115px;font-size:70px}
+ #abertura .marca{font-size:26px}
+ .cards{gap:8px}
+ .cards .card{padding:10px}
+ .cards .card strong{font-size:14px}
+ .acoes{justify-content:center}
+ .acoes .btn{width:100%}
+ .nexobar .fala{flex-basis:calc(100% - 90px)}
+ .opcoes,.computador-cena{grid-template-columns:1fr}
+ .m4-pecas,.m4-mesa{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:390px){.m4-pecas,.m4-mesa{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.card:hover{transform:none}.opcao.errada{animation:none}}
