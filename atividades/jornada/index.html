@@ -106,6 +106,13 @@ main{width:100%;max-width:1370px;flex:1 0 auto;padding:clamp(8px,1.5vh,18px) cla
  .play .prompt{overflow-wrap:anywhere}
 }
 @media(prefers-reduced-motion:reduce){.world,.btn{transition:none}}
+
+/* Navegação e reinício padronizados */
+.activity-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.activity-actions .btn{font-size:clamp(12px,1.2vw,14px);padding:9px 13px;border:1px solid #cfddf4}
+.map-actions{display:flex;justify-content:flex-end;margin:0 0 10px}
+.map-actions .btn{padding:8px 13px;font-size:13px;border:1px solid #cfddf4}
+@media(max-width:520px){.activity-actions{gap:6px}.activity-actions .btn{flex:1 1 auto;padding:8px;font-size:12px}}
 </style>
 <style id="universo-aprender-institucional">.ua-header{position:relative!important;z-index:10!important;display:flex!important;justify-content:space-between!important;align-items:center!important;flex-wrap:wrap!important;gap:12px!important;background:linear-gradient(110deg,#092a50,#0759a8)!important;color:white!important;padding:10px max(16px,calc((100% - 1160px)/2))!important;min-height:68px!important;box-sizing:border-box!important}.ua-header .ua-brand{display:flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;color:white!important}.ua-header .ua-brand svg{width:42px!important;height:42px!important;flex:0 0 42px!important;display:block!important}.ua-brand-copy{display:flex!important;flex-direction:column!important;line-height:1.1!important;white-space:nowrap!important}.ua-brand-copy strong{font:800 23px Arial,sans-serif!important;color:white!important}.ua-brand-copy em{font-style:normal!important;color:#55baff!important}.ua-brand-copy small{font:700 8px Arial,sans-serif!important;color:white!important;margin-top:4px!important}.ua-header .ua-back{font:700 13px Arial,sans-serif!important;color:white!important;text-decoration:none!important;border:1px solid #ffffff80!important;background:#ffffff15!important;border-radius:9px!important;padding:10px 12px!important}.ua-header .ua-back:hover{background:#ffffff2d!important}.ua-footer{position:relative!important;z-index:2!important;background:linear-gradient(110deg,#092a50,#061c38)!important;color:#d8e8f9!important;text-align:center!important;padding:18px 14px!important;font:400 12px/1.6 Arial,sans-serif!important}.ua-footer strong{color:white!important}.ua-footer p{margin:0!important}@media(max-width:500px){.ua-header{padding:10px 14px!important}.ua-header .ua-back{font-size:12px!important}}</style></head>
 <body><header class="ua-header"><a class="ua-brand" href="https://elisonborges.github.io/anna-one/app/" aria-label="AnnA One — abrir portal"><svg class="brand-logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t"><title id="t">Símbolo AnnA One</title><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#a)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg><span class="ua-brand-copy"><strong>AnnA <em>One</em></strong><small>TECNOLOGIA E EDUCAÇÃO JUNTAS</small></span></a><a class="ua-back" href="../../aprender/index.html">← Atividades do 2º ano</a></header>
@@ -115,6 +122,7 @@ main{width:100%;max-width:1370px;flex:1 0 auto;padding:clamp(8px,1.5vh,18px) cla
  <div class="hero"><h1>⌨️ Jornada do Teclado 2.1</h1><p>Aprenda, aplique e domine o teclado no seu ritmo.</p>
   <div class="stats"><div class="stat"><b id="stWorld">1</b><small>Mundo alcançado</small></div><div class="stat"><b id="stAcc">—</b><small>Precisão</small></div><div class="stat"><b id="stDone">0</b><small>Desafios</small></div><div class="stat"><b id="stStreak">0</b><small>Maior sequência</small></div></div>
  </div>
+ <div class="map-actions"><button class="btn soft" onclick="resetJourney()">↻ Reiniciar progresso</button></div>
  <div class="worlds" id="worlds"></div>
  <div class="extra">
   <div class="card"><h2>♾️ Jornada Infinita</h2><p>Palavras e frases continuam surgindo, com dificuldade que cresce conforme seu desempenho.</p><button class="btn primary" onclick="startInfinite()">Continuar jornada</button></div>
@@ -123,7 +131,7 @@ main{width:100%;max-width:1370px;flex:1 0 auto;padding:clamp(8px,1.5vh,18px) cla
 </section>
 
 <section id="game" class="screen play">
- <div class="card" style="padding:20px"><div class="hud"><span class="pill" id="gTitle"></span><span class="pill" id="gCount"></span><span class="pill" id="gAcc"></span><span class="pill" id="gTime"></span></div><div class="progress"><div id="bar" class="bar"></div></div>
+ <div class="card" style="padding:20px"><div class="activity-actions"><button class="btn soft" onclick="exitChallenge()">← Voltar ao quadro de atividades</button><button class="btn soft" onclick="restartChallenge()">↻ Reiniciar atividade</button></div><div class="hud"><span class="pill" id="gTitle"></span><span class="pill" id="gCount"></span><span class="pill" id="gAcc"></span><span class="pill" id="gTime"></span></div><div class="progress"><div id="bar" class="bar"></div></div>
  <div id="adaptive" class="adaptive" style="display:none"></div>
  <div id="caseTip" class="notice" style="display:none"></div>
  <div id="prompt" class="prompt"></div>
@@ -133,7 +141,7 @@ main{width:100%;max-width:1370px;flex:1 0 auto;padding:clamp(8px,1.5vh,18px) cla
 </section>
 
 <section id="arcadeScreen" class="screen play">
- <div class="card arcade-card" style="padding:14px"><div class="hud"><button class="btn soft" onclick="exitArcade()">← Voltar às missões</button><span class="pill">⚡ Tempestade de Palavras</span><span class="pill" id="arcScore">0 palavras</span><span class="pill" id="arcAcc">100%</span><span class="pill" id="arcTime">60s</span></div>
+ <div class="card arcade-card" style="padding:14px"><div class="activity-actions"><button class="btn soft" onclick="exitArcade()">← Voltar ao quadro de atividades</button><button class="btn soft" onclick="restartArcade()">↻ Reiniciar atividade</button></div><div class="hud"><span class="pill">⚡ Tempestade de Palavras</span><span class="pill" id="arcScore">0 palavras</span><span class="pill" id="arcAcc">100%</span><span class="pill" id="arcTime">60s</span></div>
  <div id="arcade" class="arcade"></div><input id="arcInput" class="typebox arcade-input" autocomplete="off" spellcheck="false" placeholder="Digite uma palavra da tela..."></div>
 </section>
 
@@ -193,6 +201,10 @@ function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.re
 function showMap(){clearInterval(timer);clearTimeout(memTimer);run=null;renderMap();show('map');LabPC.presence('jornada','mapa')}
 function goCentral(){location.href='../../aprender/index.html'}
 function back(){if(run&&confirm('Voltar ao mapa? O desafio atual será encerrado.'))showMap();else if(!run)goCentral()}
+function exitChallenge(){if(run&&!confirm('Voltar ao quadro de atividades? O desafio atual será encerrado.'))return;showMap()}
+function restartChallenge(){if(!run)return;if(!confirm('Reiniciar esta atividade desde o começo?'))return;const cfg={mode:run.mode,world:run.world,title:run.title,kind:run.kind,need:run.need,min:run.min};clearInterval(timer);clearTimeout(memTimer);run=null;startRun(cfg)}
+function restartArcade(){if(!confirm('Reiniciar a Tempestade de Palavras?'))return;exitArcade();startArcade()}
+function resetJourney(){if(!confirm('Reiniciar todo o progresso da Jornada do Teclado? As conquistas e os registros locais desta jornada serão apagados.'))return;localStorage.removeItem(KEY);location.reload()}
 function renderMap(){
  $('worlds').innerHTML=worlds.map((w,i)=>{let lock=i+1>save.unlocked,b=save.best[i+1];return `<div class="card world ${lock?'locked':''}"><span class="num">MUNDO ${i+1}</span><h3>${w.icon} ${w.n}</h3><p>${w.desc}</p><div class="stars">${b?`⭐ ${b.acc}% • ${b.time}s`:'☆ Ainda não concluído'}</div><button class="btn ${lock?'soft':'primary'}" ${lock?'disabled':''} onclick="startWorld(${i+1})">${lock?'🔒 Bloqueado':'Começar'}</button></div>`}).join('');
  let vals=Object.values(save.best);$('stWorld').textContent=Number.isFinite(Number(save.unlocked))?Math.min(12,Number(save.unlocked)):1;$('stAcc').textContent=vals.length?Math.round(vals.reduce((a,b)=>a+b.acc,0)/vals.length)+'%':'—';$('stDone').textContent=save.totalDone;$('stStreak').textContent=save.bestStreak;
