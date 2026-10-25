@@ -18,12 +18,12 @@
     --snake-head: #356ae6; --snake-body: #6d5dfc;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  #conteudo-principal { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0; }
+  #conteudo-principal { width: 100%; max-width: 940px; display: flex; flex-direction: column; align-items: center; padding: 24px 20px; }
   
-  header { background: linear-gradient(135deg, #356ae6, #6d5dfc); color: white; width: 100%; text-align: center; padding: 20px; border-radius: 16px; margin-bottom: 20px; max-width: 900px; box-shadow: 0 4px 15px rgba(53, 106, 230, 0.2); }
-  header h1 { font-size: 2rem; margin-bottom: 8px; }
-  header p { font-size: 1.1rem; opacity: 0.9; }
+  #conteudo-principal > header { background: linear-gradient(135deg, #356ae6, #6d5dfc); color: white; width: 100%; text-align: center; padding: 20px; border-radius: 16px; margin-bottom: 20px; max-width: 900px; box-shadow: 0 4px 15px rgba(53, 106, 230, 0.2); }
+  #conteudo-principal > header h1 { font-size: 2rem; margin-bottom: 8px; }
+  #conteudo-principal > header p { font-size: 1.1rem; opacity: 0.9; }
 
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 8px 25px rgba(25,45,80,0.07); width: 100%; max-width: 900px; margin-bottom: 20px; }
   .hidden { display: none !important; }
