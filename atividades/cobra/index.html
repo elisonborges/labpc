@@ -734,7 +734,7 @@ function pauseGame() {
 }
 
 function quitGame() {
-  if(confirm("Sair do jogo atual?")) { LabPC.event({activity:"cobra",type:"quit",status:"menu",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:sessionStartedAt?Math.round((Date.now()-sessionStartedAt)/1000):0}); LabPC.presence("cobra","menu"); showScreen('screen-home'); }
+  if(confirm("Sair do jogo atual?")) { LabPC.event({activity:"cobra",type:"quit",status:"menu",mode:currentMode,level:sessionLevel||"dupla",word:currentWordObj?.w||"",progress:wordIndex,hits:sessionHits,errors:sessionErrors,elapsed:sessionStartedAt?Math.round((Date.now()-sessionStartedAt)/1000):0}); LabPC.presence("cobra","menu"); window.location.assign("https://elisonborges.github.io/labpc/atividades/cobra/index.html"); }
 }
 
 // --- CONTROLES ---
