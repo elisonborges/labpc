@@ -254,6 +254,26 @@ body:has(#screen-game:not(.hidden)) .hero-pixels{display:none}
   #screen-levels .level-box{padding:5px}
   #screen-levels .emoji-large{font-size:22px}
 }
+
+/* Modo selecionado: destaque claro sem ocupar altura excessiva */
+#screen-levels .mode-highlight{display:block;width:fit-content;max-width:100%;margin:7px auto 8px;padding:8px 20px;border-radius:999px;font-size:clamp(15px,1.5vw,19px);font-weight:600;line-height:1.3}
+#screen-levels .mode-highlight strong{font-weight:900}
+#screen-levels .mode-highlight-treino{background:#dff9ed;border:1px solid #85dfb2;color:#09623d}
+#screen-levels .mode-highlight-desafio{background:#fff0dc;border:1px solid #ffc17c;color:#9c430e}
+/* Dupla: instruções e configuração lado a lado */
+#screen-duo{max-width:1250px;width:100%;padding:clamp(12px,2vh,22px)}
+#screen-duo > h2{margin:0 0 clamp(10px,1.8vh,18px);color:#10376f}
+#screen-duo .duo-columns{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(290px,.9fr);gap:clamp(12px,2vw,24px);align-items:stretch}
+#screen-duo .duo-instructions{background:#eef3ff;border:1px solid #d9e5ff;border-radius:15px;padding:clamp(12px,1.8vh,20px);text-align:left}
+#screen-duo .duo-instructions h3{margin:0 0 10px;font-size:18px;color:#123b78}
+#screen-duo .duo-instructions p{margin:8px 0;font-size:clamp(13px,1.15vw,16px);line-height:1.45}
+#screen-duo .duo-setup{background:#f8fbff;border:1px solid #d9e5ff;border-radius:15px;padding:clamp(12px,2vh,22px);display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:12px}
+#screen-duo .duo-setup label{font-size:17px;font-weight:800;color:#123b78;text-align:center}
+#screen-duo #duo-word{max-width:100%;width:100%;text-align:center;margin:0}
+#screen-duo .duo-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+#screen-duo .duo-actions button{flex:1 1 130px;margin:0;padding:12px 8px}
+@media(max-width:760px){#screen-duo .duo-columns{grid-template-columns:1fr}#screen-duo .duo-instructions,#screen-duo .duo-setup{padding:12px}#screen-levels .mode-highlight{border-radius:12px;padding:8px 12px}}
+@media(min-width:800px) and (max-height:650px){#screen-duo{padding:10px}#screen-duo > h2{margin-bottom:8px}#screen-duo .duo-instructions,#screen-duo .duo-setup{padding:10px}#screen-levels .mode-highlight{padding:5px 14px;margin:4px auto;font-size:15px}}
 </style>
 <script src="../../shared/labpc.js"></script>
 <style id="universo-aprender-institucional">.ua-header{width:100%!important;max-width:none!important;box-shadow:none!important;text-align:left!important;border-radius:0!important;position:relative!important;z-index:10!important;display:flex!important;justify-content:space-between!important;align-items:center!important;flex-wrap:wrap!important;gap:12px!important;background:linear-gradient(110deg,#092a50,#0759a8)!important;color:white!important;padding:10px max(16px,calc((100% - 1160px)/2))!important;min-height:68px!important;box-sizing:border-box!important}.ua-header .ua-brand{display:flex!important;align-items:center!important;gap:10px!important;text-decoration:none!important;color:white!important}.ua-header .ua-brand svg{width:42px!important;height:42px!important;flex:0 0 42px!important;display:block!important}.ua-brand-copy{display:flex!important;flex-direction:column!important;line-height:1.1!important;white-space:nowrap!important}.ua-brand-copy strong{font:800 23px Arial,sans-serif!important;color:white!important}.ua-brand-copy em{font-style:normal!important;color:#55baff!important}.ua-brand-copy small{font:700 8px Arial,sans-serif!important;color:white!important;margin-top:4px!important}.ua-header .ua-back{font:700 13px Arial,sans-serif!important;color:white!important;text-decoration:none!important;border:1px solid #ffffff80!important;background:#ffffff15!important;border-radius:9px!important;padding:10px 12px!important}.ua-header .ua-back:hover{background:#ffffff2d!important}.ua-footer{width:100%!important;box-sizing:border-box!important;position:relative!important;z-index:2!important;background:linear-gradient(110deg,#092a50,#061c38)!important;color:#d8e8f9!important;text-align:center!important;padding:18px 14px!important;font:400 12px/1.6 Arial,sans-serif!important}.ua-footer strong{color:white!important}.ua-footer p{margin:0!important}@media(max-width:500px){.ua-header{padding:10px 14px!important}.ua-header .ua-back{font-size:12px!important}}</style></head>
@@ -309,17 +329,22 @@ body:has(#screen-game:not(.hidden)) .hero-pixels{display:none}
 </div>
 
 <!-- TELA: CONFIGURAÇÃO DUPLA -->
-<div id="screen-duo" class="card hidden center">
-  <h2>🤝 Mestre e Robô (Dupla)</h2>
-  <div style="background: #eef3ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left;">
-    <strong>Instruções Computacionais:</strong><br>
-    👩‍💻 <strong>Aluno 1 (O Programador):</strong> Escreva uma palavra. Durante o jogo, você deve falar em voz alta as direções ("Vire para cima", "Vire para a direita").<br>
-    🤖 <strong>Aluno 2 (O Robô):</strong> Você só pode apertar as setas do teclado seguindo as instruções do Programador!
-  </div>
-  <input type="text" id="duo-word" placeholder="DIGITE A PALAVRA AQUI" maxlength="8">
-  <div>
-    <button onclick="startDuo()">🚀 Iniciar Algoritmo</button>
-    <button class="secondary" onclick="showScreen('screen-home')">🏠 Voltar</button>
+<div id="screen-duo" class="card hidden">
+  <h2 class="center">🤝 Mestre e Robô (Dupla)</h2>
+  <div class="duo-columns">
+    <section class="duo-instructions" aria-label="Instruções computacionais">
+      <h3>📋 Instruções Computacionais</h3>
+      <p>👩‍💻 <strong>Aluno 1 (O Programador):</strong> Escreva uma palavra. Durante o jogo, fale as direções em voz alta: “Vire para cima”, “Vire para a direita”.</p>
+      <p>🤖 <strong>Aluno 2 (O Robô):</strong> Aperte as setas do teclado seguindo apenas as instruções do Programador!</p>
+    </section>
+    <section class="duo-setup" aria-label="Preparar partida em dupla">
+      <label for="duo-word">✏️ Palavra da dupla</label>
+      <input type="text" id="duo-word" placeholder="DIGITE A PALAVRA AQUI" maxlength="8">
+      <div class="duo-actions">
+        <button onclick="startDuo()">🚀 Iniciar Algoritmo</button>
+        <button class="secondary" onclick="showScreen('screen-home')">🏠 Voltar</button>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -428,9 +453,11 @@ function showScreen(id) {
 
 function setMode(mode) {
   currentMode = mode;
-  document.getElementById('mode-subtitle').innerHTML = mode === 'treino' 
-    ? "<strong>Modo Treino:</strong> Jogue no seu ritmo, sem perder vidas!" 
-    : "<strong>Modo Desafio:</strong> Cuidado com as barreiras e letras falsas!";
+  const subtitle = document.getElementById('mode-subtitle');
+  subtitle.className = 'center mode-highlight ' + (mode === 'treino' ? 'mode-highlight-treino' : 'mode-highlight-desafio');
+  subtitle.innerHTML = mode === 'treino'
+    ? "<strong>🟢 Modo Treino:</strong> Jogue no seu ritmo, sem perder vidas!"
+    : "<strong>⚡ Modo Desafio:</strong> Cuidado com as barreiras e letras falsas!";
   renderLevels();
 }
 
