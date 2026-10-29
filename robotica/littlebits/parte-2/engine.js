@@ -21,6 +21,7 @@
   function progress() {
     const completed = lab.readProgress(localStorageSafe);
     document.querySelectorAll('[data-n]').forEach(el => el.classList.toggle('done', completed.includes(Number(el.dataset.n))));
+    if (globalThis.EnergyProgress) globalThis.EnergyProgress();
     $('next').hidden = !completed.includes(n);
   }
   // Obtaining localStorage itself can throw on restricted file origins.
