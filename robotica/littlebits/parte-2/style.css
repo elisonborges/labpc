@@ -69,3 +69,6 @@ header .anna-identity-text{display:flex;flex-direction:column;line-height:1.08;w
 header .anna-identity-text strong{font-size:14px;font-weight:800}
 header .anna-identity-text em{font-style:normal;color:#33c4ff}
 header .anna-identity-text small{font-size:5px;font-weight:800}
+
+/* Contador e reinício seguro do progresso da Parte 2 */
+.energy-progress-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;padding:7px 12px;background:#e4effb;color:#254d76;font-size:12px}.energy-progress-actions button{border:1px solid #d6a29b;border-radius:8px;background:#fff;color:#8c342a;font-size:12px;font-weight:700;padding:7px 10px;cursor:pointer}.energy-progress-actions button:hover{background:#fff0ed}@media(max-width:600px){.energy-progress-actions{padding:5px;gap:5px}.energy-progress-actions button{font-size:11px;padding:6px}}
