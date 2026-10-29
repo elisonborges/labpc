@@ -12,6 +12,7 @@ let selected=null,source=null,drag=null,suppressClick=false;
 function message(text,type=''){ $('status').textContent=text;$('status').className='top-status '+type; }
 function progress(){
  let completed=false;try{const saved=JSON.parse(localStorage.getItem(key)||'{}');completed=saved?.completed?.includes(1)===true;}catch{}
+ if(globalThis.EnergyProgress) globalThis.EnergyProgress();
  const dot=document.querySelector('[data-n="1"]');dot.classList.toggle('done',completed);
  dot.title=completed?'Missão 1 concluída — jogar novamente':'O caminho da energia';
 }
@@ -90,8 +91,8 @@ $('test').addEventListener('click',()=>{
  if(wrong!==-1){message('Revise o espaço '+(wrong+1)+': '+(wrong===0?'a geração começa na usina.':wrong===1?'a transmissão transporta energia por longas distâncias.':wrong===2?'o transformador adapta a tensão antes do consumo.':'a lâmpada recebe a energia no final.'),'bad');return;}
  if(!links.every(Boolean)){message('Falta conectar os elos. Clique nos losangos entre os componentes.','bad');return;}
  $('effect').classList.add('active');$('board').classList.add('powered');$('effectText').textContent='Lâmpada acesa!';
- let saved=true;try{localStorage.setItem(key,JSON.stringify({completed:[1]}));}catch{saved=false;}
- progress();message('✓ Missão 1 concluída! Geração → transmissão → transformação → consumo. A lâmpada transforma energia elétrica em luz e calor.'+(saved?'':' Seu navegador não permitiu salvar o progresso.'),'good');
+ let saved=true;try{let completed=[];try{const previous=JSON.parse(localStorage.getItem(key)||'{}');if(Array.isArray(previous?.completed))completed=previous.completed.filter(x=>Number.isInteger(x)&&x>=1&&x<=9);}catch{}localStorage.setItem(key,JSON.stringify({completed:[...new Set([...completed,1])].sort((a,b)=>a-b)}));}catch{saved=false;}
+ progress();if(document.getElementById('next'))document.getElementById('next').hidden=false;message('✓ Missão 1 concluída! Geração → transmissão → transformação → consumo. A lâmpada transforma energia elétrica em luz e calor.'+(saved?'':' Seu navegador não permitiu salvar o progresso.'),'good');
 });
 $('remove').addEventListener('click',()=>{
  if(source===null){message('Clique em uma peça montada para selecioná-la e remover.','bad');return;}
