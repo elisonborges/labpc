@@ -15,8 +15,8 @@
     document.querySelectorAll('[data-n]').forEach(el => {
       const n = Number(el.dataset.n);
       el.classList.toggle('done', completed.includes(n));
-      el.title = (el.dataset.titleOriginal || el.title || 'Missão ' + n) + (completed.includes(n) ? ' — concluída' : '');
-      if (!el.dataset.titleOriginal) el.dataset.titleOriginal = (el.title || 'Missão ' + n).replace(/ — concluída$/, '');
+      if (!el.dataset.titleOriginal) el.dataset.titleOriginal = el.title || 'Missão ' + n;
+      el.title = el.dataset.titleOriginal + (completed.includes(n) ? ' — concluída' : '');
     });
     const count = document.getElementById('energyProgressCount');
     if (count) count.textContent = completed.length + ' de 9 missões concluídas';
