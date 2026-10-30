@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import pg from 'pg';
 const { Pool } = pg;
 const db = new Pool({ connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:true},max:3 });
@@ -12,6 +12,27 @@ function authorized(req){
  const provided=(req.headers.authorization||'').replace(/^Bearer /i,'');
  const a=Buffer.from(provided),b=Buffer.from(secret);
  return a.length===b.length&&timingSafeEqual(a,b);
+}
+function verifyAnnaJwt(header){
+ const secret=process.env.SD_JWT_SECRET,issuer=process.env.SD_JWT_ISSUER,audience=process.env.SD_JWT_AUDIENCE;
+ if(!secret||Buffer.byteLength(secret)<32||!issuer||!audience||typeof header!=='string'||!/^Bearer [A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(header))return null;
+ try{
+ const token=header.slice(7),[h,p,s]=token.split('.');
+ const meta=JSON.parse(Buffer.from(h,'base64url').toString('utf8'));
+ if(meta.alg!=='HS256'||meta.typ!=='JWT')return null;
+ const expected=createHmac('sha256',secret).update(h+'.'+p).digest(),actual=Buffer.from(s,'base64url');
+ if(actual.length!==expected.length||!timingSafeEqual(actual,expected))return null;
+ const claims=JSON.parse(Buffer.from(p,'base64url').toString('utf8')),now=Math.floor(Date.now()/1000);
+ if(!/^[0-9a-f-]{36}$/i.test(claims.sub||'')||claims.iss!==issuer||claims.aud!==audience||!Number.isInteger(claims.exp)||claims.exp<=now||claims.exp>now+3600||!Number.isInteger(claims.iat)||claims.iat>now+60||claims.iat>claims.exp||(claims.nbf!=null&&claims.nbf>now))return null;
+ return claims.sub;
+ }catch{return null}
+}
+async function adminIdentity(req){
+ if(authorized(req))return 'professor-chave';
+ const userId=verifyAnnaJwt(req.headers.authorization);
+ if(!userId)return null;
+ const data=await db.query('SELECT 1 FROM public.platform_admins pa JOIN neon_auth."user" u ON u.id=pa.user_id WHERE pa.user_id=$1 AND u."emailVerified"=true AND coalesce(u.banned,false)=false LIMIT 1',[userId]);
+ return data.rowCount?'anna-one:'+userId:null;
 }
 function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':process.env.LABPC_ORIGIN||'null','vary':'Origin'});res.end(JSON.stringify(data))}
 const server=http.createServer(async(req,res)=>{
@@ -29,7 +50,7 @@ const server=http.createServer(async(req,res)=>{
   }catch(e){console.error('Consulta de exemplos:',e.message);return send(res,503,{error:'Biblioteca temporariamente indisponível'})}
  }
  // A API de escrita é exclusiva do professor até existir uma autenticação institucional para envio.
- if(!authorized(req))return send(res,401,{error:'Acesso restrito ao professor'});
+ const identity=await adminIdentity(req);if(!identity)return send(res,401,{error:'Acesso restrito ao administrador'});
  try{
  if(req.url==='/examples/approved'&&req.method==='GET'){
  const data=await db.query("SELECT id,category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 300");
@@ -49,7 +70,7 @@ const server=http.createServer(async(req,res)=>{
  const approve=req.url?.match(/^\/examples\/([0-9a-f-]{36})\/(approve|reject)$/);
  if(approve&&req.method==='POST'){
  const id=approve[1],status=approve[2]==='approve'?'approved':'rejected';
- const data=await db.query('UPDATE labpc_learning.drawing_examples SET status=$1,reviewed_at=now(),reviewed_by=$2 WHERE id=$3 AND status=$4 RETURNING id,status',[status,'professor',id,'pending']);
+ const data=await db.query('UPDATE labpc_learning.drawing_examples SET status=$1,reviewed_at=now(),reviewed_by=$2 WHERE id=$3 AND status=$4 RETURNING id,status',[status,identity,id,'pending']);
  return send(res,data.rowCount?200:404,data.rowCount?data.rows[0]:{error:'Não encontrado'});
  }
  send(res,404,{error:'Rota não encontrada'});
