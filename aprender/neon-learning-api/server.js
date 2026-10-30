@@ -27,12 +27,16 @@ function verifyAnnaJwt(header){
  return claims.sub;
  }catch{return null}
 }
+const SERVICE_DESK='https://anna-one.onrender.com';
 async function adminIdentity(req){
  if(authorized(req))return 'professor-chave';
- const userId=verifyAnnaJwt(req.headers.authorization);
- if(!userId)return null;
- const data=await db.query('SELECT 1 FROM public.platform_admins pa JOIN neon_auth."user" u ON u.id=pa.user_id WHERE pa.user_id=$1 AND u."emailVerified"=true AND coalesce(u.banned,false)=false LIMIT 1',[userId]);
- return data.rowCount?'anna-one:'+userId:null;
+ const header=req.headers.authorization;
+ if(typeof header!=='string'||!/^Bearer [A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(header))return null;
+ try{
+  const check=await fetch(SERVICE_DESK+'/api/v1/master/companies',{headers:{Authorization:header},signal:AbortSignal.timeout(6000),cache:'no-store'});
+  if(check.status!==200)return null;
+  return 'anna-service-desk-master';
+ }catch{return null}
 }
 function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':process.env.LABPC_ORIGIN||'null','vary':'Origin'});res.end(JSON.stringify(data))}
 const server=http.createServer(async(req,res)=>{
@@ -42,6 +46,21 @@ const server=http.createServer(async(req,res)=>{
   res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(page);return;
  }
  if(req.url==='/health'&&req.method==='GET')return send(res,200,{ok:true});
+ if(req.url==='/auth/login'&&req.method==='POST'){
+  let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>4096)return send(res,413,{error:'Dados muito grandes'})}
+  try{
+   const data=JSON.parse(raw);
+   if(typeof data.email!=='string'||typeof data.password!=='string')return send(res,400,{error:'Dados inválidos'});
+   const login=await fetch(SERVICE_DESK+'/api/v1/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:data.email,password:data.password}),cache:'no-store',signal:AbortSignal.timeout(10000)});
+   if(!login.ok)return send(res,login.status===401?401:503,{error:login.status===401?'Credenciais inválidas':'Autenticação indisponível'});
+   const result=await login.json();const token=result.access_token;
+   if(typeof token!=='string')return send(res,503,{error:'Sessão inválida'});
+   const master=await adminIdentity({headers:{authorization:'Bearer '+token}});
+   if(!master)return send(res,403,{error:'Conta sem permissão administrativa no Service Desk'});
+   return send(res,200,{access_token:token,expires_in:Math.min(result.expires_in||900,900)});
+  }catch{return send(res,503,{error:'Não foi possível autenticar'})}
+ }
+
 // Somente amostras APROVADAS são publicamente legíveis; nenhuma rota pública escreve dados.
  if(req.url==='/examples/approved'&&req.method==='GET'){
   try {
