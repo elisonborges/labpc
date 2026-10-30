@@ -30,6 +30,7 @@ function verifyAnnaJwt(header){
 const SERVICE_DESK='https://anna-one.onrender.com';
 async function adminIdentity(req){
  if(authorized(req))return 'professor-chave';
+ if(validLabSession(req.headers.authorization))return 'labpc-admin-session';
  const header=req.headers.authorization;
  if(typeof header!=='string'||!/^Bearer [A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(header))return null;
  try{
@@ -37,6 +38,24 @@ async function adminIdentity(req){
   if(check.status!==200)return null;
   return 'anna-service-desk-master';
  }catch{return null}
+}
+function issueLabSession(){
+ const exp=Math.floor(Date.now()/1000)+900;
+ const payload=Buffer.from(JSON.stringify({v:1,exp,scope:'labpc-admin'})).toString('base64url');
+ const sig=createHmac('sha256',secret).update('labpc-session.'+payload).digest('base64url');
+ return payload+'.'+sig;
+}
+function validLabSession(header){
+ const token=typeof header==='string'?header.replace(/^Bearer /i,''):'';
+ if(!/^[A-Za-z0-9_-]{12,300}\\.[A-Za-z0-9_-]{43}$/.test(token))return false;
+ try{
+ const [payload,sig]=token.split('.');
+ const expected=createHmac('sha256',secret).update('labpc-session.'+payload).digest();
+ const actual=Buffer.from(sig,'base64url');
+ if(actual.length!==expected.length||!timingSafeEqual(actual,expected))return false;
+ const data=JSON.parse(Buffer.from(payload,'base64url').toString('utf8'));
+ return data.v===1&&data.scope==='labpc-admin'&&Number.isInteger(data.exp)&&data.exp>Math.floor(Date.now()/1000)&&data.exp<=Math.floor(Date.now()/1000)+900;
+ }catch{return false}
 }
 function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':process.env.LABPC_ORIGIN||'null','vary':'Origin'});res.end(JSON.stringify(data))}
 const server=http.createServer(async(req,res)=>{
@@ -57,7 +76,7 @@ const server=http.createServer(async(req,res)=>{
    if(typeof token!=='string')return send(res,503,{error:'Sessão inválida'});
    const master=await adminIdentity({headers:{authorization:'Bearer '+token}});
    if(!master)return send(res,403,{error:'Conta sem permissão administrativa no Service Desk'});
-   return send(res,200,{access_token:token,expires_in:Math.min(result.expires_in||900,900)});
+   return send(res,200,{access_token:issueLabSession(),expires_in:900});
   }catch{return send(res,503,{error:'Não foi possível autenticar'})}
  }
 
