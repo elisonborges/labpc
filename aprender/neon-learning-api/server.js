@@ -15,6 +15,13 @@ function send(res,status,data){res.writeHead(status,{'content-type':'application
 const server=http.createServer(async(req,res)=>{
  if(req.method==='OPTIONS'){res.writeHead(204,{'access-control-allow-origin':process.env.LABPC_ORIGIN||'null','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'Authorization,Content-Type'});res.end();return}
  if(req.url==='/health'&&req.method==='GET')return send(res,200,{ok:true});
+// Somente amostras APROVADAS são publicamente legíveis; nenhuma rota pública escreve dados.
+ if(req.url==='/examples/approved'&&req.method==='GET'){
+  try {
+   const data=await db.query("SELECT category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 150");
+   return send(res,200,{examples:data.rows});
+  }catch(e){console.error('Consulta de exemplos:',e.message);return send(res,503,{error:'Biblioteca temporariamente indisponível'})}
+ }
  // A API de escrita é exclusiva do professor até existir uma autenticação institucional para envio.
  if(!authorized(req))return send(res,401,{error:'Acesso restrito ao professor'});
  try{
