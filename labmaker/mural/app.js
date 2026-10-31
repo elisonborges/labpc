@@ -15,8 +15,8 @@ $('classSelect').replaceChildren(...classes.map(x=>{const o=document.createEleme
 if(!classes.length)return msg('Não há turmas vinculadas à sua conta.','status',true);await selectClass()}
 function backMurals(){mural=null;$('listView').classList.remove('hide');$('muralView').classList.add('hide');if(channel){sb.removeChannel(channel);channel=null}}
 async function selectClass(){backMurals();const r=await sb.from('lm_murals').select('*').eq('class_id',$('classSelect').value).order('created_at',{ascending:false});if(r.error)return msg(r.error.message,'status',true);murals=r.data||[];
-$('murals').innerHTML=murals.map(m=>'<article class="tile"><h3>'+esc(m.title)+'</h3><p>'+esc(m.description)+'</p><button class="btn primary" data-open="'+m.id+'">Abrir mural</button> <button class="btn" data-share="'+m.id+'">Compartilhar com alunos</button> <button class="btn" data-copy-mural="'+m.id+'">Duplicar para turma</button></article>').join('')||'<p class="muted">Ainda não há murais nesta turma.</p>';
-$('murals').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openMural(b.dataset.open));$('murals').querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareMural(b.dataset.share));$('murals').querySelectorAll('[data-copy-mural]').forEach(b=>b.onclick=()=>duplicateMuralToClass(b.dataset.copyMural))}
+$('murals').innerHTML=murals.map(m=>'<article class="tile"><h3>'+esc(m.title)+'</h3><p>'+esc(m.description)+'</p><button class="btn primary" data-open="'+m.id+'">Abrir mural</button> <button class="btn" data-share="'+m.id+'">Compartilhar com alunos</button> <button class="btn" data-copy-mural="'+m.id+'">Duplicar para turma</button> <button class="btn" data-save-template="'+m.id+'">Salvar modelo</button></article>').join('')||'<p class="muted">Ainda não há murais nesta turma.</p>';
+$('murals').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openMural(b.dataset.open));$('murals').querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareMural(b.dataset.share));$('murals').querySelectorAll('[data-copy-mural]').forEach(b=>b.onclick=()=>duplicateMuralToClass(b.dataset.copyMural));$('murals').querySelectorAll('[data-save-template]').forEach(b=>b.onclick=()=>saveTemplate(b.dataset.saveTemplate))}
 async function createMural(){const title=prompt('Título do novo mural:');if(!title?.trim())return;const description=prompt('Descrição (opcional):')||'';const r=await sb.from('lm_murals').insert({class_id:$('classSelect').value,owner_id:user.id,title:title.trim(),description}).select('id').single();if(r.error)return msg('Erro ao criar mural: '+r.error.message,'status',true);await selectClass();await openMural(r.data.id)}
 async function openMural(id){mural=murals.find(x=>x.id===id);if(!mural)return; $('muralTitle').textContent=mural.title;$('listView').classList.add('hide');$('muralView').classList.remove('hide');$('addSection').disabled=mural.owner_id!==user.id;await refresh();if(channel)await sb.removeChannel(channel);channel=sb.channel('lm-'+id).on('postgres_changes',{event:'*',schema:'public',table:'lm_cards'},()=>refresh()).on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},()=>refresh()).subscribe()}
 async function refresh(){if(!mural)return;let r=await sb.from('lm_sections').select('*').eq('mural_id',mural.id).order('position');if(r.error)return msg(r.error.message,'status',true);sections=r.data||[];let c=sections.length?await sb.from('lm_cards').select('*').in('section_id',sections.map(s=>s.id)).order('created_at'):{data:[],error:null};if(c.error)return msg(c.error.message,'status',true);cards=c.data||[];renderSections()}
@@ -89,4 +89,64 @@ async function duplicateMuralToClass(id){
   if(createdId){const cleanup=await sb.from('lm_murals').delete().eq('id',createdId).eq('owner_id',user.id);detail=cleanup.error?' Revise a cópia parcial na turma.':' Cópia parcial descartada.'}
   msg('Falha ao copiar: '+e.message+'.'+detail,'status',true);
  }finally{replicationBusy=false}
+}
+
+async function saveTemplate(id){
+ if(replicationBusy)return;
+ const m=murals.find(x=>x.id===id);
+ if(!m||m.owner_id!==user.id)return msg('Somente o criador pode salvar um modelo.','status',true);
+ const title=prompt('Nome do modelo:',m.title);if(!title?.trim())return;
+ replicationBusy=true;
+ try{
+  const sr=await sb.from('lm_sections').select('id,title,position').eq('mural_id',id).order('position');
+  if(sr.error)throw sr.error;
+  const ss=sr.data||[];
+  const cr=ss.length?await sb.from('lm_cards').select('section_id,title,author_label,body,image_url,elements,layout,origin').in('section_id',ss.map(x=>x.id)).eq('author_id',user.id).eq('origin','teacher'):{data:[],error:null};
+  if(cr.error)throw cr.error;
+  const blueprint=ss.map(s=>({title:s.title,position:s.position,cards:(cr.data||[]).filter(x=>x.section_id===s.id).map(x=>({title:x.title,author_label:x.author_label,body:x.body,image_url:x.image_url,elements:x.elements,layout:x.layout}))}));
+  const saved=await sb.from('lm_templates').insert({owner_id:user.id,title:title.trim(),description:m.description||'',blueprint});
+  if(saved.error)throw saved.error;
+  msg('Modelo salvo! Ele pode ser reutilizado em suas turmas.');
+ }catch(e){msg('Erro ao salvar modelo: '+e.message,'status',true)}finally{replicationBusy=false}
+}
+async function openTemplates(){
+ const r=await sb.from('lm_templates').select('id,title,description,created_at').eq('owner_id',user.id).order('created_at',{ascending:false});
+ if(r.error)return msg('Não foi possível carregar modelos: '+r.error.message,'status',true);
+ const items=r.data||[];
+ if(!items.length)return msg('Ainda não há modelos. Em um mural, clique em Salvar modelo.');
+ const selection=prompt('Escolha um modelo pelo número:\n\n'+items.map((x,i)=>(i+1)+' — '+x.title).join('\n'));
+ if(selection===null)return;
+ const choice=items[Number(selection)-1];
+ if(!choice||String(Number(selection))!==selection.trim())return msg('Modelo inválido.','status',true);
+ await applyTemplate(choice.id);
+}
+async function applyTemplate(templateId){
+ if(replicationBusy)return;
+ const chosen=classes.map((x,i)=>({number:i+1,id:x.id,label:[x.grade,'Turma '+x.class_name,x.shift,x.units?.name].join(' · ')}));
+ const selection=prompt('Escolha a turma de destino:\n\n'+chosen.map(x=>x.number+' — '+x.label).join('\n'));
+ if(selection===null)return;
+ const target=chosen.find(x=>String(x.number)===selection.trim());
+ if(!target)return msg('Turma inválida.','status',true);
+ const r=await sb.from('lm_templates').select('*').eq('id',templateId).eq('owner_id',user.id).single();
+ if(r.error||!r.data)return msg('Modelo não encontrado.','status',true);
+ const t=r.data;
+ const title=prompt('Título do mural:',t.title);if(!title?.trim())return;
+ if(!confirm('Criar um novo mural em '+target.label+' usando o modelo "'+t.title+'"?'))return;
+ replicationBusy=true;let created=null;
+ try{
+  const rows=Array.isArray(t.blueprint)?t.blueprint:[];
+  if(rows.length>100)throw Error('Modelo excede o limite de seções.');
+  const mr=await sb.from('lm_murals').insert({owner_id:user.id,class_id:target.id,title:title.trim(),description:t.description||'',student_enabled:false}).select('id').single();
+  if(mr.error)throw mr.error;
+  created=mr.data.id;
+  for(let i=0;i<rows.length;i++){
+   const group=rows[i],s=await sb.from('lm_sections').insert({mural_id:created,title:group.title,position:i}).select('id').single();
+   if(s.error)throw s.error;
+   const cards=Array.isArray(group.cards)?group.cards:[];
+   if(cards.length>100)throw Error('Limite de cartões por seção excedido.');
+   if(cards.length){const data=cards.map(x=>({section_id:s.data.id,author_id:user.id,title:x.title,author_label:x.author_label||'',body:x.body||'',image_url:x.image_url||'',elements:x.elements||[],layout:x.layout||'organized',origin:'teacher'}));
+    const cr=await sb.from('lm_cards').insert(data);if(cr.error)throw cr.error}
+  }
+  $('classSelect').value=target.id;await selectClass();msg('Modelo aplicado! Novo mural criado para '+target.label+'. Compartilhamento ainda desativado.');
+ }catch(e){msg('Erro ao usar modelo: '+e.message+(created?' Verifique possível mural incompleto na turma.':''),'status',true)}finally{replicationBusy=false}
 }
