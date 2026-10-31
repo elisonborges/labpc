@@ -84,7 +84,7 @@ const server=http.createServer(async(req,res)=>{
   try {
    const data=JSON.parse(raw);
    if(typeof data.email!=='string'||typeof data.password!=='string'||data.email.length>254||data.password.length>1024)return send(res,400,{error:'Dados inválidos'});
-   const login=await fetch(NEON_AUTH_URL+'/sign-in/email',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:data.email,password:data.password}),cache:'no-store',signal:AbortSignal.timeout(11000)});
+   const login=await fetch(NEON_AUTH_URL+'/sign-in/email',{method:'POST',headers:{'content-type':'application/json','origin':'https://annaone.com.br'},body:JSON.stringify({email:data.email,password:data.password}),cache:'no-store',signal:AbortSignal.timeout(11000)});
    if(!login.ok){
     let reason='';try{const error=await login.json();reason=String(error.code||error.error?.code||'').slice(0,64)}catch{}
     console.warn('Neon Auth rejeitou login',{status:login.status,code:reason||'sem_codigo'});
