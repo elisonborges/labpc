@@ -95,36 +95,46 @@ async function personalizeShareLink(){
  if(shareTarget?.id===current.id){$('shareLink').value=shortLinkCache.get('mural:'+current.id);$('shareQr').replaceChildren();$('shareNotice').textContent='Nome personalizado salvo; o link anterior continua válido.';await listShortLinks();}
 }
 async function listShortLinks(){
- const m=shareTarget, node=$('shortLinksList');if(!m||!node)return;
+ const m=shareTarget,node=$('shortLinksList');if(!m||!node)return;
  node.textContent='Carregando links...';
  const {data,error}=await sb.from('anna_short_links').select('code,active,created_at').eq('target_type','mural').eq('target_id',m.id).eq('owner_id',user.id).order('created_at',{ascending:false});
  if(shareTarget?.id!==m.id)return;
  if(error){node.textContent='Não foi possível carregar os links.';return}
  node.replaceChildren();
  if(!data?.length){node.textContent='Nenhum link cadastrado.';return}
- for(const item of data){
-  const row=document.createElement('div');row.style.cssText='padding:9px 0;border-bottom:1px solid #dce8f7;overflow-wrap:anywhere';
-  const label=document.createElement('div');label.textContent=item.code+(item.active?' · Ativo':' · Desativado');
-  const buttons=document.createElement('div');buttons.className='share-actions';
+ const isAutomatic=x=>/^[0-9a-f]{24}$/.test(x.code);
+ const active=data.filter(x=>x.active), custom=active.filter(x=>!isAutomatic(x)), auto=active.filter(isAutomatic);
+ const primary=custom[0]||auto[0]||null;
+ const makeTitle=(label)=>{const h=document.createElement('h4');h.textContent=label;h.style.cssText='margin:15px 0 6px;font-size:13px;color:#143e6e';node.append(h)};
+ const makeRow=(item)=>{
+  const row=document.createElement('div');row.style.cssText='padding:10px 0;border-bottom:1px solid #dce8f7;overflow-wrap:anywhere';
+  const title=document.createElement('strong');title.textContent=item.code===primary?.code?'★ Principal · '+item.code:item.code;
+  const state=document.createElement('span');state.textContent=item.active?' · Ativo':' · Desativado';state.style.color=item.active?'#087b61':'#7c8794';
+  const address=document.createElement('div');address.textContent='labpc.annaone.com.br/m/?c='+item.code;address.style.cssText='font-size:11px;color:#526c85;margin:5px 0;word-break:break-all';
+  const actions=document.createElement('div');actions.className='share-actions';
   const url='https://labpc.annaone.com.br/m/?c='+encodeURIComponent(item.code);
-  const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent='Copiar';
+  const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent='Copiar';copy.disabled=!item.active;
   copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);$('shareNotice').textContent='Link copiado.'}catch{$('shareNotice').textContent=url}};
-  buttons.appendChild(copy);
+  actions.append(copy);
   if(item.active){
    const off=document.createElement('button');off.type='button';off.className='btn btn-danger';off.textContent='Desativar';
    off.onclick=async()=>{
-    if(!confirm('Desativar este link curto? O endereço antigo do mural continuará sujeito às permissões do LabMaker.'))return;
+    if(!confirm('Desativar este link curto? Outros links e o endereço original continuarão sujeitos às permissões do LabMaker.'))return;
     off.disabled=true;
     const result=await sb.from('anna_short_links').update({active:false}).eq('code',item.code).eq('owner_id',user.id).select('code');
     if(result.error||!result.data?.length){off.disabled=false;$('shareNotice').textContent='Não foi possível desativar o link.';return}
     shortLinkCache.delete('mural:'+m.id);
-    $('shareNotice').textContent='Link curto desativado.';
+    $('shareNotice').textContent='Link desativado.';
     if(shareTarget?.id===m.id){$('shareLink').value=await muralShareLink(m);$('shareQr').replaceChildren();await listShortLinks()}
    };
-   buttons.appendChild(off);
+   actions.append(off);
   }
-  row.append(label,buttons);node.appendChild(row);
- }
+  row.append(title,state,address,actions);node.append(row);
+ };
+ if(custom.length){makeTitle('Links personalizados');custom.forEach(makeRow)}
+ if(auto.length){makeTitle('Códigos automáticos');auto.forEach(makeRow)}
+ const disabled=data.filter(x=>!x.active);
+ if(disabled.length){makeTitle('Desativados');disabled.forEach(makeRow)}
 }
 async function muralShareLink(m){return m.student_enabled?getShortLink('mural',m.id,shareUrl(m)):shareUrl(m)}
 function shareUrl(m){const url=new URL('./aluno/',location.href);url.searchParams.set('m',m.share_token);return url.toString()}
