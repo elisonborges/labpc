@@ -92,12 +92,44 @@ async function personalizeShareLink(){
   if(created.error)return $('shareNotice').textContent=created.error.code==='23505'?'Nome indisponível.':'Não foi possível salvar: '+created.error.message;
  }
  shortLinkCache.set('mural:'+current.id,'https://labpc.annaone.com.br/m/?c='+code);
- if(shareTarget?.id===current.id){$('shareLink').value=shortLinkCache.get('mural:'+current.id);$('shareQr').replaceChildren();$('shareNotice').textContent='Nome personalizado salvo; o link anterior continua válido.';}
+ if(shareTarget?.id===current.id){$('shareLink').value=shortLinkCache.get('mural:'+current.id);$('shareQr').replaceChildren();$('shareNotice').textContent='Nome personalizado salvo; o link anterior continua válido.';await listShortLinks();}
+}
+async function listShortLinks(){
+ const m=shareTarget, node=$('shortLinksList');if(!m||!node)return;
+ node.textContent='Carregando links...';
+ const {data,error}=await sb.from('anna_short_links').select('code,active,created_at').eq('target_type','mural').eq('target_id',m.id).eq('owner_id',user.id).order('created_at',{ascending:false});
+ if(shareTarget?.id!==m.id)return;
+ if(error){node.textContent='Não foi possível carregar os links.';return}
+ node.replaceChildren();
+ if(!data?.length){node.textContent='Nenhum link cadastrado.';return}
+ for(const item of data){
+  const row=document.createElement('div');row.style.cssText='padding:9px 0;border-bottom:1px solid #dce8f7;overflow-wrap:anywhere';
+  const label=document.createElement('div');label.textContent=item.code+(item.active?' · Ativo':' · Desativado');
+  const buttons=document.createElement('div');buttons.className='share-actions';
+  const url='https://labpc.annaone.com.br/m/?c='+encodeURIComponent(item.code);
+  const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent='Copiar';
+  copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);$('shareNotice').textContent='Link copiado.'}catch{$('shareNotice').textContent=url}};
+  buttons.appendChild(copy);
+  if(item.active){
+   const off=document.createElement('button');off.type='button';off.className='btn btn-danger';off.textContent='Desativar';
+   off.onclick=async()=>{
+    if(!confirm('Desativar este link curto? O endereço antigo do mural continuará sujeito às permissões do LabMaker.'))return;
+    off.disabled=true;
+    const result=await sb.from('anna_short_links').update({active:false}).eq('code',item.code).eq('owner_id',user.id).select('code');
+    if(result.error||!result.data?.length){off.disabled=false;$('shareNotice').textContent='Não foi possível desativar o link.';return}
+    shortLinkCache.delete('mural:'+m.id);
+    $('shareNotice').textContent='Link curto desativado.';
+    if(shareTarget?.id===m.id){$('shareLink').value=await muralShareLink(m);$('shareQr').replaceChildren();await listShortLinks()}
+   };
+   buttons.appendChild(off);
+  }
+  row.append(label,buttons);node.appendChild(row);
+ }
 }
 async function muralShareLink(m){return m.student_enabled?getShortLink('mural',m.id,shareUrl(m)):shareUrl(m)}
 function shareUrl(m){const url=new URL('./aluno/',location.href);url.searchParams.set('m',m.share_token);return url.toString()}
 function closeSharePanel(){$('shareOverlay').classList.add('hide');$('sharePanel').classList.add('hide');shareTarget=null}
-async function openSharePanel(m){shareTarget=m;$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=shareUrl(m);if(m.student_enabled){const link=await muralShareLink(m);if(shareTarget?.id===m.id)$('shareLink').value=link;}$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();const groupPanel=$('groupSharingPanel');if(groupPanel){groupPanel.open=false;groupPanel.dataset.mural=m.id;$('groupRooms').replaceChildren()}$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
+async function openSharePanel(m){shareTarget=m;listShortLinks();$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=shareUrl(m);if(m.student_enabled){const link=await muralShareLink(m);if(shareTarget?.id===m.id)$('shareLink').value=link;}$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();const groupPanel=$('groupSharingPanel');if(groupPanel){groupPanel.open=false;groupPanel.dataset.mural=m.id;$('groupRooms').replaceChildren()}$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
 async function shareMural(id){const m=murals.find(x=>x.id===id)||(mural?.id===id?mural:null);if(!m)return;if(m.owner_id!==user.id)return msg('Somente o criador pode compartilhar este mural.','status',true);openSharePanel(m)}
 async function changeSharePermission(){if(!shareTarget)return;const enabled=$('shareEnabled').checked;const r=await sb.from('lm_murals').update({student_enabled:enabled}).eq('id',shareTarget.id).eq('owner_id',user.id).select('id').single();if(r.error){$('shareEnabled').checked=!enabled;return alert('Não foi possível salvar: '+r.error.message)}shareTarget.student_enabled=enabled;$('shareQr').replaceChildren();$('shareQrStatus').textContent=enabled?'Acesso sem login ativo.':'Link desativado para alunos.';msg(enabled?'Compartilhamento ativado.':'Compartilhamento desativado.')}
 async function copyShareLink(){if(!shareTarget)return;const link=await muralShareLink(shareTarget);try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
