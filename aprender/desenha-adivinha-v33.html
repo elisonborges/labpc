@@ -526,6 +526,12 @@ $('beginRound').onclick=beginRound;$('voiceToggle').onclick=()=>{voiceOn=!voiceO
  window.addEventListener('load',()=>setTimeout(checkAi,1700));
 
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
- if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./desenha-offline-sw-v33.js').then(()=>{const el=document.getElementById('offlineStatus');if(el&&navigator.onLine)el.textContent='✅ Página em cache. Verificando arquivos da IA...'}).catch(()=>{const el=document.getElementById('offlineStatus');if(el)el.textContent='⚠️ Instalação offline indisponível neste navegador'}))}
+ if('serviceWorker' in navigator){window.addEventListener('load',()=>Promise.resolve({active:null}).then(()=>{const el=document.getElementById('offlineStatus');if(el&&navigator.onLine)el.textContent='✅ Página em cache. Verificando arquivos da IA...'}).catch(()=>{const el=document.getElementById('offlineStatus');if(el)el.textContent='⚠️ Instalação offline indisponível neste navegador'}))}
 })();
+</script><script>
+(async()=>{if(!('serviceWorker' in navigator))return;try{
+ const regs=await navigator.serviceWorker.getRegistrations();
+ for(const reg of regs){const u=reg.active?.scriptURL||reg.waiting?.scriptURL||'';if(u.includes('desenha-offline-sw-v'))await reg.unregister()}
+ if('caches' in window)for(const key of await caches.keys())if(key.startsWith('labpc-desenha-'))await caches.delete(key);
+}catch(e){console.warn('Cache de jogo:',e)}})();
 </script></body></html>
