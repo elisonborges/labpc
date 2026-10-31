@@ -32,4 +32,6 @@ function showObjectFields(){const o=shapes[active];$('objFields').classList.togg
 function updateObj(){const o=shapes[active];if(!o)return;o.value=$('objValue').value;o.color=$('objColor').value;o.w=Math.min(440,Math.max(30,Number($('objWidth').value)||90));o.h=Math.min(280,Math.max(25,Number($('objHeight').value)||80));drawObjects()}
 ['objValue','objColor','objWidth','objHeight'].forEach(id=>$(id).addEventListener('change',updateObj));
 $('removeObj').onclick=()=>{if(active<0)return;shapes.splice(active,1);active=-1;drawObjects()};
+// Enter publica a partir dos campos curtos; na área de texto, Enter cria nova linha.
+$('dialog').addEventListener('keydown',event=>{if(event.key!=='Enter'||event.shiftKey||event.isComposing||event.repeat)return;if(!['name','cardTitle'].includes(event.target.id))return;event.preventDefault();$('save').click()});
 </script></body></html>
