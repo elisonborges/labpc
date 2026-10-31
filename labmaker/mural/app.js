@@ -226,7 +226,7 @@ async function reorderSections(ordered){
  await refresh();msg('Organização das mesas atualizada.');
 }
 
-function cardActionsMenu(id){const c=cards.find(x=>x.id===id);if(!c||c.author_id!==user.id||c.origin==='student')return;const existing=document.getElementById('cardActionsPopup');if(existing){existing.remove();if(existing.dataset.card===id)return}const trigger=document.querySelector('[data-card-menu="'+id+'"]');if(!trigger)return;const popup=document.createElement('div');popup.id='cardActionsPopup';popup.dataset.card=id;popup.className='card-actions-popup';const actions=[['✏️ Editar',()=>editCard(id)],['📋 Duplicar',()=>duplicateCard(id)],['🗑️ Excluir',()=>deleteMuralCard(id)]];for(const [label,action] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{popup.remove();action()};popup.appendChild(b)}trigger.parentElement.style.position='relative';trigger.parentElement.appendChild(popup)}
+function cardActionsMenu(id){const c=cards.find(x=>x.id===id);if(!c||c.author_id!==user.id||c.origin==='student')return;const existing=document.getElementById('cardActionsPopup');if(existing){existing.remove();if(existing.dataset.card===id)return}const trigger=document.querySelector('[data-card-menu="'+id+'"]');if(!trigger)return;const popup=document.createElement('div');popup.id='cardActionsPopup';popup.dataset.card=id;popup.className='card-actions-popup';const actions=[['✏️ Editar',()=>editCard(id)],['📋 Duplicar',()=>duplicateCard(id)],['🕘 Histórico',()=>openCardHistory(id)],['🗑️ Excluir',()=>deleteMuralCard(id)]];for(const [label,action] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{popup.remove();action()};popup.appendChild(b)}trigger.parentElement.style.position='relative';trigger.parentElement.appendChild(popup)}
 document.addEventListener('click',e=>{if(!e.target.closest('#cardActionsPopup')&&!e.target.closest('[data-card-menu]'))document.getElementById('cardActionsPopup')?.remove()});
 
 async function loadGroupLinks(m){
@@ -664,4 +664,22 @@ async function togglePollClosed(id,closed){
  const response=await sb.from('lm_polls').update({closed}).eq('id',id).eq('mural_id',mural.id).select('id').single();
  if(response.error)return msg('Erro: '+response.error.message,'status',true);
  await refreshPollResults();
+}
+
+async function openCardHistory(id){
+ if(!mural||mural.owner_id!==user.id)return;
+ const card=cards.find(c=>c.id===id);if(!card)return;
+ const dialog=$('cardHistoryDialog'),list=$('cardHistoryList');
+ $('cardHistoryTitle').textContent='Histórico — '+card.title;list.textContent='Carregando…';dialog.showModal();
+ const r=await sb.rpc('lm_card_history',{p_card:id});
+ if(r.error){list.textContent='Erro: '+r.error.message;return}
+ list.replaceChildren();
+ if(!r.data?.length){list.textContent='Ainda não há versões anteriores. O histórico começa nas próximas edições.';return}
+ for(const v of r.data){const item=document.createElement('div');item.className='card-history-entry';
+ const title=document.createElement('strong');title.textContent=v.title||'Sem título';
+ const date=document.createElement('small');date.textContent=new Date(v.saved_at).toLocaleString('pt-BR');
+ const body=document.createElement('p');body.textContent=(v.body||'').slice(0,220);
+ const button=document.createElement('button');button.className='btn';button.textContent='Restaurar versão';
+ button.onclick=async()=>{if(!confirm('Restaurar esta versão? A versão atual será guardada no histórico.'))return;button.disabled=true;const result=await sb.rpc('lm_restore_card_version',{p_card:id,p_version:v.id});button.disabled=false;if(result.error)return alert(result.error.message);dialog.close();await refresh();msg('Versão restaurada.')};
+ item.append(title,date,body,button);list.append(item)}
 }
