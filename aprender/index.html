@@ -17,7 +17,7 @@ a{color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #ffbd2e;o
 .labpc{font-weight:950;font-size:34px;letter-spacing:-2px;line-height:1;background:linear-gradient(90deg,#063b80 45%,#8728ed);background-clip:text;color:transparent;white-space:nowrap}
 .portal-title{font-size:23px;font-weight:900;line-height:1.05;white-space:nowrap}.portal-title small{display:block;font-size:12px;font-weight:500;margin-top:6px}
 .actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.actions a{text-decoration:none;border:1px solid #cbd9f3;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:750;background:white;white-space:nowrap}
-.actions a:first-child{background:#074da4;color:white;border-color:#074da4}.actions .grade{background:linear-gradient(100deg,#6632d8,#8c50fa);color:white;border:0;padding:11px 20px;font-size:16px}
+.actions a:first-child{background:#074da4;color:white;border-color:#074da4}.actions .teacher-access{background:#eef4ff;border-color:#9cbce9;color:#084caa}.actions .grade{background:linear-gradient(100deg,#6632d8,#8c50fa);color:white;border:0;padding:11px 20px;font-size:16px}
 .hero{min-height:282px;position:relative;overflow:hidden;background:linear-gradient(100deg,#0c9df5 0%,#d8f2ff 34%,#eefaff 55%,#1ba6f8 100%);border-bottom:4px solid #d7e6ff}
 .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 47% 35%,#fff9,transparent 38%);pointer-events:none}
 .hero-inner{max-width:1470px;margin:auto;min-height:282px;display:grid;place-items:center;position:relative;padding:20px 20px}
@@ -42,7 +42,7 @@ footer{border-top:1px solid #dce6f5;background:white;padding:23px 28px;color:#35
 .preview-note{background:#fff7db;color:#7c5300;padding:9px 16px;text-align:center;font-size:13px;border-bottom:1px solid #f2d791}
 @media(max-width:1250px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.portal-title{display:none}.hero-art{opacity:.7}}
 @media(max-width:960px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.nav{flex-wrap:wrap}.actions{margin-left:auto}.hero-art{opacity:.35}}
-@media(max-width:650px){.nav{padding:12px 16px;gap:10px}.separator,.labpc{display:none}.anna{font-size:19px}.actions a:not(:first-child){display:none}.hero-inner{min-height:290px}.hero-art{opacity:.2}.hero h1{font-size:40px}.hero p{font-size:14px}.year{font-size:15px}.chips span{font-size:11px}.content{padding:20px 14px}.section-top{display:block}.teacher-tip{margin-top:12px;max-width:none}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.art{height:100px}.card-body{padding:11px}.card h3{font-size:14px}.card p{font-size:12px}.start{font-size:13px;padding:9px 6px}}
+@media(max-width:650px){.nav{padding:12px 16px;gap:10px}.separator,.labpc{display:none}.anna{font-size:19px}.actions a:not(:first-child):not(.teacher-access){display:none}.actions .teacher-access{font-size:11px;padding:8px 10px}.hero-inner{min-height:290px}.hero-art{opacity:.2}.hero h1{font-size:40px}.hero p{font-size:14px}.year{font-size:15px}.chips span{font-size:11px}.content{padding:20px 14px}.section-top{display:block}.teacher-tip{margin-top:12px;max-width:none}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.art{height:100px}.card-body{padding:11px}.card h3{font-size:14px}.card p{font-size:12px}.start{font-size:13px;padding:9px 6px}}
 @media(max-width:390px){.grid{grid-template-columns:1fr}.art{height:140px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
@@ -83,7 +83,7 @@ body{background:#f2f7ff}.top{border-bottom:1px solid #e5edfa}.nav{min-height:70p
 <header class="top"><nav class="nav" aria-label="Navegação principal">
 <a class="branding" href="../index.html" aria-label="AnnA One">
 <span class="anna-mark" aria-hidden="true">A</span><span class="anna">AnnA One<small>Tecnologia a serviço da educação</small></span><span class="separator"></span><span class="labpc">LabPC</span><span class="separator"></span><span class="portal-title">Universo Aprender<small>Atividades interativas</small></span></a>
-<div class="actions"><a href="../index.html">⌂ Início LabPC</a><a href="#atividades">🎮 Atividades</a><a href="#rodape">ⓘ Sobre</a><a class="grade" href="#anos">🎓 Anos escolares</a></div>
+<div class="actions"><a href="../index.html">⌂ Início LabPC</a><a href="#atividades">🎮 Atividades</a><a href="#rodape">ⓘ Sobre</a><a class="grade" href="#anos">🎓 Anos escolares</a><a class="teacher-access" href="https://labpc-learning-api.onrender.com/admin" aria-label="Entrar na Área do Professor">🧑‍🏫 Área do Professor</a></div>
 </nav></header>
 <section class="hero" aria-labelledby="titulo"><div class="hero-inner">
 <img class="hero-art hero-left" src="assets/hero-esquerda.webp" alt="" aria-hidden="true">
