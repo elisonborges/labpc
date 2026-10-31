@@ -417,7 +417,24 @@ renderSections=function(){originalRenderSections();changeMuralLayout(muralLayout
 
 async function reviewComments(){if(!mural||mural.owner_id!==user.id)return;const ids=cards.map(c=>c.id);if(!ids.length)return alert('Não há cartões neste mural.');const q=await sb.from('lm_comments').select('id,card_id,author_label,body,approved,created_at').in('card_id',ids).order('created_at',{ascending:false}).limit(100);if(q.error)return msg('Erro ao listar comentários: '+q.error.message,'status',true);const pending=(q.data||[]).filter(c=>!c.approved);if(!pending.length)return alert('Não há comentários aguardando aprovação.');for(const c of pending){const action=prompt('Comentário de '+c.author_label+':\n'+c.body+'\n\nDigite A para aprovar, E para excluir, ou C para cancelar.','A');if(!action||action.toUpperCase()==='C')break;if(action.toUpperCase()==='A'){const x=await sb.from('lm_comments').update({approved:true}).eq('id',c.id);if(x.error){alert(x.error.message);break}}else if(action.toUpperCase()==='E'){if(!confirm('Excluir este comentário?'))continue;const x=await sb.from('lm_comments').delete().eq('id',c.id);if(x.error){alert(x.error.message);break}}}msg('Moderação de comentários atualizada.')}
 
-function showMuralProgress(){if(!mural)return;const approved=cards.filter(c=>c.moderation_status==='approved');const pending=cards.filter(c=>c.moderation_status==='pending');const students=cards.filter(c=>c.origin==='student');const rows=sections.map(s=>{const list=cards.filter(c=>c.section_id===s.id);return esc(s.title)+' — '+list.length+' cartão(ões), '+list.filter(c=>c.origin==='student').length+' aluno(s), '+list.filter(c=>c.moderation_status==='pending').length+' pendente(s)'});alert('📊 Acompanhamento — '+mural.title+'\\n\\nTotal: '+cards.length+' cartões\\nPublicados: '+approved.length+'\\nAguardando: '+pending.length+'\\nProduções de alunos: '+students.length+'\\n\\n'+rows.join('\\n'))}
+
+function showMuralProgress(){
+ if(!mural)return;
+ const dialog=$('progressDialog'),body=$('progressDashboard');
+ if(!dialog||!body)return;
+ const approved=cards.filter(c=>c.moderation_status==='approved').length;
+ const pending=cards.filter(c=>c.moderation_status==='pending').length;
+ const student=cards.filter(c=>c.origin==='student').length;
+ const metrics=[['Cartões',cards.length],['Publicados',approved],['Aguardando aprovação',pending],['Produções de alunos',student]];
+ const tiles=metrics.map(([name,n])=>'<div class="progress-metric"><strong>'+n+'</strong><span>'+esc(name)+'</span></div>').join('');
+ const max=Math.max(1,...sections.map(s=>cards.filter(c=>c.section_id===s.id).length));
+ const rows=sections.map(s=>{
+  const items=cards.filter(c=>c.section_id===s.id),total=items.length,students=items.filter(c=>c.origin==='student').length,waiting=items.filter(c=>c.moderation_status==='pending').length;
+  return '<div class="progress-row"><div class="progress-row-label"><b>'+esc(s.title)+'</b><span>'+total+' cartão(ões) · '+students+' de alunos · '+waiting+' pendente(s)</span></div><div class="progress-track"><div class="progress-fill" style="width:'+Math.round(total/max*100)+'%"></div></div></div>';
+ }).join('');
+ body.innerHTML='<div class="progress-metrics">'+tiles+'</div><h3>Participação por mesa</h3><p class="muted">Quantidade de cartões em cada mesa. Produções não equivalem necessariamente a alunos diferentes.</p>'+(rows||'<p class="muted">Nenhuma mesa criada.</p>')+'<div class="progress-footer"><button class="btn" type="button" onclick="document.getElementById(\'progressDialog\').close()">Fechar</button></div>';
+ if(!dialog.open)dialog.showModal();
+}
 
 function updateMuralStatusChips(){const el=$('muralStatusChips');if(!el||!mural)return;el.replaceChildren();const values=['Postagens: '+(mural.posting_enabled===false?'fechadas':'abertas'),'Aprovação: '+(mural.moderation_enabled?'ligada':'desligada'),'Comentários: '+(mural.comments_enabled?'ativos':'inativos')];for(const label of values){const chip=document.createElement('span');chip.textContent=label;el.appendChild(chip)}}
 function muralMenuAction(action){document.querySelectorAll('#muralView .mural-menu').forEach(x=>x.open=false);action()}
