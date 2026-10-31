@@ -294,13 +294,13 @@ async function loadGroupLinks(m){
 }
 
 let presentationItems=[],presentationIndex=0;
-let presentationOnlyCards=false,presentationDark=false,presentationSeconds=0,presentationTimer=null,presentationLimit=0;
+let presentationOnlyCards=false,presentationDark=false,presentationSeconds=0,presentationTimer=null,presentationLimit=0,presentationAutoReset=false;
 function startPresentation(){
  if(!mural)return;
  const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));
  if(!accepted.length){msg('Nenhum cartão aprovado para apresentar.','status',true);return}
  presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?(presentationOnlyCards?own:[{type:'section',name:section.title,count:own.length},...own]):[]})];
- presentationIndex=0;resetPresentationTimer();$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideOnlyCards').checked=presentationOnlyCards;$('slideContrast').checked=presentationDark;$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
+ presentationIndex=0;resetPresentationTimer();$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideOnlyCards').checked=presentationOnlyCards;$('slideContrast').checked=presentationDark;$('slideAutoReset').checked=presentationAutoReset;$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
 }
 function updatePresentationOptions(){if($('slideScreen').classList.contains('hide'))return;const current=presentationItems[presentationIndex];presentationOnlyCards=$('slideOnlyCards').checked;presentationDark=$('slideContrast').checked;$('slideScreen').classList.toggle('slide-dark',presentationDark);const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?(presentationOnlyCards?own:[{type:'section',name:section.title,count:own.length},...own]):[]})];presentationIndex=Math.max(0,presentationItems.findIndex(x=>x.type===current?.type&&(x.type==='card'?x.card.id===current.card.id:x.type==='section'?x.name===current.name:true)));renderPresentation()}
 function formatPresentationTime(){const remaining=presentationLimit*60-presentationSeconds;const notice=$('slideTimeNotice');if(notice){notice.textContent=!presentationLimit?'':remaining<=0?'⏰ Tempo encerrado!':remaining<=30?'⚠️ Faltam '+remaining+' segundos':'';notice.classList.toggle('time-over',presentationLimit>0&&remaining<=0);notice.classList.toggle('time-warning',presentationLimit>0&&remaining>0&&remaining<=30)}const m=Math.floor(presentationSeconds/60),s=presentationSeconds%60;$('slideTimer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
@@ -308,6 +308,9 @@ function pausePresentationTimer(){if(presentationTimer){clearInterval(presentati
 function togglePresentationTimer(){if(presentationTimer){pausePresentationTimer();return}presentationTimer=setInterval(()=>{if(!$('slideScreen').classList.contains('hide')){presentationSeconds++;formatPresentationTime()}},1000);$('slideTimerToggle').textContent='⏸ Pausar'}
 function resetPresentationTimer(){pausePresentationTimer();presentationSeconds=0;formatPresentationTime()}
 function changePresentationLimit(value){presentationLimit=Math.max(0,Math.min(30,Number(value)||0));resetPresentationTimer()}
+function presentationTeamKey(item){return item?.type==='card'?'section:'+item.card.section_id:item?.type==='section'?'section:'+item.name:null}
+function onPresentationNavigation(previous){if(!presentationAutoReset)return;const next=presentationItems[presentationIndex];const before=presentationTeamKey(previous),after=presentationTeamKey(next);if(after&&after!==before)resetPresentationTimer()}
+function changePresentationAutoReset(checked){presentationAutoReset=!!checked}
 function renderPresentation(){
  const item=presentationItems[presentationIndex];if(!item)return;
  const stage=$('slideContent');
@@ -321,8 +324,8 @@ function renderPresentation(){
  const c=item.card;
  stage.innerHTML='<span class="muted">'+esc(item.section)+' · '+esc(c.author_label||'Equipe')+'</span><h2>'+esc(c.title)+'</h2>'+(c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''));
 }
-function moveSlide(step){if($('slideScreen')?.classList.contains('hide')||!presentationItems.length)return;presentationIndex=Math.max(0,Math.min(presentationItems.length-1,presentationIndex+step));renderPresentation()}
-function jumpSlide(value){const i=Number(value);if(Number.isInteger(i)&&i>=0&&i<presentationItems.length){presentationIndex=i;renderPresentation()}}
+function moveSlide(step){if($('slideScreen')?.classList.contains('hide')||!presentationItems.length)return;const previous=presentationItems[presentationIndex];presentationIndex=Math.max(0,Math.min(presentationItems.length-1,presentationIndex+step));onPresentationNavigation(previous);renderPresentation()}
+function jumpSlide(value){const i=Number(value);if(Number.isInteger(i)&&i>=0&&i<presentationItems.length){const previous=presentationItems[presentationIndex];presentationIndex=i;onPresentationNavigation(previous);renderPresentation()}}
 function closePresentation(){pausePresentationTimer();$('slideScreen').classList.add('hide');if(document.fullscreenElement===$('slideScreen'))document.exitFullscreen().catch(()=>{})}
 async function toggleSlideFullscreen(){const screen=$('slideScreen');try{if(document.fullscreenElement===screen)await document.exitFullscreen();else await screen.requestFullscreen()}catch{msg('O navegador não permitiu tela cheia.','status',true)}}
 document.addEventListener('keydown',event=>{if($('slideScreen')?.classList.contains('hide')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(['ArrowRight','ArrowDown','PageDown',' '].includes(event.key)){event.preventDefault();moveSlide(1)}else if(['ArrowLeft','ArrowUp','PageUp'].includes(event.key)){event.preventDefault();moveSlide(-1)}else if(event.key==='Home'){event.preventDefault();jumpSlide(0)}else if(event.key==='End'){event.preventDefault();jumpSlide(presentationItems.length-1)}else if(event.key==='Escape')closePresentation()});
