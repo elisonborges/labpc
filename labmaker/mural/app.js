@@ -27,7 +27,7 @@ function teacherFontStyle(c){const a=Array.isArray(c.elements)?c.elements.find(x
 function teacherInlineImage(v){return typeof v==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<15000}
 function teacherAttachment(c){const a=Array.isArray(c.elements)?c.elements.find(x=>x.type==='attachment'):null;if(!a||!(safeURL(a.value)||a.kind==='image'&&teacherInlineImage(a.value)))return '';const url=esc(a.value),kind=a.kind;if(kind==='image')return '<a href="'+url+'" target="_blank" rel="noopener noreferrer"><img src="'+url+'" alt="Anexo do cartão"></a>';if(kind==='video'&&/\.(mp4|webm|ogg)(\?|$)/i.test(a.value))return '<video controls preload="none" style="width:100%" src="'+url+'"></video>';if(kind==='audio'&&/\.(mp3|wav|ogg|m4a)(\?|$)/i.test(a.value))return '<audio controls preload="none" style="width:100%" src="'+url+'"></audio>';return '<p><a target="_blank" rel="noopener noreferrer" href="'+url+'">🔗 Ver anexo ('+esc(kind||'link')+')</a></p>'}
 function renderSections(){$('sections').innerHTML=sections.map(s=>'<div class="section" data-drop-section="'+s.id+'"><div class="section-head" style="flex-wrap:wrap"><h3>'+esc(s.title)+'</h3><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn" data-new="'+s.id+'">+ Card</button><button class="btn" data-duplicate-section="'+s.id+'" title="Copiar mesa/trio e seus cartões">Duplicar</button><button class="btn" data-section-actions="'+s.id+'">⋯</button><button class="btn btn-danger" data-delete-section="'+s.id+'" title="Excluir mesa/trio e todos os seus cartões">Excluir</button></div></div>'+cards.filter(c=>c.section_id===s.id).map(c=>'<article class="post" data-drag-card="'+c.id+'"><div class="tiny muted">'+esc(c.author_label)+(c.origin==='student'?' · ALUNO · '+(c.moderation_status==='pending'?'AGUARDANDO':c.moderation_status==='rejected'?'REJEITADO':'APROVADO'):'')+'</div><strong>'+esc(c.title)+'</strong>'+(c.layout==='organized'?'<p style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</p>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''):'<div style="height:180px;position:relative;background:#f6f9ff;overflow:hidden;margin-top:8px">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>')+'<p>'+(c.author_id===user.id&&c.origin!=='student'?'<button class="btn" data-edit="'+c.id+'">Editar</button> <button class="btn" data-duplicate-card="'+c.id+'">Duplicar</button> <button class="btn" data-card-menu="'+c.id+'" title="Mais ações">⋯</button> <button class="btn" data-pick-move="'+c.id+'">⠿ Mover</button> <button class="btn btn-danger" data-delete-card="'+c.id+'">Excluir</button>' : c.origin==='student'&&mural.owner_id===user.id?'<button class="btn" data-review="'+c.id+'" data-state="approved">Aprovar</button> <button class="btn" data-review="'+c.id+'" data-state="rejected">Rejeitar</button> <button class="btn btn-danger" data-delete-card="'+c.id+'">Excluir</button>':'<span class="muted tiny">Somente leitura</span>')+'</p></article>').join('')+'</div>').join('')||'<p class="muted">Crie a primeira mesa para começar.</p>';
-setupCardDragging();setupSectionMovement();$('sections').querySelectorAll('[data-pick-move]').forEach(b=>b.onclick=()=>selectMoveDestination(b.dataset.pickMove));$('sections').querySelectorAll('[data-new]').forEach(b=>b.onclick=()=>newCard(b.dataset.new));$('sections').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editCard(b.dataset.edit));$('sections').querySelectorAll('[data-duplicate-section]').forEach(b=>b.onclick=()=>duplicateSection(b.dataset.duplicateSection));$('sections').querySelectorAll('[data-duplicate-card]').forEach(b=>b.onclick=()=>duplicateCard(b.dataset.duplicateCard));$('sections').querySelectorAll('[data-card-menu]').forEach(b=>b.onclick=()=>cardActionsMenu(b.dataset.cardMenu));$('sections').querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>reviewStudentCard(b.dataset.review,b.dataset.state));$('sections').querySelectorAll('[data-delete-card]').forEach(b=>b.onclick=()=>deleteMuralCard(b.dataset.deleteCard));$('sections').querySelectorAll('[data-delete-section]').forEach(b=>b.onclick=()=>deleteMuralSection(b.dataset.deleteSection));$('sections').querySelectorAll('[data-section-actions]').forEach(b=>b.onclick=()=>sectionActions(b.dataset.sectionActions))}
+setupCardDragging();setupSectionMovement();applyCardFilters();$('sections').querySelectorAll('[data-pick-move]').forEach(b=>b.onclick=()=>selectMoveDestination(b.dataset.pickMove));$('sections').querySelectorAll('[data-new]').forEach(b=>b.onclick=()=>newCard(b.dataset.new));$('sections').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editCard(b.dataset.edit));$('sections').querySelectorAll('[data-duplicate-section]').forEach(b=>b.onclick=()=>duplicateSection(b.dataset.duplicateSection));$('sections').querySelectorAll('[data-duplicate-card]').forEach(b=>b.onclick=()=>duplicateCard(b.dataset.duplicateCard));$('sections').querySelectorAll('[data-card-menu]').forEach(b=>b.onclick=()=>cardActionsMenu(b.dataset.cardMenu));$('sections').querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>reviewStudentCard(b.dataset.review,b.dataset.state));$('sections').querySelectorAll('[data-delete-card]').forEach(b=>b.onclick=()=>deleteMuralCard(b.dataset.deleteCard));$('sections').querySelectorAll('[data-delete-section]').forEach(b=>b.onclick=()=>deleteMuralSection(b.dataset.deleteSection));$('sections').querySelectorAll('[data-section-actions]').forEach(b=>b.onclick=()=>sectionActions(b.dataset.sectionActions))}
 async function newSection(){if(!mural||mural.owner_id!==user.id)return;const title=prompt('Nome da mesa ou seção:');if(!title?.trim())return;const r=await sb.from('lm_sections').insert({mural_id:mural.id,title:title.trim(),position:sections.length});if(r.error)return msg(r.error.message,'status',true);await refresh()}
 function newCard(id){sectionId=id;card=null;objects=[];selected=-1;$('postTitle').value='';$('postAuthor').value='';$('postBody').value='';$('postImage').value='';$('editorStatus').textContent='';setMode('organized');$('editor').showModal()}
 function editCard(id){const c=cards.find(x=>x.id===id);if(!c||c.author_id!==user.id||c.origin==='student')return;card=c;sectionId=c.section_id;$('postTitle').value=c.title;$('postAuthor').value=c.author_label;$('postBody').value=c.body;$('postImage').value=c.image_url;objects=Array.isArray(c.elements)?JSON.parse(JSON.stringify(c.elements)):[];selected=-1;setMode(c.layout==='free'?'free':'organized');$('editorStatus').textContent='';$('editor').showModal()}
@@ -510,4 +510,34 @@ async function moveSectionTo(sourceId,targetId){
  if(from<0||to<0)return;
  ordered.splice(to,0,ordered.splice(from,1)[0]);sectionMoveBusy=true;
  try{await reorderSections(ordered)}finally{sectionMoveBusy=false}
+}
+
+function applyCardFilters(){
+ const root=$('sections'),search=$('muralSearch'),bySection=$('muralFilterSection'),byStatus=$('muralFilterStatus'),counter=$('muralFilterCount');
+ if(!root||!search||!bySection||!byStatus||!counter)return;
+ const previous=bySection.value;
+ bySection.replaceChildren(new Option('Todas as mesas',''));
+ for(const section of sections)bySection.add(new Option(section.title,section.id));
+ bySection.value=sections.some(s=>s.id===previous)?previous:'';
+ const query=search.value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),status=byStatus.value;
+ const normalize=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ let shown=0;
+ for(const el of root.querySelectorAll('[data-drop-section]')){
+  const sectionId=el.dataset.dropSection,allowSection=!bySection.value||bySection.value===sectionId;
+  let visibleHere=0;
+  for(const post of el.querySelectorAll('[data-drag-card]')){
+   const card=cards.find(c=>c.id===post.dataset.dragCard);
+   const text=card?normalize([card.title,card.body,card.author_label,JSON.stringify(card.elements||[])].join(' ')):'';
+   const allowed=!!card&&allowSection&&(!status||(card.moderation_status||'approved')===status)&&(!query||text.includes(query));
+   post.classList.toggle('filter-hidden',!allowed);
+   if(allowed){visibleHere++;shown++}
+  }
+  const hasFilters=!!(query||status||bySection.value);
+  el.classList.toggle('filter-hidden',!allowSection||(hasFilters&&visibleHere===0));
+ }
+ counter.textContent=shown+' cartão(ões) encontrado(s)';
+}
+function clearCardFilters(){
+ for(const id of ['muralSearch','muralFilterSection','muralFilterStatus']){const el=$(id);if(el)el.value=''}
+ applyCardFilters();
 }
