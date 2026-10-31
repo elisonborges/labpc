@@ -561,3 +561,45 @@ function clearCardFilters(){
 
 async function toggleSectionLock(id){if(!mural||mural.owner_id!==user.id)return;const s=sections.find(x=>x.id===id);if(!s)return;const next=!s.locked;const q=await sb.from('lm_sections').update({locked:next}).eq('id',id).eq('mural_id',mural.id).select('id').single();if(q.error)return msg(q.error.message,'status',true);await refresh();msg(next?'Seção bloqueada.':'Seção desbloqueada.')}
 async function toggleCardLock(id){if(!mural||mural.owner_id!==user.id)return;const c=cards.find(x=>x.id===id);if(!c)return;const s=sections.find(x=>x.id===c.section_id);if(s?.locked)return msg('Desbloqueie a seção antes.','status',true);const next=!c.locked;const q=await sb.from('lm_cards').update({locked:next}).eq('id',id).eq('author_id',user.id).select('id').single();if(q.error)return msg(q.error.message,'status',true);await refresh();msg(next?'Cartão bloqueado.':'Cartão desbloqueado.')}
+
+const pedagogicalPresets=[
+ {id:'poster',name:'🖼️ Cartaz',desc:'Título, mensagem central, informações e conclusão.',sections:[['Ideia principal','Tema do cartaz','Qual mensagem o público precisa compreender?'],['Informações','Pontos importantes','Organize as informações mais relevantes do tema.'],['Elementos visuais','Imagens e ilustrações','Inclua imagens e legendas relacionadas ao assunto.'],['Conclusão','Mensagem final','Escreva uma conclusão ou convite à reflexão.']]},
+ {id:'research',name:'🔬 Pesquisa',desc:'Pergunta, hipótese, investigação e resultados.',sections:[['Pergunta','O que vamos investigar?','Descreva o problema ou a pergunta da pesquisa.'],['Hipótese','Nossa hipótese','Registre a previsão inicial do grupo.'],['Investigação','Como pesquisamos','Anote fontes, experimentos e evidências.'],['Resultados','O que descobrimos','Apresente resultados e referências.'],['Conclusão','Aprendizagens','Explique o que a equipe aprendeu.']]},
+ {id:'mindmap',name:'🧠 Mapa mental',desc:'Tema central e ramificações de ideias.',sections:[['Tema central','Assunto principal','Escreva o conceito que será explorado.'],['Conceitos','Ideias relacionadas','Liste palavras-chave e conceitos associados.'],['Conexões','Relações entre ideias','Explique como os conceitos se conectam.'],['Síntese','Mapa final','Organize a síntese visual do grupo.']]},
+ {id:'exhibition',name:'🏛️ Exposição',desc:'Abertura, obras das equipes e reflexão coletiva.',sections:[['Boas-vindas','Sobre nossa exposição','Apresente o objetivo e o tema da exposição.'],['Produções','Trabalhos das equipes','Cada equipe publica seu trabalho e uma breve explicação.'],['Processo','Bastidores','Compartilhe como as produções foram desenvolvidas.'],['Reflexões','O que aprendemos','Registre descobertas e comentários finais.']]}
+];
+function openPedagogicalTemplates(){
+ const dialog=$('pedagogicalDialog'),root=$('pedagogicalChoices');if(!dialog||!root)return;
+ root.replaceChildren();
+ for(const preset of pedagogicalPresets){
+  const button=document.createElement('button');button.type='button';button.className='pedagogical-choice';
+  const title=document.createElement('strong');title.textContent=preset.name;
+  const desc=document.createElement('span');desc.textContent=preset.desc;
+  button.append(title,desc);button.onclick=()=>createPedagogicalMural(preset.id);
+  root.appendChild(button);
+ }
+ dialog.showModal();
+}
+async function createPedagogicalMural(presetId){
+ if(replicationBusy||!user)return;
+ const preset=pedagogicalPresets.find(x=>x.id===presetId),classId=$('classSelect').value;
+ if(!preset||!classId)return msg('Selecione uma turma antes de criar o modelo.','status',true);
+ const title=prompt('Título do novo mural:',preset.name.replace(/^[^\p{L}]+/u,'').trim());
+ if(!title?.trim())return;
+ if(!confirm('Criar um novo mural com o modelo '+preset.name+' nesta turma?'))return;
+ replicationBusy=true;let created=null;
+ try{
+  const mr=await sb.from('lm_murals').insert({class_id:classId,owner_id:user.id,title:title.trim(),description:preset.desc,student_enabled:false}).select('id').single();
+  if(mr.error)throw mr.error;created=mr.data.id;
+  for(let i=0;i<preset.sections.length;i++){
+   const [name,heading,guide]=preset.sections[i];
+   const section=await sb.from('lm_sections').insert({mural_id:created,title:name,position:i}).select('id').single();
+   if(section.error)throw section.error;
+   const card=await sb.from('lm_cards').insert({section_id:section.data.id,author_id:user.id,title:heading,author_label:'Orientação do professor',body:guide,elements:[],layout:'organized',origin:'teacher'});
+   if(card.error)throw card.error;
+  }
+  $('pedagogicalDialog').close();await selectClass();
+  await openMural(created);msg('Modelo pedagógico criado. Revise os cartões antes de compartilhar.');
+ }catch(e){msg('Não foi possível concluir o modelo: '+e.message+(created?' Um mural parcial pode ter sido criado; revise a turma.':''),'status',true)}
+ finally{replicationBusy=false}
+}
