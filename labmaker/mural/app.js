@@ -627,3 +627,41 @@ async function submitClassPoll(event){
  }catch(err){status.textContent='Não foi possível criar: '+err.message}
  finally{button.disabled=false}
 }
+
+async function openPollResults(){
+ if(!mural||mural.owner_id!==user.id)return;
+ $('pollResultsDialog').showModal();
+ await refreshPollResults();
+}
+async function refreshPollResults(){
+ const root=$('pollResultsList');root.textContent='Carregando resultados…';
+ const result=await sb.rpc('lm_poll_teacher_results',{p_mural:mural.id});
+ if(result.error){root.textContent='Erro: '+result.error.message;return}
+ const polls=Array.isArray(result.data)?result.data:[];
+ root.replaceChildren();
+ if(!polls.length){root.textContent='Ainda não há enquetes neste mural.';return}
+ for(const poll of polls){
+  const item=document.createElement('section');item.className='poll-result-item';
+  const heading=document.createElement('h3');heading.textContent=poll.question;item.append(heading);
+  const count=Array.isArray(poll.counts)?poll.counts.map(Number):[];
+  const total=count.reduce((sum,n)=>sum+(Number.isFinite(n)?n:0),0);
+  const summary=document.createElement('p');summary.className='muted';summary.textContent=total+' voto(s) · '+(poll.closed?'Encerrada':'Aberta');item.append(summary);
+  (Array.isArray(poll.options)?poll.options:[]).forEach((option,i)=>{
+   const n=count[i]||0,pct=total?Math.round(n/total*100):0;
+   const row=document.createElement('div');row.className='poll-result-row';
+   const labels=document.createElement('div');const name=document.createElement('span');name.textContent=option;
+   const value=document.createElement('strong');value.textContent=n+' ('+pct+'%)';labels.append(name,value);
+   const track=document.createElement('div');track.className='poll-result-track';
+   const fill=document.createElement('div');fill.className='poll-result-fill';fill.style.width=pct+'%';track.append(fill);row.append(labels,track);item.append(row);
+  });
+  const actions=document.createElement('div');actions.className='poll-result-actions';
+  const toggle=document.createElement('button');toggle.className='btn';toggle.textContent=poll.closed?'Reabrir votação':'Encerrar votação';
+  toggle.onclick=()=>togglePollClosed(poll.id,!poll.closed);actions.append(toggle);item.append(actions);root.append(item);
+ }
+}
+async function togglePollClosed(id,closed){
+ if(!mural||mural.owner_id!==user.id)return;
+ const response=await sb.from('lm_polls').update({closed}).eq('id',id).eq('mural_id',mural.id).select('id').single();
+ if(response.error)return msg('Erro: '+response.error.message,'status',true);
+ await refreshPollResults();
+}
