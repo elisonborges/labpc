@@ -97,6 +97,19 @@ $('trainTest').onclick=async()=>{
   el.textContent='Palpite: '+name+' · Similaridade: '+Math.round(score*100)+'% · '+(reliable?'confiança suficiente':'resultado incerto')+' · '+(name===expected?'corresponde à palavra escolhida':'diferente da palavra escolhida')+'. Base: '+data.examples.length+' exemplo(s) aprovado(s). A similaridade não é uma probabilidade.';
  }catch(e){el.textContent='Não foi possível testar: '+e.message}finally{btn.disabled=false}
 };
-$('trainSave').onclick=async()=>{const btn=$('trainSave'),word=$('trainCategory').value;const strokes=trainStrokes.map(line=>{const step=Math.max(1,Math.ceil(line.length/160));return line.filter((_,i)=>i%step===0||i===line.length-1)}).filter(line=>line.length>=2).slice(0,35);if(strokes.flat().length<12){$('trainStatus').textContent='Faça um desenho com mais traços antes de salvar.';return}btn.disabled=true;try{const result=await call('/examples','POST',{category:word,strokes});$('trainStatus').textContent=result.duplicate?'Esse desenho já está pendente ou aprovado.':'Desenho de '+word+' salvo no Neon, aguardando revisão.';if(!result.duplicate){trainStrokes=[];trainCtx.clearRect(0,0,720,480)}await update()}catch(e){$('trainStatus').textContent=e.message}finally{btn.disabled=false}};
+$('trainSave').onclick=async()=>{const btn=$('trainSave'),word=$('trainCategory').value;const strokes=trainStrokes.map(line=>{const step=Math.max(1,Math.ceil(line.length/160));return line.filter((_,i)=>i%step===0||i===line.length-1)}).filter(line=>line.length>=2).slice(0,35);if(strokes.flat().length<12){$('trainStatus').textContent='Faça um desenho com mais traços antes de salvar.';return}btn.disabled=true;try{
+ // Aviso pedagógico: desenhos semelhantes podem ser úteis; apenas a duplicata exata é bloqueada no servidor.
+ const example=trainingGrid(strokes);
+ let similar=0;
+ try{
+  const [approved,pending]=await Promise.all([call('/examples/approved'),call('/examples/pending')]);
+  for(const e of [...(approved.examples||[]),...(pending.examples||[])]){
+   if(e.category!==word||!Array.isArray(e.strokes))continue;
+   const ref=trainingGrid(e.strokes);
+   if(ref)similar=Math.max(similar,trainingCompare(example,ref));
+  }
+ }catch(err){$('trainStatus').textContent='Não foi possível comparar desenhos existentes; o servidor verificará duplicatas exatas.'}
+ if(similar>=.90&&!confirm('Já existe um desenho de '+word+' muito semelhante ('+Math.round(similar*100)+'% de similaridade). Deseja enviar mesmo assim para revisão?')){ $('trainStatus').textContent='Envio cancelado. O desenho permanece no quadro.';return }
+ const result=await call('/examples','POST',{category:word,strokes});$('trainStatus').textContent=result.duplicate?'Esse desenho já está pendente ou aprovado.':'Desenho de '+word+' salvo no Neon, aguardando revisão.';if(!result.duplicate){trainStrokes=[];trainCtx.clearRect(0,0,720,480)}await update()}catch(e){$('trainStatus').textContent=e.message}finally{btn.disabled=false}};
 fetch('/auth/session',{credentials:'same-origin'}).then(r=>{if(r.ok)return update()}).catch(()=>{});
 </script></body></html>
