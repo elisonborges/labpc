@@ -603,3 +603,5 @@ async function createPedagogicalMural(presetId){
  }catch(e){msg('Não foi possível concluir o modelo: '+e.message+(created?' Um mural parcial pode ter sido criado; revise a turma.':''),'status',true)}
  finally{replicationBusy=false}
 }
+
+async function createClassPoll(){if(!mural||mural.owner_id!==user.id)return;const question=prompt('Pergunta da enquete:');if(!question?.trim())return;const answer=prompt('Opções, uma por linha (2 a 6):');if(answer===null)return;const opts=answer.split('\n').map(x=>x.trim()).filter(Boolean);if(opts.length<2||opts.length>6||question.length>250||opts.some(x=>x.length>120))return msg('Informe de 2 a 6 opções válidas.','status',true);const q=await sb.from('lm_polls').insert({mural_id:mural.id,question:question.trim(),options:opts});if(q.error)return msg(q.error.message,'status',true);msg('Enquete criada! Os alunos poderão votar pelo link do mural.')}
