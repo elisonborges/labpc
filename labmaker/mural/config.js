@@ -1,0 +1,1 @@
+window.LM_CONFIG={url:"https://wdlmfjxyuwgdiyukmpir.supabase.co",key:"sb_publishable_F2HfP-vkw7rLYSP-5oPTzQ_XMe_9O86"};
