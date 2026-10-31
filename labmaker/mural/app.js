@@ -250,3 +250,20 @@ async function loadGroupLinks(m){
   actions.append(copy,qr);heading.appendChild(actions);row.append(heading,output);node.appendChild(row)
  }
 }
+
+let presentationItems=[],presentationIndex=0;
+function startPresentation(){
+ if(!mural)return;
+ presentationItems=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({section:section.title,card:c})));
+ if(!presentationItems.length){msg('Nenhum cartão aprovado para apresentar.','status',true);return}
+ presentationIndex=0;$('slideScreen').classList.remove('hide');renderPresentation()
+}
+function renderPresentation(){
+ const item=presentationItems[presentationIndex];if(!item)return;const c=item.card;
+ $('slideCount').textContent=(presentationIndex+1)+' / '+presentationItems.length;
+ $('slideContent').innerHTML='<span class="muted">'+esc(item.section)+' · '+esc(c.author_label)+'</span><h2>'+esc(c.title)+'</h2>'+(c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''));
+}
+function moveSlide(step){if(!$('slideScreen')||$('slideScreen').classList.contains('hide')||!presentationItems.length)return;presentationIndex=(presentationIndex+step+presentationItems.length)%presentationItems.length;renderPresentation()}
+function closePresentation(){$('slideScreen').classList.add('hide');if(document.fullscreenElement=== $('slideScreen'))document.exitFullscreen().catch(()=>{})}
+async function toggleSlideFullscreen(){const screen=$('slideScreen');try{if(document.fullscreenElement===screen)await document.exitFullscreen();else await screen.requestFullscreen()}catch{msg('O navegador não permitiu tela cheia.','status',true)}}
+document.addEventListener('keydown',event=>{if($('slideScreen')?.classList.contains('hide'))return;if(['ArrowRight','ArrowDown'].includes(event.key)){event.preventDefault();moveSlide(1)}else if(['ArrowLeft','ArrowUp'].includes(event.key)){event.preventDefault();moveSlide(-1)}else if(event.key==='Escape')closePresentation()});
