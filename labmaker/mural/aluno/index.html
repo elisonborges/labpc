@@ -12,7 +12,7 @@ const $=id=>document.getElementById(id),s=supabase.createClient(LM_CONFIG.url,LM
 function e(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]))}
 const editStorage='labmaker-edit-keys';function getEditKeys(){try{return JSON.parse(localStorage.getItem(editStorage)||'{}')}catch{return {}}}function storeEditKey(id,secret){try{const keys=getEditKeys();keys[id]=secret;localStorage.setItem(editStorage,JSON.stringify(keys))}catch{alert('Não foi possível guardar a chave de edição neste navegador.')}}
 function safe(v){try{return new URL(v).protocol==='https:'}catch{return false}}
-function validInlineImage(v){return typeof v==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<15000}
+function validInlineImage(v){return typeof v==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<95000}
 const layoutKey='labmaker-student-layout-'+(token||'');let studentLayout='columns';try{const saved=localStorage.getItem(layoutKey);if(['columns','grid','timeline'].includes(saved))studentLayout=saved}catch(err){}
 function setStudentLayout(value){if(!['columns','grid','timeline'].includes(value))return;studentLayout=value;const lanes=$('lanes');lanes.className='lanes layout-'+value;$('studentLayout').value=value;const nav=value!=='grid'&&lanes.children.length>1;$('viewPrevious').hidden=!nav;$('viewNext').hidden=!nav;updateViewCount();try{localStorage.setItem(layoutKey,value)}catch(err){}}
 function updateViewCount(){const lanes=$('lanes'),sections=[...lanes.children];if(studentLayout==='grid'||sections.length<2){$('viewCount').textContent=sections.length+' mesa(s)';return}let at=0,least=Infinity;sections.forEach((el,i)=>{const d=Math.abs(el.offsetLeft-lanes.offsetLeft-lanes.scrollLeft);if(d<least){least=d;at=i}});$('viewCount').textContent='Mesa '+(at+1)+' de '+sections.length}
@@ -71,7 +71,29 @@ window.addEventListener('pagehide',saveStudentDraft);
 $('save').onclick=async()=>{if(editMode==='organized'&&$('mediaUrl').value.trim()&&!safe($('mediaUrl').value.trim()))return $('sendStatus').textContent='Informe uma URL HTTPS válida.';const name=$('name').value.trim(),title=$('cardTitle').value.trim(),body=$('body').value;if(name.length<2||!title)return $('sendStatus').textContent='Informe a equipe e o título.';$('save').disabled=true;const args={p_token:token,p_name:name,p_title:title,p_body:editMode==='free'?'':body,p_elements:editMode==='free'?shapes:organizedElements(),p_layout:editMode,p_group:groupRoom};if(editingId){args.p_card=editingId;args.p_secret=getEditKeys()[editingId]}else args.p_section=selected;const r=await s.rpc(editingId?'lm_student_update_own':'lm_student_create_editable',args);$('save').disabled=false;if(r.error)return $('sendStatus').textContent='Não foi possível salvar. '+r.error.message;if(!editingId&&r.data?.id&&r.data?.secret)storeEditKey(r.data.id,r.data.secret);try{localStorage.removeItem(studentDraftKey)}catch(err){}editingId=null;$('save').textContent='Publicar cartão';$('dialog').close();if(window.studentModeration)alert('Cartão enviado para aprovação do professor.');$('cardTitle').value='';$('body').value='';shapes=[];richRanges=[];localImageData='';$('studentImagePreview').hidden=true;$('localImage').value='';$('imageStatus').textContent='A imagem será compactada para caber no cartão.';active=-1;$('mediaUrl').value='';$('cardColor').value='#ffffff';$('fontSize').value='16';$('fontColor').value='#09224a';$('textAlign').value='left';$('boldText').setAttribute('aria-pressed','false');$('italicText').setAttribute('aria-pressed','false');templateTitle=null;$('cardTitle').readOnly=false;setEditMode('organized');await load()};load();setInterval(()=>{if(!$('dialog').open)load()},15000);
 
 let editMode='organized',shapes=[],active=-1,richRanges=[],localImageData='';
-async function processStudentImage(file){localImageData='';$('studentImagePreview').hidden=true;if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>12*1024*1024){$('imageStatus').textContent='Selecione JPG, PNG ou WebP de até 12 MB.';return}try{const bitmap=await createImageBitmap(file);const canvas=document.createElement('canvas');const scale=Math.min(1,400/Math.max(bitmap.width,bitmap.height));canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();let data='';for(const quality of [.68,.48,.32,.22]){data=canvas.toDataURL('image/jpeg',quality);if(data.length<10500)break}if(data.length>=10500){$('imageStatus').textContent='Imagem muito detalhada para o limite atual. Use outra imagem.';return}localImageData=data;$('studentImagePreview').src=data;$('studentImagePreview').hidden=false;$('mediaUrl').value='';mediaType='image';$('imageStatus').textContent='Imagem pronta para publicar ('+Math.round(data.length/1024)+' KB).'}catch(err){$('imageStatus').textContent='Não foi possível preparar a imagem.'}}
+async function processStudentImage(file){
+ if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>12*1024*1024){$('imageStatus').textContent='Selecione JPG, PNG ou WebP de até 12 MB.';return}
+ $('imageStatus').textContent='Otimizando imagem…';
+ try{
+  const image=await createImageBitmap(file),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');let data='';
+  for(const edge of [500,400,320,260,200,150]){
+   const scale=Math.min(1,edge/Math.max(image.width,image.height));
+   canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+   ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+   for(const quality of [.72,.6,.45,.32,.22,.14]){
+    data=canvas.toDataURL('image/jpeg',quality);if(data.length<10500)break;
+   }
+   if(data.length<10500)break;
+  }
+  image.close();
+  if(data.length>=10500)throw Error('Imagem muito detalhada para este cartão. Escolha outra imagem.');
+  localImageData=data;$('studentImagePreview').src=data;$('studentImagePreview').hidden=false;
+  $('mediaUrl').value='';mediaType='image';
+  $('imageStatus').textContent='Imagem pronta ('+canvas.width+' × '+canvas.height+', '+Math.round(data.length*.75/1024)+' KB).';
+ }catch(err){$('imageStatus').textContent=err.message||'Não foi possível preparar a imagem.'}
+}
+
 $('localImage').addEventListener('change',()=>processStudentImage($('localImage').files?.[0]));
 const dropZone=$('studentImageDrop');
 dropZone.addEventListener('dragover',event=>{if(!event.dataTransfer?.types.includes('Files'))return;event.preventDefault();dropZone.classList.add('image-drop-active')});
