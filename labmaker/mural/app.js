@@ -59,7 +59,7 @@ async function getShortLink(type,id,original){
  const key=type+':'+id;
  if(shortLinkCache.has(key))return shortLinkCache.get(key);
  try{
-  let res=await sb.from('anna_short_links').select('code,active').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).maybeSingle();
+  let res=await sb.from('anna_short_links').select('code,active').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
   if(res.error)throw res.error;
   if(!res.data){
    const created=await sb.from('anna_short_links').insert({target_type:type,target_id:id,owner_id:user.id}).select('code,active').single();
@@ -75,6 +75,24 @@ async function getShortLink(type,id,original){
   }
  }catch(e){console.warn('Encurtador indisponível; utilizando link original.',e)}
  return original;
+}
+async function personalizeShareLink(){
+ if(!shareTarget||!user||!shareTarget.student_enabled)return $('shareNotice').textContent='Ative primeiro o compartilhamento.';
+ const code=$('customShortCode').value.trim().toLowerCase();
+ if(!/^[a-z][a-z0-9-]{5,31}$/.test(code))return $('shareNotice').textContent='Use 6 a 32 caracteres: letras minúsculas, números e hífen; comece por letra.';
+ const current=shareTarget;
+ $('shareNotice').textContent='Verificando disponibilidade...';
+ const existing=await sb.from('anna_short_links').select('code,target_id,active').eq('code',code).maybeSingle();
+ if(existing.error)return $('shareNotice').textContent='Falha ao verificar nome: '+existing.error.message;
+ if(existing.data){
+  if(existing.data.target_id!==current.id)return $('shareNotice').textContent='Esse nome já está em uso.';
+  if(!existing.data.active)return $('shareNotice').textContent='Esse nome está desativado.';
+ }else{
+  const created=await sb.from('anna_short_links').insert({code,target_type:'mural',target_id:current.id,owner_id:user.id}).select('code').single();
+  if(created.error)return $('shareNotice').textContent=created.error.code==='23505'?'Nome indisponível.':'Não foi possível salvar: '+created.error.message;
+ }
+ shortLinkCache.set('mural:'+current.id,'https://labpc.annaone.com.br/m/?c='+code);
+ if(shareTarget?.id===current.id){$('shareLink').value=shortLinkCache.get('mural:'+current.id);$('shareQr').replaceChildren();$('shareNotice').textContent='Nome personalizado salvo; o link anterior continua válido.';}
 }
 async function muralShareLink(m){return m.student_enabled?getShortLink('mural',m.id,shareUrl(m)):shareUrl(m)}
 function shareUrl(m){const url=new URL('./aluno/',location.href);url.searchParams.set('m',m.share_token);return url.toString()}
