@@ -5,7 +5,7 @@ import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import pg from 'pg';
 const { Pool } = pg;
 const db = new Pool({ connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:true},max:3 });
-const categories = new Set(['SOL','CASA','FLOR','ÁRVORE','BOLA','PEIXE','CORAÇÃO','ESTRELA','LUA','CARRO']);
+const categories = new Set(["SOL","CASA","FLOR","ÁRVORE","BOLA","PEIXE","CORAÇÃO","ESTRELA","LUA","CARRO","GATO","CACHORRO","BORBOLETA","BICICLETA","AVIÃO","BARCO","CHUVA","NUVEM","GUARDA-CHUVA","RELÓGIO","ÓCULOS","CHAVE","LIVRO","XÍCARA","PIZZA","MAÇÃ","BANANA","SORVETE","ROBÔ","CASA DE PASSARINHO","COELHO","PÁSSARO","COGUMELO","BOTA","FANTASMA"]);
 const secret = process.env.LABPC_TEACHER_TOKEN;
 if(!process.env.DATABASE_URL || !secret || secret.length<32) throw Error('Configure DATABASE_URL e LABPC_TEACHER_TOKEN forte.');
 function authorized(req){
