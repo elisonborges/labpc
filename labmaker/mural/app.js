@@ -272,19 +272,29 @@ async function loadGroupLinks(m){
 let presentationItems=[],presentationIndex=0;
 function startPresentation(){
  if(!mural)return;
- presentationItems=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({section:section.title,card:c})));
- if(!presentationItems.length){msg('Nenhum cartão aprovado para apresentar.','status',true);return}
- presentationIndex=0;$('slideScreen').classList.remove('hide');renderPresentation()
+ const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));
+ if(!accepted.length){msg('Nenhum cartão aprovado para apresentar.','status',true);return}
+ presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?[{type:'section',name:section.title,count:own.length},...own]:[]})];
+ presentationIndex=0;$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
 }
 function renderPresentation(){
- const item=presentationItems[presentationIndex];if(!item)return;const c=item.card;
- $('slideCount').textContent=(presentationIndex+1)+' / '+presentationItems.length;
- $('slideContent').innerHTML='<span class="muted">'+esc(item.section)+' · '+esc(c.author_label)+'</span><h2>'+esc(c.title)+'</h2>'+(c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''));
+ const item=presentationItems[presentationIndex];if(!item)return;
+ const stage=$('slideContent');
+ const count=presentationItems.length;
+ $('slideCount').textContent=(presentationIndex+1)+' / '+count;
+ $('slideProgress').style.width=((presentationIndex+1)/count*100)+'%';
+ $('slideJump').replaceChildren(...presentationItems.map((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+' · '+(it.type==='cover'?'Capa':it.type==='section'?'Mesa: '+it.name:it.card.title);return o}));
+ $('slideJump').value=String(presentationIndex);
+ if(item.type==='cover'){stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">LabMaker · Apresentação</p><h1>'+esc(mural.title)+'</h1><p>'+esc(mural.description||'Produções da turma')+'</p><small>'+sections.length+' mesas · '+presentationItems.filter(x=>x.type==='card').length+' cartões</small></div>';return}
+ if(item.type==='section'){stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">Próxima mesa</p><h1>'+esc(item.name)+'</h1><p>'+item.count+' '+(item.count===1?'cartão':'cartões')+' para apresentar</p></div>';return}
+ const c=item.card;
+ stage.innerHTML='<span class="muted">'+esc(item.section)+' · '+esc(c.author_label||'Equipe')+'</span><h2>'+esc(c.title)+'</h2>'+(c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''));
 }
-function moveSlide(step){if(!$('slideScreen')||$('slideScreen').classList.contains('hide')||!presentationItems.length)return;presentationIndex=(presentationIndex+step+presentationItems.length)%presentationItems.length;renderPresentation()}
-function closePresentation(){$('slideScreen').classList.add('hide');if(document.fullscreenElement=== $('slideScreen'))document.exitFullscreen().catch(()=>{})}
+function moveSlide(step){if($('slideScreen')?.classList.contains('hide')||!presentationItems.length)return;presentationIndex=Math.max(0,Math.min(presentationItems.length-1,presentationIndex+step));renderPresentation()}
+function jumpSlide(value){const i=Number(value);if(Number.isInteger(i)&&i>=0&&i<presentationItems.length){presentationIndex=i;renderPresentation()}}
+function closePresentation(){$('slideScreen').classList.add('hide');if(document.fullscreenElement===$('slideScreen'))document.exitFullscreen().catch(()=>{})}
 async function toggleSlideFullscreen(){const screen=$('slideScreen');try{if(document.fullscreenElement===screen)await document.exitFullscreen();else await screen.requestFullscreen()}catch{msg('O navegador não permitiu tela cheia.','status',true)}}
-document.addEventListener('keydown',event=>{if($('slideScreen')?.classList.contains('hide'))return;if(['ArrowRight','ArrowDown'].includes(event.key)){event.preventDefault();moveSlide(1)}else if(['ArrowLeft','ArrowUp'].includes(event.key)){event.preventDefault();moveSlide(-1)}else if(event.key==='Escape')closePresentation()});
+document.addEventListener('keydown',event=>{if($('slideScreen')?.classList.contains('hide')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(['ArrowRight','ArrowDown','PageDown',' '].includes(event.key)){event.preventDefault();moveSlide(1)}else if(['ArrowLeft','ArrowUp','PageUp'].includes(event.key)){event.preventDefault();moveSlide(-1)}else if(event.key==='Home'){event.preventDefault();jumpSlide(0)}else if(event.key==='End'){event.preventDefault();jumpSlide(presentationItems.length-1)}else if(event.key==='Escape')closePresentation()});
 
 async function printSharedMural(){
  if(!shareTarget)return;
