@@ -72,7 +72,7 @@ const server=http.createServer(async(req,res)=>{
  }
  if(req.url==='/health'&&req.method==='GET')return send(res,200,{ok:true});
  if(req.url==='/auth/session'&&req.method==='GET'){
-  const who=await adminIdentity(req);return send(res,who?200:401,{authenticated:!!who});
+  const who=await adminIdentity(req);if(!who&&(req.headers.accept||'').includes('text/html')){res.writeHead(303,{'location':'/admin','cache-control':'no-store'});res.end();return}return send(res,who?200:401,{authenticated:!!who});
  }
  if(req.url==='/auth/logout'&&req.method==='POST'){
   if(!siteRequest(req))return send(res,403,{error:'Origem não autorizada'});
@@ -109,7 +109,13 @@ const server=http.createServer(async(req,res)=>{
  }
  // A API de escrita é exclusiva do professor até existir uma autenticação institucional para envio.
  if(req.method!=='GET'&&!siteRequest(req))return send(res,403,{error:'Origem não autorizada'});
- const identity=await adminIdentity(req);if(!identity)return send(res,401,{error:'Acesso restrito ao administrador'});
+ const identity=await adminIdentity(req);
+ if(!identity){
+  // Navegação direta no navegador: exibir login, não um JSON de API.
+  const wantsHtml=req.method==='GET' && (req.headers.accept||'').includes('text/html');
+  if(wantsHtml){res.writeHead(303,{'location':'/admin','cache-control':'no-store'});res.end();return}
+  return send(res,401,{error:'Acesso restrito ao administrador'});
+ }
  try{
  if(req.url==='/examples/approved'&&req.method==='GET'){
  const data=await db.query("SELECT id,category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 300");
