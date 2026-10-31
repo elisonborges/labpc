@@ -567,6 +567,18 @@ const pedagogicalPresets=[
  {id:'research',name:'🔬 Pesquisa',desc:'Pergunta, hipótese, investigação e resultados.',sections:[['Pergunta','O que vamos investigar?','Descreva o problema ou a pergunta da pesquisa.'],['Hipótese','Nossa hipótese','Registre a previsão inicial do grupo.'],['Investigação','Como pesquisamos','Anote fontes, experimentos e evidências.'],['Resultados','O que descobrimos','Apresente resultados e referências.'],['Conclusão','Aprendizagens','Explique o que a equipe aprendeu.']]},
  {id:'mindmap',name:'🧠 Mapa mental',desc:'Tema central e ramificações de ideias.',sections:[['Tema central','Assunto principal','Escreva o conceito que será explorado.'],['Conceitos','Ideias relacionadas','Liste palavras-chave e conceitos associados.'],['Conexões','Relações entre ideias','Explique como os conceitos se conectam.'],['Síntese','Mapa final','Organize a síntese visual do grupo.']]},
  {id:'exhibition',name:'🏛️ Exposição',desc:'Abertura, obras das equipes e reflexão coletiva.',sections:[['Boas-vindas','Sobre nossa exposição','Apresente o objetivo e o tema da exposição.'],['Produções','Trabalhos das equipes','Cada equipe publica seu trabalho e uma breve explicação.'],['Processo','Bastidores','Compartilhe como as produções foram desenvolvidas.'],['Reflexões','O que aprendemos','Registre descobertas e comentários finais.']]}
+ ,{id:'ad-guided',name:'📢 Propaganda guiada',desc:'Criação orientada de anúncios e campanhas: produto, público, slogan, argumentos, imagem e chamada.',sections:[
+ ['Produto ou campanha','O que vamos divulgar?','Escolha o produto, projeto ou campanha. Explique a proposta em uma frase.'],
+ ['Público-alvo','Para quem é a propaganda?','Defina a quem a mensagem se destina e quais necessidades atende.'],
+ ['Slogan','Nossa frase de impacto','Crie uma frase curta, original e fácil de lembrar.'],
+ ['Argumentos','Por que escolher esta ideia?','Apresente qualidades, benefícios e informações verificáveis.'],
+ ['Imagem e identidade visual','Como vamos chamar atenção?','Selecione cores, fotografias ou desenhos próprios e organize o visual.'],
+ ['Chamada final','Qual ação queremos incentivar?','Finalize com um convite claro: conheça, participe, descubra ou apoie.']
+ ]},
+ {id:'ad-free',name:'🎨 Propaganda livre',desc:'Espaço de criação aberta para anúncios visuais, com o editor livre e suas formas, imagens, cores e textos.',sections:[
+ ['Ateliê de propaganda','Crie seu cartaz visual','Clique em + Card nesta mesa e escolha o modo 🎨 Livre. Use textos, formas, imagens e desenhos para montar seu anúncio. Dica: inclua uma mensagem principal, slogan e chamada final.']
+ ]}
+
 ];
 function openPedagogicalTemplates(){
  const dialog=$('pedagogicalDialog'),root=$('pedagogicalChoices');if(!dialog||!root)return;
