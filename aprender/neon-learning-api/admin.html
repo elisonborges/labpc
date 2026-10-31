@@ -16,6 +16,13 @@ $('importBtn').onclick=async()=>{
   const batch=JSON.parse(await file.text());
   if(batch.format!=='labpc-desenhos-v1'||!Array.isArray(batch.examples)||batch.examples.length>400)throw Error('Arquivo incompatível ou grande demais.');
   const allowed=new Set(['SOL','CASA','FLOR','ÁRVORE','BOLA','PEIXE','CORAÇÃO','ESTRELA','LUA','CARRO']);
+  const signatures=new Set();
+  for(const entry of batch.examples){
+   if(!allowed.has(entry.category)||!Array.isArray(entry.strokes)||entry.strokes.length>35||!entry.strokes.every(st=>Array.isArray(st)&&st.length>=2&&st.length<=170&&st.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isInteger(n)&&n>=0&&n<=720))))throw Error('Arquivo contém desenho inválido. Nenhum exemplo enviado.');
+   signatures.add(JSON.stringify([entry.category,entry.strokes]));
+  }
+  if(batch.examples.length===0)throw Error('Arquivo sem desenhos.');
+  if(!confirm('Enviar '+signatures.size+' desenhos distintos para revisão? Nenhum será aprovado automaticamente.'))return;
   let done=0;
   for(const entry of batch.examples){
    if(!allowed.has(entry.category)||!Array.isArray(entry.strokes)||entry.strokes.length>35||!entry.strokes.every(st=>Array.isArray(st)&&st.length>=2&&st.length<=170&&st.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isInteger(n)&&n>=0&&n<=720))))throw Error('Exemplo inválido. '+done+' enviados antes do erro.');
