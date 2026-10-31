@@ -285,7 +285,7 @@ $('sendCommunity').onclick=async()=>{
  const code=$('pairCode').value.trim().toUpperCase(),btn=$('sendCommunity'),status=$('sendCommunityStatus');
  if(!/^[0-9A-F]{16}$/.test(code)){status.textContent='Solicite ao professor um código válido.';return}
  const examples=[];
- for(const word of ['SOL','CASA','FLOR','ÁRVORE','BOLA','PEIXE','CORAÇÃO','ESTRELA','LUA','CARRO'])for(const lines of learned[word]||[]){
+ for(const word of Object.keys(models))for(const lines of learned[word]||[]){
   const strokes=compactStrokes(lines);
   if(strokes.length&&strokes.every(st=>st.length>=2&&st.length<=170&&st.every(p=>p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=720))))examples.push({category:word,strokes});
  }
@@ -303,7 +303,7 @@ $('sendCommunity').onclick=async()=>{
 };
 $('exportExamples').onclick=()=>{
  const examples=[];
- for(const word of ['SOL','CASA','FLOR','ÁRVORE','BOLA','PEIXE','CORAÇÃO','ESTRELA','LUA','CARRO'])for(const lines of learned[word]||[]){
+ for(const word of Object.keys(models))for(const lines of learned[word]||[]){
   const strokes=compactStrokes(lines);
   if(strokes.flat().length>=6&&strokes.length<=35&&strokes.every(st=>st.length<=170&&st.every(p=>p.every(n=>Number.isFinite(n)&&n>=0&&n<=720))))examples.push({category:word,strokes});
  }
