@@ -111,7 +111,7 @@ const server=http.createServer(async(req,res)=>{
  // Somente amostras APROVADAS são publicamente legíveis; nenhuma rota pública escreve dados.
  if(req.url==='/examples/approved'&&req.method==='GET'){
   try {
-   const data=await db.query("SELECT category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 150");
+   const data=await db.query("SELECT category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 500");
    return send(res,200,{examples:data.rows});
   }catch(e){console.error('Consulta de exemplos:',e.message);return send(res,503,{error:'Biblioteca temporariamente indisponível'})}
  }
