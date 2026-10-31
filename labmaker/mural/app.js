@@ -291,3 +291,45 @@ function printMural(){
  node.innerHTML='<h1>'+esc(mural.title)+'</h1><p>'+esc(mural.description||'')+'</p><small>AnnA One · LabMaker Mural</small>'+content;
  window.print();
 }
+
+async function exportSharedTable(format){
+ if(!shareTarget)return;
+ const id=shareTarget.id;
+ closeSharePanel();
+ if(mural?.id!==id)await openMural(id);
+ if(mural?.id===id)exportMuralTable(format);
+}
+function exportMuralRows(){
+ if(!mural)return [];
+ return sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='pending'&&c.moderation_status!=='rejected').map(c=>({
+  'Mural':mural.title,
+  'Mesa / Trio':section.title,
+  'Equipe / Autor':c.author_label||'',
+  'Título':c.title||'',
+  'Conteúdo':c.body||((Array.isArray(c.elements)?c.elements:[]).filter(o=>o.type==='text').map(o=>o.value).join(' | ')),
+  'Modo':c.layout==='free'?'Livre':'Organizado',
+  'Origem':c.origin==='student'?'Aluno':'Professor',
+  'Data de criação':c.created_at?new Date(c.created_at).toLocaleString('pt-BR'):'',
+  'Imagem URL':safeURL(c.image_url)?c.image_url:'',
+  'Anexo URL':(Array.isArray(c.elements)?c.elements:[]).filter(o=>o.type==='attachment'&&safeURL(o.value)).map(o=>o.value).join(' | ')
+ })));
+}
+function exportMuralTable(format){
+ if(!mural)return msg('Abra um mural para exportar.','status',true);
+ const rows=exportMuralRows();
+ const keys=['Mural','Mesa / Trio','Equipe / Autor','Título','Conteúdo','Modo','Origem','Data de criação','Imagem URL','Anexo URL'];
+ const safeCell=value=>{const v=String(value??'');return /^[\s]*[=+\-@\t\r]/.test(v)?"'"+v:v};
+ const cleanRows=rows.map(row=>Object.fromEntries(keys.map(k=>[k,safeCell(row[k])])));
+ const name='LabMaker-'+String(mural.title||'mural').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,55);
+ if(format==='xlsx'){
+  if(typeof XLSX==='undefined')return msg('Biblioteca Excel indisponível. Use CSV.','status',true);
+  const ws=XLSX.utils.json_to_sheet(cleanRows,{header:keys});
+  ws['!cols']=keys.map(k=>({wch:k==='Conteúdo'?65:k==='Mural'?32:24}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Cartões');
+  XLSX.writeFile(wb,name+'.xlsx');msg(rows.length+' cartão(ões) exportado(s) para Excel.');return;
+ }
+ const csv=[keys,...cleanRows.map(row=>keys.map(k=>row[k]))].map(line=>line.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download=name+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ msg(rows.length+' cartão(ões) exportado(s) para CSV.');
+}
