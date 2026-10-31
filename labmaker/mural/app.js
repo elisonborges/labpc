@@ -167,11 +167,23 @@ async function deleteMuralSection(id){if(replicationBusy||!mural||mural.owner_id
 // Enter confirma campos do editor; em textos longos, Enter continua criando nova linha.
 $('editor').addEventListener('keydown',event=>{if(event.key!=='Enter'||event.shiftKey||event.isComposing||event.repeat)return;const node=event.target;if(!node.matches('input:not([type=color]):not([type=number])'))return;event.preventDefault();if(node.id==='objectValue'){changeObject();node.blur();return}saveCard()});
 
-async function sectionActions(id){
+let activeSectionMenu=null;
+function sectionActions(id){
  if(!mural||mural.owner_id!==user.id)return msg('Somente o responsável pode organizar as mesas.','status',true);
+ if(activeSectionMenu===id){closeSectionMenu();return}
+ closeSectionMenu();
+ const trigger=document.querySelector('[data-section-actions="'+id+'"]');if(!trigger)return;
+ const menu=document.createElement('div');menu.id='sectionPopup';menu.className='section-popup';menu.setAttribute('role','menu');
+ const items=[['1','✏️','Renomear seção'],['2','➕','Nova seção acima'],['3','➕','Nova seção abaixo'],['4','⬆️','Mover para cima'],['5','⬇️','Mover para baixo'],['6','📋','Copiar nome'],['7','🗑️','Excluir seção']];
+ items.forEach(([n,icon,label])=>{const btn=document.createElement('button');btn.type='button';btn.setAttribute('role','menuitem');btn.className='section-menu-item'+(n==='7'?' danger':'');btn.textContent=icon+'  '+label;btn.onclick=()=>{closeSectionMenu();performSectionAction(id,n)};menu.appendChild(btn)});
+ trigger.parentElement.appendChild(menu);activeSectionMenu=id;trigger.setAttribute('aria-expanded','true');menu.querySelector('button').focus();
+}
+function closeSectionMenu(){document.getElementById('sectionPopup')?.remove();document.querySelectorAll('[data-section-actions]').forEach(b=>b.setAttribute('aria-expanded','false'));activeSectionMenu=null}
+document.addEventListener('click',e=>{if(activeSectionMenu&&!e.target.closest('#sectionPopup')&&!e.target.closest('[data-section-actions]'))closeSectionMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSectionMenu()});
+async function performSectionAction(id,op){
+ if(!mural||mural.owner_id!==user.id)return;
  const section=sections.find(x=>x.id===id);if(!section)return;
- const op=prompt('Ações de '+section.title+':\n1 — Renomear\n2 — Nova seção acima\n3 — Nova seção abaixo\n4 — Mover para cima\n5 — Mover para baixo\n6 — Copiar nome\n7 — Excluir seção\n\nDigite o número:');
- if(op===null)return;
  if(op==='6'){try{await navigator.clipboard.writeText(section.title);msg('Nome copiado.')}catch{prompt('Copie o nome:',section.title)}return}
  if(op==='7')return deleteMuralSection(id);
  if(op==='1'){const name=prompt('Novo nome:',section.title);if(!name?.trim())return;const q=await sb.from('lm_sections').update({title:name.trim()}).eq('id',id);if(q.error)return msg(q.error.message,'status',true);await refresh();return msg('Seção renomeada.')}
