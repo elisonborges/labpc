@@ -227,21 +227,26 @@ async function loadGroupLinks(m){
  const node=$('groupRooms');if(!node)return;node.textContent='Carregando salas...';
  const ss=await sb.from('lm_sections').select('id,title').eq('mural_id',m.id).order('position');
  if(ss.error){node.textContent='Não foi possível obter as mesas.';return}
- let links=await sb.from('lm_group_links').select('section_id,token').in('section_id',(ss.data||[]).map(x=>x.id));
+ const sections=ss.data||[];if(!sections.length){node.textContent='Crie mesas antes de gerar links de grupos.';return}
+ const links=await sb.from('lm_group_links').select('section_id,token').in('section_id',sections.map(x=>x.id));
  if(links.error){node.textContent='Erro ao carregar links: '+links.error.message;return}
  node.replaceChildren();
- for(const section of ss.data||[]){
-  const row=document.createElement('div');row.className='share-row group-row';
-  const title=document.createElement('b');title.textContent=section.title;row.appendChild(title);
-  const button=document.createElement('button');button.className='btn';button.textContent='Copiar link';row.appendChild(button);
-  button.onclick=async()=>{
-   if(!m.student_enabled){alert('Primeiro ative o compartilhamento do mural.');return}
-   let entry=links.data.find(x=>x.section_id===section.id);
-   if(!entry){const res=await sb.from('lm_group_links').insert({section_id:section.id}).select('section_id,token').single();if(res.error){alert('Falha ao criar link: '+res.error.message);return}entry=res.data;links.data.push(entry)}
-   const url=new URL('./aluno/',location.href);url.searchParams.set('g',entry.token);
-   try{await navigator.clipboard.writeText(url.toString());$('shareNotice').textContent='Link exclusivo de '+section.title+' copiado.'}catch{prompt('Copie o link da sala:',url.toString())}
-  };
-  node.appendChild(row);
+ async function getRoomUrl(section){
+  if(!m.student_enabled){$('shareNotice').textContent='Ative primeiro o compartilhamento do mural.';return null}
+  let entry=(links.data||[]).find(x=>x.section_id===section.id);
+  if(!entry){const res=await sb.from('lm_group_links').insert({section_id:section.id}).select('section_id,token').single();if(res.error){$('shareNotice').textContent='Falha ao criar link: '+res.error.message;return null}entry=res.data;links.data.push(entry)}
+  const url=new URL('./aluno/',location.href);url.searchParams.set('g',entry.token);return url.toString();
  }
- if(!(ss.data||[]).length)node.textContent='Crie mesas antes de gerar links de grupos.';
+ for(const section of sections){
+  const row=document.createElement('div');row.className='group-room';
+  const heading=document.createElement('div');heading.className='group-room-heading';
+  const name=document.createElement('strong');name.textContent=section.title;heading.appendChild(name);
+  const actions=document.createElement('div');actions.className='group-room-buttons';
+  const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent='🔗 Copiar link';
+  copy.onclick=async()=>{const url=await getRoomUrl(section);if(!url)return;try{await navigator.clipboard.writeText(url);$('shareNotice').textContent='Link exclusivo de '+section.title+' copiado.'}catch{prompt('Copie o link da sala:',url)}};
+  const qr=document.createElement('button');qr.type='button';qr.className='btn';qr.textContent='▦ Código QR';
+  const output=document.createElement('div');output.className='group-qr';output.hidden=true;
+  qr.onclick=async()=>{if(!output.hidden){output.hidden=true;qr.textContent='▦ Código QR';return}const url=await getRoomUrl(section);if(!url)return;if(typeof QRCode!=='function'){$('shareNotice').textContent='Biblioteca de QR indisponível. Use Copiar link.';return}document.querySelectorAll('.group-qr').forEach(el=>el.hidden=true);document.querySelectorAll('.group-room-buttons button:last-child').forEach(el=>el.textContent='▦ Código QR');output.replaceChildren();const label=document.createElement('p');label.textContent='Aponte a câmera para acessar somente '+section.title+'.';output.appendChild(label);const image=document.createElement('div');image.className='group-qr-image';output.appendChild(image);new QRCode(image,{text:url,width:190,height:190,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});output.hidden=false;qr.textContent='Fechar QR'};
+  actions.append(copy,qr);heading.appendChild(actions);row.append(heading,output);node.appendChild(row)
+ }
 }
