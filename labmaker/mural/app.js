@@ -267,3 +267,27 @@ function moveSlide(step){if(!$('slideScreen')||$('slideScreen').classList.contai
 function closePresentation(){$('slideScreen').classList.add('hide');if(document.fullscreenElement=== $('slideScreen'))document.exitFullscreen().catch(()=>{})}
 async function toggleSlideFullscreen(){const screen=$('slideScreen');try{if(document.fullscreenElement===screen)await document.exitFullscreen();else await screen.requestFullscreen()}catch{msg('O navegador não permitiu tela cheia.','status',true)}}
 document.addEventListener('keydown',event=>{if($('slideScreen')?.classList.contains('hide'))return;if(['ArrowRight','ArrowDown'].includes(event.key)){event.preventDefault();moveSlide(1)}else if(['ArrowLeft','ArrowUp'].includes(event.key)){event.preventDefault();moveSlide(-1)}else if(event.key==='Escape')closePresentation()});
+
+async function printSharedMural(){
+ if(!shareTarget)return;
+ const id=shareTarget.id;
+ closeSharePanel();
+ if(mural?.id!==id)await openMural(id);
+ if(mural?.id===id)printMural();
+}
+function printMural(){
+ if(!mural)return msg('Abra um mural antes de imprimir.','status',true);
+ const node=$('printArea');
+ const approved=cards.filter(c=>c.moderation_status!=='pending'&&c.moderation_status!=='rejected');
+ const content=sections.map(section=>{
+  const posts=approved.filter(c=>c.section_id===section.id);
+  return '<section><h2>'+esc(section.title)+'</h2>'+posts.map(c=>{
+   const content=c.layout==='free'
+    ?'<div class="print-free">'+(Array.isArray(c.elements)?c.elements:[]).filter(x=>['text','image','rectangle','circle','triangle'].includes(x.type)).map(x=>objHTML(x,true)).join('')+'</div>'
+    :'<p style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</p>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem">':'');
+   return '<article><small>'+esc(c.author_label)+'</small><h3>'+esc(c.title)+'</h3>'+content+'</article>';
+  }).join('')+'</section>';
+ }).join('');
+ node.innerHTML='<h1>'+esc(mural.title)+'</h1><p>'+esc(mural.description||'')+'</p><small>AnnA One · LabMaker Mural</small>'+content;
+ window.print();
+}
