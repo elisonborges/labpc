@@ -135,8 +135,18 @@ const server=http.createServer(async(req,res)=>{
  let body='';for await(const chunk of req){body+=chunk;if(body.length>25000)return send(res,413,{error:'Exemplo muito grande'})}
  const {category,strokes}=JSON.parse(body);
  if(!categories.has(category)||!Array.isArray(strokes)||strokes.length>35||!strokes.every(line=>Array.isArray(line)&&line.length>=2&&line.length<=170&&line.every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(n=>Number.isFinite(n)&&n>=0&&n<=720))))return send(res,400,{error:'Exemplo inválido'});
- const data=await db.query('INSERT INTO labpc_learning.drawing_examples(category,strokes) VALUES ($1,$2) RETURNING id,status',[category,JSON.stringify(strokes)]);
- return send(res,201,data.rows[0]);
+ // Impede duplicatas idênticas, inclusive em envios simultâneos.
+ const normalized=JSON.stringify(strokes);
+ const client=await db.connect();
+ try{
+  await client.query('BEGIN');
+  await client.query('SELECT pg_advisory_xact_lock(hashtext($1))',[category+':'+normalized]);
+  const existing=await client.query("SELECT id,status FROM labpc_learning.drawing_examples WHERE category=$1 AND strokes=$2::jsonb AND status IN ('pending','approved') LIMIT 1",[category,normalized]);
+  if(existing.rowCount){await client.query('COMMIT');return send(res,200,{...existing.rows[0],duplicate:true})}
+  const data=await client.query('INSERT INTO labpc_learning.drawing_examples(category,strokes) VALUES ($1,$2::jsonb) RETURNING id,status',[category,normalized]);
+  await client.query('COMMIT');
+  return send(res,201,{...data.rows[0],duplicate:false});
+ }catch(error){await client.query('ROLLBACK');throw error}finally{client.release()}
  }
  const approve=req.url?.match(/^\/examples\/([0-9a-f-]{36})\/(approve|reject)$/);
  if(approve&&req.method==='POST'){
