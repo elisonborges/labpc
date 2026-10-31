@@ -15,6 +15,12 @@ function moveStudentLane(step){const lanes=$('lanes'),sections=[...lanes.childre
 $('studentLayout').onchange=ev=>setStudentLayout(ev.target.value);$('viewPrevious').onclick=()=>moveStudentLane(-1);$('viewNext').onclick=()=>moveStudentLane(1);$('lanes').addEventListener('scroll',updateViewCount,{passive:true});
 
 async function loadStudentComments(){
+ const cfg=await s.rpc('lm_student_settings',{p_token:token,p_group:groupRoom});
+ if(cfg.error||!cfg.data)return;
+ const enabled=cfg.data.comments_enabled===true;
+ document.querySelectorAll('[data-comment]').forEach(el=>el.hidden=!enabled||!window.studentPostingOpen);
+ if(/^#[0-9a-f]{6}$/i.test(cfg.data.theme_color||''))document.querySelector('.hero').style.background=cfg.data.theme_color;
+ if(!enabled)return;
  const r=await s.rpc('lm_comment_list',{p_token:token,p_group:groupRoom});
  if(r.error)return;
  const items=Array.isArray(r.data)?r.data:[];
