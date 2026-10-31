@@ -164,7 +164,7 @@ async function applyTemplate(templateId){
  }catch(e){msg('Erro ao usar modelo: '+e.message+(created?' Verifique possível mural incompleto na turma.':''),'status',true)}finally{replicationBusy=false}
 }
 
-function renderTeacherControls(){if(!$('muralView')||!mural)return;let el=$('teacherControls');if(!el)returnel.replaceChildren();updateMuralStatusChips();if(mural.owner_id!==user.id){$('muralConfigMenu').style.display='none';return}$('muralConfigMenu').style.display='';
+function renderTeacherControls(){if(!$('muralView')||!mural)return;let el=$('teacherControls');if(!el)return;el.replaceChildren();updateMuralStatusChips();if(mural.owner_id!==user.id){$('muralConfigMenu').style.display='none';return}$('muralConfigMenu').style.display='';
 const make=(label,handler)=>{const b=document.createElement('button');b.className='btn';b.textContent=label;b.onclick=handler;el.appendChild(b)};
 make(mural.posting_enabled===false?'🔒 Postagens fechadas · Reabrir':'🔓 Postagens abertas · Bloquear',()=>toggleMuralFlag('posting_enabled'));
 make(mural.moderation_enabled?'🛡️ Aprovação ligada · Desligar':'🛡️ Aprovação desligada · Ligar',()=>toggleMuralFlag('moderation_enabled'));
