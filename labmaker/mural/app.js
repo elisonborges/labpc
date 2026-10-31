@@ -43,7 +43,7 @@ async function saveCard(){const title=$('postTitle').value.trim();if(!title)retu
 let shareTarget=null;
 function shareUrl(m){const url=new URL('./aluno/',location.href);url.searchParams.set('m',m.share_token);return url.toString()}
 function closeSharePanel(){$('shareOverlay').classList.add('hide');$('sharePanel').classList.add('hide');shareTarget=null}
-function openSharePanel(m){shareTarget=m;$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=shareUrl(m);$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
+async function openSharePanel(m){shareTarget=m;$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=shareUrl(m);$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();loadGroupLinks(m);$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
 async function shareMural(id){const m=murals.find(x=>x.id===id)||(mural?.id===id?mural:null);if(!m)return;if(m.owner_id!==user.id)return msg('Somente o criador pode compartilhar este mural.','status',true);openSharePanel(m)}
 async function changeSharePermission(){if(!shareTarget)return;const enabled=$('shareEnabled').checked;const r=await sb.from('lm_murals').update({student_enabled:enabled}).eq('id',shareTarget.id).eq('owner_id',user.id).select('id').single();if(r.error){$('shareEnabled').checked=!enabled;return alert('Não foi possível salvar: '+r.error.message)}shareTarget.student_enabled=enabled;$('shareQr').replaceChildren();$('shareQrStatus').textContent=enabled?'Acesso sem login ativo.':'Link desativado para alunos.';msg(enabled?'Compartilhamento ativado.':'Compartilhamento desativado.')}
 async function copyShareLink(){if(!shareTarget)return;const link=shareUrl(shareTarget);try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
@@ -222,3 +222,26 @@ async function reorderSections(ordered){
 
 function cardActionsMenu(id){const c=cards.find(x=>x.id===id);if(!c||c.author_id!==user.id||c.origin==='student')return;const existing=document.getElementById('cardActionsPopup');if(existing){existing.remove();if(existing.dataset.card===id)return}const trigger=document.querySelector('[data-card-menu="'+id+'"]');if(!trigger)return;const popup=document.createElement('div');popup.id='cardActionsPopup';popup.dataset.card=id;popup.className='card-actions-popup';const actions=[['✏️ Editar',()=>editCard(id)],['📋 Duplicar',()=>duplicateCard(id)],['🗑️ Excluir',()=>deleteMuralCard(id)]];for(const [label,action] of actions){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{popup.remove();action()};popup.appendChild(b)}trigger.parentElement.style.position='relative';trigger.parentElement.appendChild(popup)}
 document.addEventListener('click',e=>{if(!e.target.closest('#cardActionsPopup')&&!e.target.closest('[data-card-menu]'))document.getElementById('cardActionsPopup')?.remove()});
+
+async function loadGroupLinks(m){
+ const node=$('groupRooms');if(!node)return;node.textContent='Carregando salas...';
+ const ss=await sb.from('lm_sections').select('id,title').eq('mural_id',m.id).order('position');
+ if(ss.error){node.textContent='Não foi possível obter as mesas.';return}
+ let links=await sb.from('lm_group_links').select('section_id,token').in('section_id',(ss.data||[]).map(x=>x.id));
+ if(links.error){node.textContent='Erro ao carregar links: '+links.error.message;return}
+ node.replaceChildren();
+ for(const section of ss.data||[]){
+  const row=document.createElement('div');row.className='share-row group-row';
+  const title=document.createElement('b');title.textContent=section.title;row.appendChild(title);
+  const button=document.createElement('button');button.className='btn';button.textContent='Copiar link';row.appendChild(button);
+  button.onclick=async()=>{
+   if(!m.student_enabled){alert('Primeiro ative o compartilhamento do mural.');return}
+   let entry=links.data.find(x=>x.section_id===section.id);
+   if(!entry){const res=await sb.from('lm_group_links').insert({section_id:section.id}).select('section_id,token').single();if(res.error){alert('Falha ao criar link: '+res.error.message);return}entry=res.data;links.data.push(entry)}
+   const url=new URL('./aluno/',location.href);url.searchParams.set('g',entry.token);
+   try{await navigator.clipboard.writeText(url.toString());$('shareNotice').textContent='Link exclusivo de '+section.title+' copiado.'}catch{prompt('Copie o link da sala:',url.toString())}
+  };
+  node.appendChild(row);
+ }
+ if(!(ss.data||[]).length)node.textContent='Crie mesas antes de gerar links de grupos.';
+}
