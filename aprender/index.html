@@ -16,7 +16,7 @@ a{color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #ffbd2e;o
 .separator{height:42px;width:1px;background:#d1dfff}
 .labpc{font-weight:950;font-size:34px;letter-spacing:-2px;line-height:1;background:linear-gradient(90deg,#063b80 45%,#8728ed);background-clip:text;color:transparent;white-space:nowrap}
 .portal-title{font-size:23px;font-weight:900;line-height:1.05;white-space:nowrap}.portal-title small{display:block;font-size:12px;font-weight:500;margin-top:6px}
-.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.actions a{text-decoration:none;border:1px solid #cbd9f3;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:750;background:white;white-space:nowrap}
+.actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;flex-shrink:0}.actions a{text-decoration:none;border:1px solid #cbd9f3;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:750;background:white;white-space:nowrap}
 .actions a:first-child{background:#074da4;color:white;border-color:#074da4}.actions .teacher-access{background:#eef4ff;border-color:#9cbce9;color:#084caa}.actions .grade{background:linear-gradient(100deg,#6632d8,#8c50fa);color:white;border:0;padding:11px 20px;font-size:16px}
 .hero{min-height:282px;position:relative;overflow:hidden;background:linear-gradient(100deg,#0c9df5 0%,#d8f2ff 34%,#eefaff 55%,#1ba6f8 100%);border-bottom:4px solid #d7e6ff}
 .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 47% 35%,#fff9,transparent 38%);pointer-events:none}
@@ -77,13 +77,21 @@ body{background:#f2f7ff}.top{border-bottom:1px solid #e5edfa}.nav{min-height:70p
 .hero p{max-width:600px;text-align:center;margin:10px auto 0}
 @media(max-width:960px){.hero-content{transform:none;width:min(100%,620px)}.hero h1{font-size:clamp(33px,5.2vw,53px);white-space:normal}}
 @media(max-width:650px){.hero-content{padding:0 10px}.hero h1{font-size:clamp(32px,9vw,42px);line-height:1.1}.hero p{max-width:310px}}
+
+/* Menu compacto: mantém os quatro acessos alinhados em desktop */
+.nav{gap:16px;padding:12px 22px}
+.branding{gap:12px}
+.actions a{padding:9px 11px;font-size:12px}
+.actions .grade{padding:10px 13px;font-size:13px}
+@media(max-width:1180px){.nav{flex-wrap:wrap;justify-content:center;gap:12px}.actions{width:100%;justify-content:center;flex-wrap:wrap}}
+@media(max-width:650px){.nav{padding:12px 14px}.branding{flex-wrap:wrap;justify-content:center}.actions{gap:7px}.actions a,.actions .grade{font-size:12px;padding:9px 10px}}
 </style></head>
 <body id="topo">
 
 <header class="top"><nav class="nav" aria-label="Navegação principal">
 <a class="branding" href="../index.html" aria-label="AnnA One">
 <span class="anna-mark" aria-hidden="true">A</span><span class="anna">AnnA One<small>Tecnologia a serviço da educação</small></span><span class="separator"></span><span class="labpc">LabPC</span><span class="separator"></span><span class="portal-title">Universo Aprender<small>Atividades interativas</small></span></a>
-<div class="actions"><a href="../index.html">⌂ Início LabPC</a><a href="#atividades">🎮 Atividades</a><a href="#rodape">ⓘ Sobre</a><a class="grade" href="#anos">🎓 Anos escolares</a><a class="teacher-access" href="https://labpc-learning-api.onrender.com/admin" aria-label="Entrar na Área do Professor">🧑‍🏫 Área do Professor</a></div>
+<div class="actions"><a href="../index.html">⌂ Início LabPC</a><a href="#atividades">🎮 Atividades</a><a class="grade" href="#anos">🎓 Anos escolares</a><a class="teacher-access" href="https://labpc-learning-api.onrender.com/admin" aria-label="Entrar na Área do Professor">🧑‍🏫 Área do Professor</a></div>
 </nav></header>
 <section class="hero" aria-labelledby="titulo"><div class="hero-inner">
 <img class="hero-art hero-left" src="assets/hero-esquerda.webp" alt="" aria-hidden="true">
