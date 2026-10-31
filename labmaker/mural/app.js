@@ -338,7 +338,7 @@ async function exportSharedPNG(){
  if(!shareTarget)return;
  const id=shareTarget.id;closeSharePanel();
  if(mural?.id!==id)await openMural(id);
- if(mural?.id===id)exportMuralPNG();
+ if(mural?.id===id)exportVisualPNG();
 }
 function exportMuralPNG(){
  if(!mural)return msg('Abra um mural antes de exportar.','status',true);
@@ -357,4 +357,42 @@ function exportMuralPNG(){
   y+=175;
  }
  canvas.toBlob(blob=>{if(!blob)return msg('Falha ao gerar imagem.','status',true);const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='LabMaker-mural.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);msg('Imagem PNG gerada (versão textual).')},'image/png');
+}
+
+async function exportVisualPNG(){
+ if(!mural)return msg('Abra um mural para exportar.','status',true);
+ if(typeof html2canvas!=='function'){msg('Captura visual indisponível. Gerando PNG textual.','status',true);return exportMuralPNG()}
+ const root=document.createElement('div');
+ root.style.cssText='position:absolute;left:-20000px;top:0;width:960px;padding:32px;background:#eef4fd;color:#12365f;font:16px Arial,sans-serif;box-sizing:border-box';
+ const header=document.createElement('header');header.style.cssText='padding:22px;background:#103f80;color:white;border-radius:16px;margin-bottom:18px';
+ const h1=document.createElement('h1');h1.textContent=mural.title;h1.style.cssText='margin:0 0 8px;font-size:32px;color:white';header.appendChild(h1);
+ const desc=document.createElement('p');desc.textContent=mural.description||'LabMaker Mural · AnnA One';desc.style.margin='0';header.appendChild(desc);root.appendChild(header);
+ for(const section of sections){
+  const area=document.createElement('section');area.style.cssText='margin:18px 0 25px';
+  const title=document.createElement('h2');title.textContent=section.title;title.style.cssText='padding:12px 18px;border-radius:11px;background:#1b579b;color:white;font-size:23px';area.appendChild(title);
+  for(const c of cards.filter(x=>x.section_id===section.id&&!['pending','rejected'].includes(x.moderation_status))){
+   const article=document.createElement('article');article.style.cssText='padding:18px;margin:12px 0;background:white;border:1px solid #d5e3f6;border-radius:13px;overflow:hidden;break-inside:avoid';
+   const label=document.createElement('div');label.textContent=c.author_label||'';label.style.cssText='font-size:13px;color:#587394';article.appendChild(label);
+   const ct=document.createElement('h3');ct.textContent=c.title;ct.style.cssText='margin:8px 0 12px;color:#123b75;font-size:23px';article.appendChild(ct);
+   if(c.layout==='free'){
+    const free=document.createElement('div');free.style.cssText='height:230px;position:relative;background:#f6f9ff;overflow:hidden;border-radius:9px';
+    free.innerHTML=(Array.isArray(c.elements)?c.elements:[]).filter(x=>['text','image','rectangle','circle','triangle'].includes(x.type)).map(x=>objHTML(x,true)).join('');
+    article.appendChild(free);
+   }else{
+    const body=document.createElement('p');body.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;'+teacherFontStyle(c);body.innerHTML=teacherRichBody(c);article.appendChild(body);
+    const media=document.createElement('div');media.innerHTML=teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem">':'');media.querySelectorAll('img').forEach(el=>{el.style.maxWidth='100%';el.style.maxHeight='360px';el.crossOrigin='anonymous'});media.querySelectorAll('video,audio').forEach(el=>el.remove());article.appendChild(media);
+   }
+   area.appendChild(article);
+  }
+  root.appendChild(area);
+ }
+ document.body.appendChild(root);
+ try{
+  if(root.scrollHeight>16000)throw new Error('Mural muito extenso para uma imagem única');
+  const canvas=await html2canvas(root,{backgroundColor:'#eef4fd',scale:1,useCORS:true,allowTaint:false,logging:false,imageTimeout:6000,windowWidth:1200});
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if(!blob)throw new Error('Não foi possível criar o PNG');
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='LabMaker-'+String(mural.title||'mural').replace(/[^a-zA-Z0-9_-]+/g,'-').slice(0,45)+'-visual.png';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  msg('PNG visual gerado. Imagens hospedadas sem CORS podem não aparecer.');
+ }catch(error){msg('Captura visual indisponível: '+error.message+'. Gerando versão textual.','status',true);exportMuralPNG()}finally{root.remove()}
 }
