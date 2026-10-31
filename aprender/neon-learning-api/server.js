@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import pg from 'pg';
 const { Pool } = pg;
 const db = new Pool({ connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:true},max:3 });
@@ -63,6 +63,8 @@ function siteRequest(req){
  return !origin || origin==='https://labpc-learning-api.onrender.com';
 }
 function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':process.env.LABPC_ORIGIN||'null','vary':'Origin'});res.end(JSON.stringify(data))}
+let pairing=null;
+function validExample(e){return e&&categories.has(e.category)&&Array.isArray(e.strokes)&&e.strokes.length<=35&&e.strokes.every(line=>Array.isArray(line)&&line.length>=2&&line.length<=170&&line.every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(n=>Number.isFinite(n)&&n>=0&&n<=720)))}
 const server=http.createServer(async(req,res)=>{
  if(req.method==='OPTIONS'){res.writeHead(204,{'access-control-allow-origin':process.env.LABPC_ORIGIN||'null','access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'Authorization,Content-Type'});res.end();return}
  if((req.url==='/'||req.url==='/index.html')&&req.method==='GET'){res.writeHead(302,{'location':'/admin','cache-control':'no-store'});res.end();return}
@@ -113,6 +115,25 @@ const server=http.createServer(async(req,res)=>{
    return send(res,200,{examples:data.rows});
   }catch(e){console.error('Consulta de exemplos:',e.message);return send(res,503,{error:'Biblioteca temporariamente indisponível'})}
  }
+ if(req.url==='/pair/upload'&&req.method==='POST'){
+  if(req.headers.origin!==process.env.LABPC_ORIGIN)return send(res,403,{error:'Origem não autorizada'});
+  let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>180000)return send(res,413,{error:'Lote muito grande'})}
+  let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'JSON inválido'})}
+  const code=String(data?.code||'').trim().toUpperCase();
+  if(!pairing||Date.now()>pairing.until||pairing.remaining<=0||code!==pairing.code)return send(res,403,{error:'Código expirado ou inválido'});
+  if(!Array.isArray(data.examples)||data.examples.length<1||data.examples.length>40||!data.examples.every(validExample))return send(res,400,{error:'Desenhos inválidos ou limite de 40 excedido'});
+  if(pairing.remaining<data.examples.length)return send(res,429,{error:'Limite de desenhos da sessão atingido'});
+  pairing.remaining-=data.examples.length;
+  let inserted=0,duplicate=0;
+  try{
+   for(const e of data.examples){
+    const normalized=JSON.stringify(e.strokes);
+    const result=await db.query("INSERT INTO labpc_learning.drawing_examples(category,strokes) SELECT $1,$2::jsonb WHERE NOT EXISTS (SELECT 1 FROM labpc_learning.drawing_examples WHERE category=$1 AND strokes=$2::jsonb AND status IN ('pending','approved')) RETURNING id",[e.category,normalized]);
+    if(result.rowCount)inserted++;else duplicate++;
+   }
+   return send(res,200,{inserted,duplicate,remaining:pairing.remaining});
+  }catch(err){console.error('Upload supervisionado:',err.message);return send(res,503,{error:'Falha ao enviar lote'})}
+ }
  // A API de escrita é exclusiva do professor até existir uma autenticação institucional para envio.
  if(req.method!=='GET'&&!siteRequest(req))return send(res,403,{error:'Origem não autorizada'});
  const identity=await adminIdentity(req);
@@ -123,6 +144,11 @@ const server=http.createServer(async(req,res)=>{
   return send(res,401,{error:'Acesso restrito ao administrador'});
  }
  try{
+ if(req.url==='/pair/start'&&req.method==='POST'){
+  pairing={code:randomBytes(8).toString('hex').toUpperCase(),until:Date.now()+10*60*1000,remaining:200};
+  return send(res,200,{code:pairing.code,expires_in:600,max_examples:200});
+ }
+ if(req.url==='/pair/stop'&&req.method==='POST'){pairing=null;return send(res,200,{ok:true})}
  if(req.url==='/examples/approved'&&req.method==='GET'){
  const data=await db.query("SELECT id,category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 300");
  return send(res,200,{examples:data.rows});
