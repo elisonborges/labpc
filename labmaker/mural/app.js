@@ -333,3 +333,28 @@ function exportMuralTable(format){
  const a=document.createElement('a');a.href=url;a.download=name+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
  msg(rows.length+' cartão(ões) exportado(s) para CSV.');
 }
+
+async function exportSharedPNG(){
+ if(!shareTarget)return;
+ const id=shareTarget.id;closeSharePanel();
+ if(mural?.id!==id)await openMural(id);
+ if(mural?.id===id)exportMuralPNG();
+}
+function exportMuralPNG(){
+ if(!mural)return msg('Abra um mural antes de exportar.','status',true);
+ const rows=sections.flatMap(s=>[{kind:'section',title:s.title},...cards.filter(c=>c.section_id===s.id&&!['pending','rejected'].includes(c.moderation_status)).map(c=>({kind:'card',card:c}))]);
+ const width=1100,height=200+rows.length*175;
+ if(height>16000)return msg('Mural extenso demais para PNG único. Use PDF.','status',true);
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const cx=canvas.getContext('2d');cx.fillStyle='#f3f7fd';cx.fillRect(0,0,width,height);
+ cx.fillStyle='#113968';cx.font='bold 34px Arial';cx.fillText('LabMaker Mural',40,55);
+ cx.font='bold 26px Arial';cx.fillText(String(mural.title||'Mural').slice(0,65),40,100);
+ const draw=(value,x,y,limit,maxLines)=>{cx.font='17px Arial';let line='',count=0;for(const word of String(value||'').split(/\s+/)){const next=line?line+' '+word:word;if(cx.measureText(next).width>limit&&line){cx.fillText(line,x,y+count*23);line=word;count++;if(count>=maxLines)break}else line=next}if(count<maxLines)cx.fillText(line,x,y+count*23)};
+ let y=145;
+ for(const row of rows){
+  if(row.kind==='section'){cx.fillStyle='#1b5598';cx.fillRect(40,y,1020,55);cx.fillStyle='white';cx.font='bold 23px Arial';cx.fillText(String(row.title).slice(0,60),60,y+35)}
+  else {const c=row.card;cx.fillStyle='white';cx.fillRect(40,y,1020,158);cx.strokeStyle='#cadbf0';cx.strokeRect(40,y,1020,158);cx.fillStyle='#3d628a';cx.font='15px Arial';cx.fillText(String(c.author_label||'').slice(0,75),58,y+25);cx.fillStyle='#123d72';cx.font='bold 22px Arial';cx.fillText(String(c.title||'').slice(0,80),58,y+57);cx.fillStyle='#263b51';draw(c.layout==='free'?(Array.isArray(c.elements)?c.elements:[]).filter(o=>o.type==='text').map(o=>o.value).join(' • '):c.body,58,y+87,960,3)}
+  y+=175;
+ }
+ canvas.toBlob(blob=>{if(!blob)return msg('Falha ao gerar imagem.','status',true);const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='LabMaker-mural.png';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);msg('Imagem PNG gerada (versão textual).')},'image/png');
+}
