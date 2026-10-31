@@ -270,13 +270,15 @@ async function loadGroupLinks(m){
 }
 
 let presentationItems=[],presentationIndex=0;
+let presentationOnlyCards=false,presentationDark=false;
 function startPresentation(){
  if(!mural)return;
  const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));
  if(!accepted.length){msg('Nenhum cartão aprovado para apresentar.','status',true);return}
- presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?[{type:'section',name:section.title,count:own.length},...own]:[]})];
- presentationIndex=0;$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
+ presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?(presentationOnlyCards?own:[{type:'section',name:section.title,count:own.length},...own]):[]})];
+ presentationIndex=0;$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideOnlyCards').checked=presentationOnlyCards;$('slideContrast').checked=presentationDark;$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
 }
+function updatePresentationOptions(){if($('slideScreen').classList.contains('hide'))return;const current=presentationItems[presentationIndex];presentationOnlyCards=$('slideOnlyCards').checked;presentationDark=$('slideContrast').checked;$('slideScreen').classList.toggle('slide-dark',presentationDark);const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?(presentationOnlyCards?own:[{type:'section',name:section.title,count:own.length},...own]):[]})];presentationIndex=Math.max(0,presentationItems.findIndex(x=>x.type===current?.type&&(x.type==='card'?x.card.id===current.card.id:x.type==='section'?x.name===current.name:true)));renderPresentation()}
 function renderPresentation(){
  const item=presentationItems[presentationIndex];if(!item)return;
  const stage=$('slideContent');
