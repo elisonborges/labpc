@@ -47,7 +47,7 @@ function issueLabSession(userId){
  return payload+'.'+sig;
 }
 function validateLabSession(token){
- if(!/^[A-Za-z0-9_-]{25,350}\\.[A-Za-z0-9_-]{43}$/.test(token||''))return null;
+ if(!/^[A-Za-z0-9_-]{25,350}\.[A-Za-z0-9_-]{43}$/.test(token||''))return null;
  try {
  const [payload,sig]=token.split('.');
  const expected=createHmac('sha256',secret).update('labpc-session.'+payload).digest();
