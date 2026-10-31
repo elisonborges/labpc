@@ -153,6 +153,10 @@ const server=http.createServer(async(req,res)=>{
  const data=await db.query("SELECT id,category,strokes FROM labpc_learning.drawing_examples WHERE status='approved' ORDER BY submitted_at DESC LIMIT 300");
  return send(res,200,{examples:data.rows});
  }
+ if(req.url==='/examples/stats'&&req.method==='GET'){
+ const data=await db.query("SELECT status,category,COUNT(*)::integer AS total FROM labpc_learning.drawing_examples GROUP BY status,category ORDER BY category,status");
+ return send(res,200,{counts:data.rows});
+ }
  if(req.url==='/examples/pending'&&req.method==='GET'){
  const data=await db.query("SELECT id,category,strokes,submitted_at FROM labpc_learning.drawing_examples WHERE status='pending' ORDER BY submitted_at DESC LIMIT 100");
  return send(res,200,{examples:data.rows});
