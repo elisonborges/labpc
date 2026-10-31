@@ -59,19 +59,22 @@ async function getShortLink(type,id,original){
  const key=type+':'+id;
  if(shortLinkCache.has(key))return shortLinkCache.get(key);
  try{
-  let res=await sb.from('anna_short_links').select('code,active').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
-  if(res.error)throw res.error;
-  if(!res.data){
+  const lookup=await sb.from('anna_short_links').select('code,active,created_at').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).order('created_at',{ascending:false});
+  if(lookup.error)throw lookup.error;
+  let records=lookup.data||[];
+  if(!records.length){
    const created=await sb.from('anna_short_links').insert({target_type:type,target_id:id,owner_id:user.id}).select('code,active').single();
    if(created.error){
-    res=await sb.from('anna_short_links').select('code,active').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).maybeSingle();
-    if(res.error||!res.data)throw created.error;
-   }else res=created;
+    const retry=await sb.from('anna_short_links').select('code,active,created_at').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).order('created_at',{ascending:false});
+    if(retry.error||!retry.data?.length)throw created.error;
+    records=retry.data;
+   }else records=[created.data];
   }
-  if(res.data?.active&&/^[a-z0-9_-]{6,48}$/.test(res.data.code)){
-   const short='https://labpc.annaone.com.br/m/?c='+encodeURIComponent(res.data.code);
-   shortLinkCache.set(key,short);
-   return short;
+  const active=records.filter(x=>x.active);
+  const preferred=active.find(x=>!/^[0-9a-f]{24}$/.test(x.code))||active[0];
+  if(preferred&&/^[a-z0-9_-]{6,48}$/.test(preferred.code)){
+   const url='https://labpc.annaone.com.br/m/?c='+encodeURIComponent(preferred.code);
+   shortLinkCache.set(key,url);return url;
   }
  }catch(e){console.warn('Encurtador indisponível; utilizando link original.',e)}
  return original;
