@@ -396,3 +396,15 @@ async function exportVisualPNG(){
   msg('PNG visual gerado. Imagens hospedadas sem CORS podem não aparecer.');
  }catch(error){msg('Captura visual indisponível: '+error.message+'. Gerando versão textual.','status',true);exportMuralPNG()}finally{root.remove()}
 }
+
+let muralLayout='columns';
+function changeMuralLayout(value){
+ if(!['columns','grid','timeline'].includes(value))return;
+ muralLayout=value;
+ const root=$('sections');if(root)root.className='sections layout-'+value;
+ const control=$('layoutSelect');if(control)control.value=value;
+ try{sessionStorage.setItem('labmaker-layout',value)}catch(err){}
+}
+try{const saved=sessionStorage.getItem('labmaker-layout');if(['columns','grid','timeline'].includes(saved))muralLayout=saved}catch(err){}
+const originalRenderSections=renderSections;
+renderSections=function(){originalRenderSections();changeMuralLayout(muralLayout)};
