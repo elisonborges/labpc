@@ -171,4 +171,22 @@ body{background:#f2f7ff}.top{border-bottom:1px solid #e5edfa}.nav{min-height:70p
  </article></div>
 </main>
 <footer id="rodape"><div class="footer-inner"><div><strong>AnnA One <span style="color:#7934eb">· LabPC</span></strong><p>Universo Aprender — Idealização e desenvolvimento: Prof. Elison Borges · © 2026</p></div><a href="#topo">↑ Voltar ao topo</a></div></footer>
-</body></html>
+<script>
+/* Atualização de recuperação: apenas caches/service workers do Desenha & Adivinha. */
+(async()=>{
+ if(!('serviceWorker' in navigator))return;
+ try{
+  const regs=await navigator.serviceWorker.getRegistrations();
+  let changed=false;
+  for(const reg of regs){
+   const url=reg.active?.scriptURL||reg.waiting?.scriptURL||reg.installing?.scriptURL||'';
+   if(url.includes('desenha-offline-sw-v')){await reg.unregister();changed=true}
+  }
+  if('caches' in window){for(const key of await caches.keys())if(key.startsWith('labpc-desenha-')){await caches.delete(key);changed=true}}
+  if(changed&&!sessionStorage.getItem('labpc-cache-reset-20261031')){
+   sessionStorage.setItem('labpc-cache-reset-20261031','1');
+   location.replace(location.pathname+'?atualizado=20261031');
+  }
+ }catch(e){console.warn('Atualização de cache:',e)}
+})();
+</script></body></html>
