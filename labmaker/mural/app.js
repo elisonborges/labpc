@@ -53,13 +53,37 @@ const r=card?await sb.from('lm_cards').update(row).eq('id',card.id):await sb.fro
 (async()=>{const r=await sb.auth.getUser();if(r.data?.user)await start(r.data.user)})();
 
 let shareTarget=null;
+const shortLinkCache=new Map();
+async function getShortLink(type,id,original){
+ if(!user||!id)return original;
+ const key=type+':'+id;
+ if(shortLinkCache.has(key))return shortLinkCache.get(key);
+ try{
+  let res=await sb.from('anna_short_links').select('code,active').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).maybeSingle();
+  if(res.error)throw res.error;
+  if(!res.data){
+   const created=await sb.from('anna_short_links').insert({target_type:type,target_id:id,owner_id:user.id}).select('code,active').single();
+   if(created.error){
+    res=await sb.from('anna_short_links').select('code,active').eq('target_type',type).eq('target_id',id).eq('owner_id',user.id).maybeSingle();
+    if(res.error||!res.data)throw created.error;
+   }else res=created;
+  }
+  if(res.data?.active&&/^[a-z0-9_-]{6,48}$/.test(res.data.code)){
+   const short='https://labpc.annaone.com.br/m/?c='+encodeURIComponent(res.data.code);
+   shortLinkCache.set(key,short);
+   return short;
+  }
+ }catch(e){console.warn('Encurtador indisponível; utilizando link original.',e)}
+ return original;
+}
+async function muralShareLink(m){return m.student_enabled?getShortLink('mural',m.id,shareUrl(m)):shareUrl(m)}
 function shareUrl(m){const url=new URL('./aluno/',location.href);url.searchParams.set('m',m.share_token);return url.toString()}
 function closeSharePanel(){$('shareOverlay').classList.add('hide');$('sharePanel').classList.add('hide');shareTarget=null}
-async function openSharePanel(m){shareTarget=m;$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=shareUrl(m);$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();const groupPanel=$('groupSharingPanel');if(groupPanel){groupPanel.open=false;groupPanel.dataset.mural=m.id;$('groupRooms').replaceChildren()}$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
+async function openSharePanel(m){shareTarget=m;$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=shareUrl(m);if(m.student_enabled){const link=await muralShareLink(m);if(shareTarget?.id===m.id)$('shareLink').value=link;}$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();const groupPanel=$('groupSharingPanel');if(groupPanel){groupPanel.open=false;groupPanel.dataset.mural=m.id;$('groupRooms').replaceChildren()}$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
 async function shareMural(id){const m=murals.find(x=>x.id===id)||(mural?.id===id?mural:null);if(!m)return;if(m.owner_id!==user.id)return msg('Somente o criador pode compartilhar este mural.','status',true);openSharePanel(m)}
 async function changeSharePermission(){if(!shareTarget)return;const enabled=$('shareEnabled').checked;const r=await sb.from('lm_murals').update({student_enabled:enabled}).eq('id',shareTarget.id).eq('owner_id',user.id).select('id').single();if(r.error){$('shareEnabled').checked=!enabled;return alert('Não foi possível salvar: '+r.error.message)}shareTarget.student_enabled=enabled;$('shareQr').replaceChildren();$('shareQrStatus').textContent=enabled?'Acesso sem login ativo.':'Link desativado para alunos.';msg(enabled?'Compartilhamento ativado.':'Compartilhamento desativado.')}
-async function copyShareLink(){if(!shareTarget)return;const link=shareUrl(shareTarget);try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
-function generateShareQr(){if(!shareTarget)return;if(!shareTarget.student_enabled){$('shareQrStatus').textContent='Primeiro ative o acesso dos alunos.';return}if(typeof QRCode!=='function'){$('shareQrStatus').textContent='Biblioteca de QR indisponível. Compartilhe pelo link.';return}const node=$('shareQr');node.replaceChildren();new QRCode(node,{text:shareUrl(shareTarget),width:220,height:220,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});$('shareQrStatus').textContent='QR gerado no navegador, sem enviar o link a serviços externos.'}
+async function copyShareLink(){if(!shareTarget)return;const link=await muralShareLink(shareTarget);try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
+async function generateShareQr(){if(!shareTarget)return;if(!shareTarget.student_enabled){$('shareQrStatus').textContent='Primeiro ative o acesso dos alunos.';return}if(typeof QRCode!=='function'){$('shareQrStatus').textContent='Biblioteca de QR indisponível. Compartilhe pelo link.';return}const node=$('shareQr');node.replaceChildren();new QRCode(node,{text:await muralShareLink(shareTarget),width:220,height:220,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});$('shareQrStatus').textContent='QR gerado no navegador, sem enviar o link a serviços externos.'}
 
 let replicationBusy=false;
 function sectionTitleNext(base){const match=base.match(/^(Mesa|Trio)\s+(\d+)$/i);if(match){const prefix=match[1];let n=Number(match[2])+1;while(sections.some(s=>s.title.toLowerCase()=== (prefix+' '+n).toLowerCase()))n++;return prefix+' '+n}let title=base+' (cópia)',n=2;while(sections.some(s=>s.title===title))title=base+' (cópia '+n+++')';return title}
@@ -253,7 +277,7 @@ async function loadGroupLinks(m){
   if(!m.student_enabled){$('shareNotice').textContent='Ative primeiro o compartilhamento do mural.';return null}
   let entry=(links.data||[]).find(x=>x.section_id===section.id);
   if(!entry){const res=await sb.from('lm_group_links').insert({section_id:section.id}).select('section_id,token').single();if(res.error){$('shareNotice').textContent='Falha ao criar link: '+res.error.message;return null}entry=res.data;links.data.push(entry)}
-  const url=new URL('./aluno/',location.href);url.searchParams.set('g',entry.token);return url.toString();
+  const url=new URL('./aluno/',location.href);url.searchParams.set('g',entry.token);return await getShortLink('group',section.id,url.toString());
  }
  for(const section of sections){
   const row=document.createElement('div');row.className='group-room';
