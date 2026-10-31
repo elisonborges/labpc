@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-store">
+<title>Link curto | AnnA One</title>
+<style>
+body{min-height:100vh;margin:0;display:grid;place-items:center;background:#edf6ff;color:#092a50;font:16px system-ui,Arial,sans-serif}
+main{background:white;border:1px solid #dae6f3;padding:28px;border-radius:16px;max-width:480px;margin:16px;text-align:center}a{color:#0759a8}
+</style></head>
+<body><main><h1>AnnA One</h1><p id="status" role="status">Verificando link...</p><p><a href="/">Voltar ao LabPC</a></p></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../labmaker/mural/config.js"></script>
+<script>
+(async () => {
+ const status=document.getElementById('status');
+ const code=new URLSearchParams(location.search).get('c')||'';
+ if(!/^[a-z0-9_-]{6,48}$/.test(code)){status.textContent='Endereço inválido.';return;}
+ try {
+  const client=supabase.createClient(LM_CONFIG.url,LM_CONFIG.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const {data,error}=await client.rpc('anna_resolve_short_link',{p_code:code});
+  if(error||typeof data!=='string'){status.textContent='Link não encontrado ou desativado.';return;}
+  const target=new URL(data);const params=[...target.searchParams.entries()];
+  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if(target.origin!=='https://labpc.annaone.com.br'||target.pathname!=='/labmaker/mural/aluno/'||target.hash||target.username||target.password||params.length!==1||!['m','g'].includes(params[0][0])||!uuid.test(params[0][1])){status.textContent='Destino não autorizado.';return;}
+  location.replace(target.href);
+ }catch(_){status.textContent='Não foi possível verificar este endereço.';}
+})();
+</script></body></html>
