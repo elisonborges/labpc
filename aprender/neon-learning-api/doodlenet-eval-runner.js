@@ -23,7 +23,7 @@ export async function evaluateDoodleNet(db){
   return pix;
  };
  const labels=await db.query('SELECT 1'); // verifies database connection
- const mapping=JSON.parse(process.env.LABPC_EVAL_LABELS||'{}');
+ const mapping={"2":"COGUMELO","6":"SOL","12":"MAÇÃ","43":"NUVEM","59":"ÁRVORE","86":"PEIXE","114":"CHUVA","115":"LUA","137":"BICICLETA","142":"PÁSSARO","145":"CHAVE","149":"XÍCARA","155":"ÓCULOS","168":"CARRO","172":"CACHORRO","176":"FLOR","179":"BORBOLETA","188":"COELHO","196":"RELÓGIO","210":"ESTRELA","211":"GATO","212":"PIZZA","223":"AVIÃO","237":"SORVETE","246":"LIVRO","251":"BANANA","276":"GUARDA-CHUVA","290":"BARCO","294":"CASA"};
  if(!Object.keys(mapping).length)throw Error('Mapeamento de classes não configurado');
  const indices=Object.entries(mapping).map(([i,c])=>[Number(i),c]);
  let evaluated=0,correct=0;const byCategory={};
