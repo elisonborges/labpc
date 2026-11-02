@@ -330,7 +330,18 @@ function ensureTF(){
   let done=false;
   function finish(error){if(done)return;done=true;clearTimeout(timer);script.onload=null;script.onerror=null;
    if(error){script.remove();reject(error)}else resolve(window.tf)}
-  script.onload=()=>window.tf?.sequential&&window.tf?.tensor4d?finish():finish(Error('Biblioteca local incompleta.'));
+  script.onload=async()=>{
+   try{
+    const lib=window.tf;
+    if(!lib?.sequential||!lib?.tensor4d||!lib?.layers?.dense)throw Error('Objeto TensorFlow ausente ou sem funções de treinamento.');
+    await lib.setBackend('cpu');await lib.ready();
+    const test=lib.tensor1d([1,2]);const result=test.square();
+    const ok=(await result.data())[0]===1;
+    test.dispose();result.dispose();
+    if(!ok)throw Error('Autoteste do TensorFlow não passou.');
+    finish();
+   }catch(e){finish(Error('Falha na inicialização local: '+e.message))}
+  };
   script.onerror=()=>finish(Error('O TensorFlow.js local não foi entregue pelo servidor. Verifique o estado do serviço Render.'));
   document.head.appendChild(script);
  }).catch(e=>{tfLoadPromise=null;throw e});
