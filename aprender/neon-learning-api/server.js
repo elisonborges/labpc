@@ -41,8 +41,7 @@ async function adminIdentity(req){
  return subject && await isNeonAdmin(subject)?'neon:'+subject:null;
 }
 function issueLabSession(userId){
- const exp=Math.floor(Date.now()/1000)+900;
- const payload=Buffer.from(JSON.stringify({v:2,sub:userId,exp,scope:'labpc-admin'})).toString('base64url');
+ const payload=Buffer.from(JSON.stringify({v:3,sub:userId,scope:'labpc-admin'})).toString('base64url');
  const sig=createHmac('sha256',secret).update('labpc-session.'+payload).digest('base64url');
  return payload+'.'+sig;
 }
@@ -54,7 +53,7 @@ function validateLabSession(token){
  const actual=Buffer.from(sig,'base64url');
  if(actual.length!==expected.length||!timingSafeEqual(actual,expected))return null;
  const data=JSON.parse(Buffer.from(payload,'base64url').toString('utf8')),now=Math.floor(Date.now()/1000);
- return data.v===2&&data.scope==='labpc-admin'&&data.exp>now&&data.exp<=now+900?data.sub:null;
+ return data.v===3&&data.scope==='labpc-admin'&&typeof data.sub==='string'?data.sub:null;
  }catch{return null}
 }
 function cookie(res,token){res.setHeader('Set-Cookie','labpc_admin='+token+'; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age='+(token?'900':'0'))}
@@ -192,6 +191,14 @@ const server=http.createServer(async(req,res)=>{
   await client.query('COMMIT');
   return send(res,201,{...data.rows[0],duplicate:false});
  }catch(error){await client.query('ROLLBACK');if(error.constraint==='drawing_examples_strokes_check')return send(res,413,{error:'Desenho grande demais para salvar. Apague alguns traços e tente novamente.'});throw error}finally{client.release()}
+ }
+ if(req.url==='/examples/bulk-review'&&req.method==='POST'){
+ let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>10000)return send(res,413,{error:'Lote muito grande'})}
+ let body;try{body=JSON.parse(raw)}catch{return send(res,400,{error:'JSON inválido'})}
+ const ids=body?.ids,status=body?.status;
+ if(!Array.isArray(ids)||ids.length<1||ids.length>100||!ids.every(id=>typeof id==='string'&&/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id))||new Set(ids).size!==ids.length||!['approved','rejected'].includes(status))return send(res,400,{error:'Seleção ou status inválido'});
+ const result=await db.query("UPDATE labpc_learning.drawing_examples SET status=$1,reviewed_at=now(),reviewed_by=$2 WHERE id=ANY($3::uuid[]) AND status='pending' RETURNING id,status",[status,identity,ids]);
+ return send(res,200,{updated:result.rowCount,requested:ids.length,results:result.rows});
  }
  const approve=req.url?.match(/^\/examples\/([0-9a-f-]{36})\/(approve|reject)$/);
  if(approve&&req.method==='POST'){
