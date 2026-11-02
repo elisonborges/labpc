@@ -389,7 +389,7 @@ const augment=(pixels,angle,scale,dx,dy)=>{
   model.add(tf.layers.conv2d({inputShape:[28,28,1],filters:12,kernelSize:3,activation:'relu'}));
   model.add(tf.layers.maxPooling2d({poolSize:2}));
   model.add(tf.layers.conv2d({filters:24,kernelSize:3,activation:'relu'}));
-  model.add(tf.layers.globalAveragePooling2d());
+  model.add(tf.layers.globalAveragePooling2d({dataFormat:'channelsLast'}));
   model.add(tf.layers.dense({units:32,activation:'relu'}));
   model.add(tf.layers.dense({units:labels.length,activation:'softmax'}));
   model.compile({optimizer:tf.train.adam(.002),loss:'categoricalCrossentropy',metrics:['accuracy']});
