@@ -151,7 +151,7 @@ body:has(#loginView:not([hidden])) .login-view{height:100dvh;min-height:0!import
 
 const $=id=>document.getElementById(id);
 function status(t){$('message').textContent=t;$('panelStatus').textContent=t}
-async function call(path,method='GET',payload){const r=await fetch(path,{method,credentials:'same-origin',headers:payload?{'Content-Type':'application/json'}:{},body:payload?JSON.stringify(payload):undefined});let data=await r.json();if(!r.ok)throw Error(data.error||'Erro HTTP '+r.status);return data}
+async function call(path,method='GET',payload){const r=await fetch(path,{method,credentials:'same-origin',headers:payload?{'Content-Type':'application/json'}:{},body:payload?JSON.stringify(payload):undefined});let data=await r.json();if(!r.ok){if(r.status===401){const msg='Sessão expirada. Seu desenho permanece no quadro. Entre novamente para salvar.';throw Error(msg)}throw Error(data.error||'Erro HTTP '+r.status)}return data}
 function draw(canvas,lines){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='#3f40aa';ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=3;for(const st of lines){if(!Array.isArray(st)||st.length<2)continue;ctx.beginPath();st.forEach((p,i)=>{let x=p[0]*canvas.width/720,y=p[1]*canvas.height/480;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke()}}
 let approvedGallery=[];
 function renderGallery(){
@@ -331,6 +331,8 @@ $('neuralTrain').onclick=async()=>{
  finally{for(const t of [xTrain,yTrain,xVal,yVal])try{t?.dispose()}catch{};try{model?.dispose()}catch{};neuralTraining=false;$('neuralTrain').disabled=false}
 };
 
+// Renova a sessão apenas enquanto o painel está aberto e a aba está ativa.
+setInterval(()=>{if(!$('panelView').hidden&&!document.hidden)fetch('/auth/session',{credentials:'same-origin',cache:'no-store'}).catch(()=>{})},4*60*1000);
 fetch('/auth/session',{credentials:'same-origin'}).then(r=>{if(r.ok)return update()}).catch(()=>{});
 </script><script>
 (function(){
