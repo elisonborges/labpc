@@ -893,3 +893,24 @@ async function loadTeacherPrivateMedia(){
 }
 
 $('postMediaFile').addEventListener('change',()=>{const f=$('postMediaFile').files?.[0];teacherMediaFile=null;if(!f)return;if(!['audio/webm','audio/ogg','audio/mp4','audio/mpeg','video/webm','video/mp4'].includes(f.type)||f.size>5*1024*1024){$('postMediaStatus').textContent='Selecione um arquivo de áudio ou vídeo de até 5 MB.';return}teacherMediaFile=f;$('postMediaStatus').textContent='Arquivo pronto: '+f.name});
+
+function galleryApprovedCards(){return sections.flatMap(s=>cards.filter(c=>c.section_id===s.id&&!['rejected','pending'].includes(c.moderation_status)).map(c=>({card:c,section:s.title})))}
+function openProjectGallery(){
+ const items=galleryApprovedCards();$('galleryCount').textContent=items.length+' trabalhos';const root=$('galleryCards');root.replaceChildren();
+ if(!items.length){root.textContent='Ainda não há trabalhos aprovados para expor.'}
+ for(const item of items){const c=item.card;const tile=document.createElement('button');tile.type='button';tile.className='gallery-tile';const cover=document.createElement('div');cover.className='gallery-cover';
+ const text=document.createElement('span');text.textContent='🎨';cover.append(text);
+ const media=c.elements?.find(x=>x.type==='privateImage');const inline=c.elements?.find(x=>x.type==='attachment'&&x.kind==='image'&&(teacherInlineImage(x.value)||safeURL(x.value)));
+ const url=inline?.value||(safeURL(c.image_url)?c.image_url:null);
+ if(url){const img=document.createElement('img');img.src=url;img.alt='Capa do trabalho';cover.replaceChildren(img)}
+ else if(media){teacherOriginalUrl(c.id).then(url=>{if(tile.isConnected){const img=document.createElement('img');img.src=url;img.alt='Capa do trabalho';cover.replaceChildren(img)}}).catch(()=>{})}
+ const body=document.createElement('div');body.className='gallery-copy';const title=document.createElement('strong');title.textContent=c.title||'Sem título';const by=document.createElement('p');by.textContent=(c.author_label||'Equipe não identificada')+' · '+item.section;body.append(title,by);tile.append(cover,body);tile.onclick=()=>openGalleryDetail(c.id);root.append(tile)}
+ $('projectGallery').classList.remove('hide');
+}
+function closeProjectGallery(){$('projectGallery').classList.add('hide');$('galleryDetail').close?.()}
+function openGalleryDetail(id){
+ const c=cards.find(x=>x.id===id);if(!c)return;const root=$('galleryDetailContent');
+ root.innerHTML='<h2>'+esc(c.title)+'</h2><p>'+esc(c.author_label||'Equipe não identificada')+'</p>'+(c.layout==='free'?'<div class="slide-free">'+(c.elements||[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do projeto">':''));
+ if(c.elements?.some(x=>x.type==='privateImage')){const image=document.createElement('img');image.alt='Imagem do projeto';root.append(image);teacherOriginalUrl(id).then(url=>{image.src=url}).catch(()=>{image.alt='Imagem indisponível'})}
+ $('galleryDetail').showModal();
+}
