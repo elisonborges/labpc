@@ -74,7 +74,7 @@ const server=http.createServer(async(req,res)=>{
  }
  if(req.url==='/health'&&req.method==='GET')return send(res,200,{ok:true});
  if(req.url==='/auth/session'&&req.method==='GET'){
-  const who=await adminIdentity(req);if(!who&&(req.headers.accept||'').includes('text/html')){res.writeHead(303,{'location':'/admin','cache-control':'no-store'});res.end();return}return send(res,who?200:401,{authenticated:!!who});
+  const who=await adminIdentity(req);if(who?.startsWith('neon:'))cookie(res,issueLabSession(who.slice(5)));if(!who&&(req.headers.accept||'').includes('text/html')){res.writeHead(303,{'location':'/admin','cache-control':'no-store'});res.end();return}return send(res,who?200:401,{authenticated:!!who});
  }
  if(req.url==='/auth/logout'&&req.method==='POST'){
   if(!siteRequest(req))return send(res,403,{error:'Origem não autorizada'});
@@ -137,11 +137,12 @@ const server=http.createServer(async(req,res)=>{
  // A API de escrita é exclusiva do professor até existir uma autenticação institucional para envio.
  if(req.method!=='GET'&&!siteRequest(req))return send(res,403,{error:'Origem não autorizada'});
  const identity=await adminIdentity(req);
+ if(identity?.startsWith('neon:'))cookie(res,issueLabSession(identity.slice(5)));
  if(!identity){
   // Navegação direta no navegador: exibir login, não um JSON de API.
   const wantsHtml=req.method==='GET' && (req.headers.accept||'').includes('text/html');
   if(wantsHtml){res.writeHead(303,{'location':'/admin','cache-control':'no-store'});res.end();return}
-  return send(res,401,{error:'Acesso restrito ao administrador'});
+  return send(res,401,{error:'Sua sessão expirou. Entre novamente no Painel do Professor para continuar.'});
  }
  try{
  if(req.url==='/pair/start'&&req.method==='POST'){
