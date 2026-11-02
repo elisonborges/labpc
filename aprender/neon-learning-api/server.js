@@ -166,7 +166,18 @@ const server=http.createServer(async(req,res)=>{
  const {category,strokes}=JSON.parse(body);
  if(!categories.has(category)||!Array.isArray(strokes)||strokes.length>35||!strokes.every(line=>Array.isArray(line)&&line.length>=2&&line.length<=170&&line.every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(n=>Number.isFinite(n)&&n>=0&&n<=720))))return send(res,400,{error:'Exemplo inválido'});
  // Impede duplicatas idênticas, inclusive em envios simultâneos.
- const normalized=JSON.stringify(strokes);
+ // Reduz amostras muito densas antes de gravar, preservando início e fim dos traços.
+ let safeStrokes=strokes.map(line=>line.map(p=>p));
+ let normalized=JSON.stringify(safeStrokes);
+ for(let maxPoints=100;Buffer.byteLength(normalized,'utf8')>14000&&maxPoints>=12;maxPoints=Math.floor(maxPoints*.75)){
+  safeStrokes=safeStrokes.map(line=>{
+   if(line.length<=maxPoints)return line;
+   const sampled=[];for(let i=0;i<maxPoints;i++)sampled.push(line[Math.round(i*(line.length-1)/(maxPoints-1))]);
+   return sampled;
+  });
+  normalized=JSON.stringify(safeStrokes);
+ }
+ if(Buffer.byteLength(normalized,'utf8')>14000)return send(res,413,{error:'Desenho muito complexo. Faça menos traços e tente novamente.'});
  const client=await db.connect();
  try{
   await client.query('BEGIN');
