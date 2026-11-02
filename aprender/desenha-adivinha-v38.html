@@ -444,7 +444,7 @@ function neuralGuess(){
 function aiDiagnosticUpdate(){
  const el=document.getElementById('aiDiagnosticInfo');if(!el)return;
  const teacher=Object.values(communityExamples).reduce((n,arr)=>n+arr.length,0);
- el.textContent='Rede neural: '+(neuralReady?'pronta':'indisponível ou carregando')+' · Padrões professores: '+teacher+' · Categorias: '+Object.keys(models).length+' · Conexão: '+(navigator.onLine?'online':'offline');
+ el.textContent='Rede neural: '+(neuralReady?'pronta':'indisponível ou carregando')+' · Desenhos aprovados (prioridade): '+teacher+' · Categorias: '+Object.keys(models).length+' · Conexão: '+(navigator.onLine?'online':'offline');
 }
 function runAiSelfTests(){
  const cases=Object.keys(models),report=[];let passed=0;
@@ -470,15 +470,19 @@ bootstrapNeural();
 function match(){
  const input=prepare(strokes);if(!input)return null;
  const ranked=[];
+ // Com biblioteca aprovada, os desenhos humanos têm exclusividade na escolha.
+ // Modelos geométricos só entram quando não há nenhuma referência aprovada carregada.
+ const trained=Object.values(reference).some(ref=>ref.teacher.length>0);
  for(const name of Object.keys(models)){
   const refs=reference[name]||{teacher:[],template:[]};
-  const best=arr=>arr.length?Math.max(...arr.map(ref=>compareGrid(input,ref))):0;
-  const t=best(refs.teacher),base=best(refs.template);
-  // Padrões aprovados têm prioridade; sem exemplos do professor usamos o modelo básico.
-  const score=refs.teacher.length?Math.max(t*.88+base*.12,t*.97):base;
+  if(trained&&!refs.teacher.length)continue;
+  const candidates=trained?refs.teacher:refs.template;
+  if(!candidates.length)continue;
+  const score=Math.max(...candidates.map(ref=>compareGrid(input,ref)));
   ranked.push([name,score]);
  }
- ranked.sort((a,b)=>b[1]-a[1]);return ranked;
+ ranked.sort((a,b)=>b[1]-a[1]);
+ return ranked;
 }
 // Critérios conservadores: classificador por dez exemplos não deve fabricar certezas.
 function confident(m,minimum=.70,margin=.07){return !!(m&&m.length>1&&m[0][1]>=minimum&&m[0][1]-m[1][1]>=margin)}
@@ -503,26 +507,27 @@ let visualCandidate='',visualCount=0,visualLastCheck=0;
 function progressiveGuess(){
  if(finished||mode!=='kid'||!canEvaluate())return;
  const ranked=match();if(!ranked?.length)return;
- logRecognition(ranked,'Modelos');
+ logRecognition(ranked,Object.values(reference).some(ref=>ref.teacher.length)?'Desenhos aprovados':'Modelos básicos');
  const now=Date.now(),top=ranked[0],margin=top[1]-(ranked[1]?.[1]||0);
  // Não adivinhar por obrigação: traços parciais geram falsos candidatos.
  const enough=strokes.flat().length>=18&&now-drawStartedAt>=2200;
- const plausible=enough&&top[1]>=.48&&margin>=.055;
+ const plausible=enough&&top[1]>=.62&&margin>=.09;
  if(plausible){
   if(visualCandidate===top[0]&&now-visualLastCheck>=650)visualCount++;
   else if(visualCandidate!==top[0]){visualCandidate=top[0];visualCount=1}
   visualLastCheck=now;
  }else{visualCandidate='';visualCount=0}
- if(plausible&&visualCount>=3){
-  if(top[0]===deck[idx]&&confident(ranked,.70,.08)){
+ if(plausible&&visualCount>=4){
+  if(top[0]===deck[idx]&&confident(ranked,.75,.12)){
    resolve(true,'🤖 Reconheci! É '+top[0]+'! 🎉');return;
   }
-  if(now-lastSpokenAt>=4500&&!roundGuesses.has(top[0]))vocalGuess(top[0]);
+  if(top[1]>=.70&&margin>=.12&&now-lastSpokenAt>=6500&&!roundGuesses.has(top[0])&&roundGuesses.size<2)vocalGuess(top[0]);
  }else if(now-lastHintAt>=7000){
   lastHintAt=now;
   $('iaText').textContent=enough?'Ainda não reconheci com segurança. Pode acrescentar mais detalhes?':'Estou observando os traços. Continue desenhando!';
  }
- if(neuralReady)neuralGuess();
+ // A rede externa não deve competir com padrões humanos aprovados.
+ if(neuralReady&&!Object.values(reference).some(ref=>ref.teacher.length))neuralGuess();
 }
 function canEvaluate(){return drawStartedAt&&Date.now()-drawStartedAt>=1000&&strokes.flat().length>=8}
 refreshLearned();restoreTeacherCache();aiDiagnosticUpdate();syncCommunityExamples();
