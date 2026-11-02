@@ -76,7 +76,7 @@ const server=http.createServer(async(req,res)=>{
  }
  if(req.url==='/admin'&&req.method==='GET'){
   const page=await readFile(fileURLToPath(new URL('./admin.html',import.meta.url)));
-  res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(page);return;
+  res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(page);return;
  }
  if(req.url==='/health'&&req.method==='GET')return send(res,200,{ok:true});
  if(req.url==='/auth/session'&&req.method==='GET'){
