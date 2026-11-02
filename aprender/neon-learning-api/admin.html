@@ -322,30 +322,18 @@ let tfLoadPromise=null;
 function ensureTF(){
  if(window.tf?.sequential&&window.tf?.tensor4d)return Promise.resolve(window.tf);
  if(tfLoadPromise)return tfLoadPromise;
- const sources=[
-  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js',
-  'https://unpkg.com/@tensorflow/tfjs@4.22.0/dist/tf.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.22.0/tf.min.js'
- ];
- tfLoadPromise=(async()=>{
-  const errors=[];
-  for(let i=0;i<sources.length;i++){
-   $('neuralProgress').textContent='Carregando TensorFlow.js (fonte '+(i+1)+' de '+sources.length+')...';
-   try{
-    await new Promise((resolve,reject)=>{
-     const script=document.createElement('script');let done=false;
-     const timer=setTimeout(()=>finish(Error('tempo excedido')),12000);
-     function finish(err){if(done)return;done=true;clearTimeout(timer);script.onload=null;script.onerror=null;if(err){script.remove();reject(err)}else resolve()}
-     script.src=sources[i];script.async=true;
-     script.onload=()=>window.tf?.sequential?finish():finish(Error('biblioteca incompleta'));
-     script.onerror=()=>finish(Error('rede ou bloqueio da CDN'));
-     document.head.appendChild(script);
-    });
-    if(window.tf?.sequential&&window.tf?.tensor4d)return window.tf;
-   }catch(e){errors.push((new URL(sources[i])).hostname+': '+e.message)}
-  }
-  throw Error('TensorFlow.js indisponível após tentar 3 fontes. Verifique bloqueios de rede/CDN ou extensões. '+errors.join(' | '));
- })().catch(e=>{tfLoadPromise=null;throw e});
+ tfLoadPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.src='/assets/tf.min.js';
+  script.async=true;
+  const timer=setTimeout(()=>finish(Error('O carregamento local do TensorFlow excedeu o tempo limite.')),20000);
+  let done=false;
+  function finish(error){if(done)return;done=true;clearTimeout(timer);script.onload=null;script.onerror=null;
+   if(error){script.remove();reject(error)}else resolve(window.tf)}
+  script.onload=()=>window.tf?.sequential&&window.tf?.tensor4d?finish():finish(Error('Biblioteca local incompleta.'));
+  script.onerror=()=>finish(Error('O TensorFlow.js local não foi entregue pelo servidor. Verifique o estado do serviço Render.'));
+  document.head.appendChild(script);
+ }).catch(e=>{tfLoadPromise=null;throw e});
  return tfLoadPromise;
 }
 $('neuralTrain').onclick=async()=>{
