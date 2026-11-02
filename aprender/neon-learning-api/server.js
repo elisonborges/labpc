@@ -61,7 +61,9 @@ function siteRequest(req){
  const origin=req.headers.origin;
  return !origin || origin==='https://labpc-learning-api.onrender.com';
 }
-function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':process.env.LABPC_ORIGIN||'null','vary':'Origin'});res.end(JSON.stringify(data))}
+const gameOrigins=new Set(['https://labpc.annaone.com.br','https://elisonborges.github.io',process.env.LABPC_ORIGIN].filter(Boolean));
+function corsOrigin(res.req){return gameOrigins.has(req?.headers?.origin)?req.headers.origin:'null'}
+function send(res,status,data){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':corsOrigin(req),'vary':'Origin'});res.end(JSON.stringify(data))}
 let pairing=null;
 function validExample(e){return e&&categories.has(e.category)&&Array.isArray(e.strokes)&&e.strokes.length<=35&&e.strokes.every(line=>Array.isArray(line)&&line.length>=2&&line.length<=170&&line.every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(n=>Number.isFinite(n)&&n>=0&&n<=720)))}
 const server=http.createServer(async(req,res)=>{
@@ -122,7 +124,7 @@ const server=http.createServer(async(req,res)=>{
   }catch(e){console.error('Consulta de exemplos:',e.message);return send(res,503,{error:'Biblioteca temporariamente indisponível'})}
  }
  if(req.url==='/pair/upload'&&req.method==='POST'){
-  if(req.headers.origin!==process.env.LABPC_ORIGIN)return send(res,403,{error:'Origem não autorizada'});
+  if(!gameOrigins.has(req.headers.origin))return send(res,403,{error:'Origem não autorizada'});
   let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>180000)return send(res,413,{error:'Lote muito grande'})}
   let data;try{data=JSON.parse(raw)}catch{return send(res,400,{error:'JSON inválido'})}
   const code=String(data?.code||'').trim().toUpperCase();
