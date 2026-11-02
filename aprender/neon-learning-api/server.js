@@ -226,5 +226,3 @@ const server=http.createServer(async(req,res)=>{
  }catch(e){console.error('LabPC API:',e.message);send(res,500,{error:'Erro interno'})}
 });
 server.listen(Number(process.env.PORT||3000),()=>console.log('LabPC Learning API pronta'));
-// Avaliação independente, somente leitura; não interfere no jogo.
-import('./doodlenet-eval-runner.js').then(m=>m.evaluateDoodleNet(db)).catch(e=>console.error('LABPC_DOODLENET_EVAL_ERROR',e.message));
