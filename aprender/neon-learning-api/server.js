@@ -56,7 +56,7 @@ function validateLabSession(token){
  return data.v===3&&data.scope==='labpc-admin'&&typeof data.sub==='string'?data.sub:null;
  }catch{return null}
 }
-function cookie(res,token){res.setHeader('Set-Cookie','labpc_admin='+token+'; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age='+(token?'900':'0'))}
+function cookie(res,token){res.setHeader('Set-Cookie','labpc_admin='+token+'; HttpOnly; Secure; SameSite=Strict; Path=/'+(token?'':'; Max-Age=0'))}
 function siteRequest(req){
  const origin=req.headers.origin;
  return !origin || origin==='https://labpc-learning-api.onrender.com';
