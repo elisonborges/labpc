@@ -167,17 +167,20 @@ const server=http.createServer(async(req,res)=>{
  if(!categories.has(category)||!Array.isArray(strokes)||strokes.length>35||!strokes.every(line=>Array.isArray(line)&&line.length>=2&&line.length<=170&&line.every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(n=>Number.isFinite(n)&&n>=0&&n<=720))))return send(res,400,{error:'Exemplo inválido'});
  // Impede duplicatas idênticas, inclusive em envios simultâneos.
  // Reduz amostras muito densas antes de gravar, preservando início e fim dos traços.
- let safeStrokes=strokes.map(line=>line.map(p=>p));
- let normalized=JSON.stringify(safeStrokes);
- for(let maxPoints=100;Buffer.byteLength(normalized,'utf8')>14000&&maxPoints>=12;maxPoints=Math.floor(maxPoints*.75)){
-  safeStrokes=safeStrokes.map(line=>{
-   if(line.length<=maxPoints)return line;
-   const sampled=[];for(let i=0;i<maxPoints;i++)sampled.push(line[Math.round(i*(line.length-1)/(maxPoints-1))]);
-   return sampled;
-  });
-  normalized=JSON.stringify(safeStrokes);
- }
- if(Buffer.byteLength(normalized,'utf8')>14000)return send(res,413,{error:'Desenho muito complexo. Faça menos traços e tente novamente.'});
+ // O limite do Neon é pg_column_size(jsonb), maior que o JSON textual.
+ // Inteiros e no máximo 280 pontos no desenho inteiro evitam exceder a restrição.
+ const pointBudget=280;
+ const lengths=strokes.map(line=>line.length);
+ const allocations=lengths.map(n=>Math.min(n,Math.max(2,Math.floor(pointBudget*n/lengths.reduce((a,b)=>a+b,0)))));
+ let total=allocations.reduce((a,b)=>a+b,0);
+ while(total>pointBudget){const idx=allocations.findIndex(n=>n>2);if(idx<0)break;allocations[idx]--;total--}
+ const safeStrokes=strokes.map((line,j)=>{
+  const count=allocations[j];const sampled=[];
+  for(let i=0;i<count;i++){const p=line[Math.round(i*(line.length-1)/(count-1))];sampled.push([Math.round(p[0]),Math.round(p[1])])}
+  return sampled;
+ });
+ const normalized=JSON.stringify(safeStrokes);
+ if(Buffer.byteLength(normalized,'utf8')>9000)return send(res,413,{error:'O desenho contém pontos demais. Simplifique e tente novamente.'});
  const client=await db.connect();
  try{
   await client.query('BEGIN');
@@ -187,7 +190,7 @@ const server=http.createServer(async(req,res)=>{
   const data=await client.query('INSERT INTO labpc_learning.drawing_examples(category,strokes) VALUES ($1,$2::jsonb) RETURNING id,status',[category,normalized]);
   await client.query('COMMIT');
   return send(res,201,{...data.rows[0],duplicate:false});
- }catch(error){await client.query('ROLLBACK');throw error}finally{client.release()}
+ }catch(error){await client.query('ROLLBACK');if(error.constraint==='drawing_examples_strokes_check')return send(res,413,{error:'Desenho grande demais para salvar. Apague alguns traços e tente novamente.'});throw error}finally{client.release()}
  }
  const approve=req.url?.match(/^\/examples\/([0-9a-f-]{36})\/(approve|reject)$/);
  if(approve&&req.method==='POST'){
