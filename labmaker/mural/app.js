@@ -862,9 +862,9 @@ async function teacherOriginalUrl(cardId){
  return result.url;
 }
 async function loadPrivateCardPhotos(){
- for(const el of document.querySelectorAll('[data-card-photo]')){
+ await Promise.all([...document.querySelectorAll('[data-card-photo]')].map(async el=>{
   const id=el.dataset.cardPhoto;try{const url=await teacherOriginalUrl(id);if(!el.isConnected)return;el.replaceChildren();const img=document.createElement('img');img.src=url;img.alt='Imagem original do cartão';img.loading='lazy';el.appendChild(img)}catch(err){if(el.isConnected)el.textContent='Imagem indisponível: '+err.message}
- }
+ }));
 }
 function presentSingleCard(id){
  const c=cards.find(x=>x.id===id);if(!c)return;
