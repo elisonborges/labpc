@@ -32,8 +32,9 @@ setupCardDragging();setupSectionMovement();applyCardFilters();$('sections').quer
 async function newSection(){if(!mural||mural.owner_id!==user.id)return;const title=prompt('Nome da mesa ou seção:');if(!title?.trim())return;const r=await sb.from('lm_sections').insert({mural_id:mural.id,title:title.trim(),position:sections.length});if(r.error)return msg(r.error.message,'status',true);await refresh()}
 let teacherLocalImage='',teacherOriginalFile=null;
 function resetTeacherLocalImage(){teacherLocalImage='';teacherOriginalFile=null;$('postLocalImage').value='';$('postLocalPreview').hidden=true;$('postLocalStatus').textContent='Selecione JPG, PNG ou WebP. A imagem será compactada automaticamente.'}
-function newCard(id){resetTeacherLocalImage();$('postMediaUrl').value='';sectionId=id;card=null;objects=[];selected=-1;$('postTitle').value='';$('postAuthor').value='';$('postBody').value='';$('postImage').value='';$('editorStatus').textContent='';setMode('organized');$('editor').showModal()}
-function editCard(id){resetTeacherLocalImage();$('postMediaUrl').value='';const c=cards.find(x=>x.id===id);if(!c||c.author_id!==user.id||c.origin==='student')return;card=c;sectionId=c.section_id;$('postTitle').value=c.title;$('postAuthor').value=c.author_label;$('postBody').value=c.body;$('postImage').value=c.image_url;objects=Array.isArray(c.elements)?JSON.parse(JSON.stringify(c.elements)):[];$('postMediaUrl').value=objects.find(x=>x.type==='attachment'&&safeURL(x.value)&&!x.value.match(/\.(jpg|png|webp)(\?|$)/i))?.value||'';const savedImage=objects.find(x=>x.type==='attachment'&&x.kind==='image'&&teacherInlineImage(x.value));if(savedImage){teacherLocalImage=savedImage.value;$('postLocalPreview').src=teacherLocalImage;$('postLocalPreview').hidden=false;$('postLocalStatus').textContent='Imagem local existente neste cartão.'}selected=-1;setMode(c.layout==='free'?'free':'organized');$('editorStatus').textContent='';$('editor').showModal()}
+let teacherMediaFile=null;
+function newCard(id){resetTeacherLocalImage();teacherMediaFile=null;$('postMediaFile').value='';$('postMediaStatus').textContent='';$('postMediaUrl').value='';sectionId=id;card=null;objects=[];selected=-1;$('postTitle').value='';$('postAuthor').value='';$('postBody').value='';$('postImage').value='';$('editorStatus').textContent='';setMode('organized');$('editor').showModal()}
+function editCard(id){resetTeacherLocalImage();teacherMediaFile=null;$('postMediaFile').value='';$('postMediaStatus').textContent='';$('postMediaUrl').value='';const c=cards.find(x=>x.id===id);if(!c||c.author_id!==user.id||c.origin==='student')return;card=c;sectionId=c.section_id;$('postTitle').value=c.title;$('postAuthor').value=c.author_label;$('postBody').value=c.body;$('postImage').value=c.image_url;objects=Array.isArray(c.elements)?JSON.parse(JSON.stringify(c.elements)):[];$('postMediaUrl').value=objects.find(x=>x.type==='attachment'&&safeURL(x.value)&&!x.value.match(/\.(jpg|png|webp)(\?|$)/i))?.value||'';const savedImage=objects.find(x=>x.type==='attachment'&&x.kind==='image'&&teacherInlineImage(x.value));if(savedImage){teacherLocalImage=savedImage.value;$('postLocalPreview').src=teacherLocalImage;$('postLocalPreview').hidden=false;$('postLocalStatus').textContent='Imagem local existente neste cartão.'}selected=-1;setMode(c.layout==='free'?'free':'organized');$('editorStatus').textContent='';$('editor').showModal()}
 function setMode(m){mode=m;$('organized').classList.toggle('hide',m!=='organized');$('free').classList.toggle('hide',m!=='free');renderObjects()}
 function addObject(type){let value=type==='text'?'Seu texto':'';if(type==='image'){value=prompt('URL HTTPS da imagem:')||'';if(!safeURL(value))return msg('Informe uma imagem HTTPS válida.','editorStatus',true)}objects.push({type,x:15,y:15,w:type==='text'?170:110,h:type==='text'?65:100,value,color:'#ffbd36'});selected=objects.length-1;renderObjects()}
 function renderObjects(){$('canvas').innerHTML=objects.map((x,i)=>objHTML(x).replace('class="object"','class="object '+(i===selected?'selected':'')+'" data-i="'+i+'"')).join('');$('canvas').querySelectorAll('[data-i]').forEach(el=>{el.onpointerdown=e=>{selected=+el.dataset.i;const o=objects[selected],sx=e.clientX,sy=e.clientY,ox=o.x,oy=o.y;el.setPointerCapture(e.pointerId);el.onpointermove=ev=>{o.x=Math.max(0,Math.min(620,ox+ev.clientX-sx));o.y=Math.max(0,Math.min(300,oy+ev.clientY-sy));el.style.left=o.x+'px';el.style.top=o.y+'px'};el.onpointerup=()=>{el.onpointermove=null;renderObjects()};showTools()}});showTools()}
@@ -48,6 +49,16 @@ async function saveCard(){const title=$('postTitle').value.trim();if(!title)retu
   row.elements=[...row.elements,{type:'privateImage',path}];
   $('postLocalStatus').textContent='Original salvo em armazenamento privado. Miniatura preservada no cartão.';
  }catch(err){$('postLocalStatus').textContent='Original não enviado: '+err.message+'. A miniatura continuará disponível.'}
+}
+if(teacherMediaFile&&mode==='organized'){
+ try{
+  const extensions={'audio/webm':'webm','audio/ogg':'ogg','audio/mp4':'m4a','audio/mpeg':'mp3','video/webm':'webm','video/mp4':'mp4'};
+  const ext=extensions[teacherMediaFile.type];if(!ext||teacherMediaFile.size>5*1024*1024)throw Error('Formato não permitido ou arquivo maior que 5 MB');
+  const path=user.id+'/'+crypto.randomUUID()+'.'+ext;
+  const uploaded=await sb.storage.from('labmaker-mural-files').upload(path,teacherMediaFile,{contentType:teacherMediaFile.type,upsert:false});
+  if(uploaded.error)throw uploaded.error;
+  row.elements=[...row.elements.filter(x=>x.type!=='privateMedia'),{type:'privateMedia',path,kind:teacherMediaFile.type.startsWith('video/')?'video':'audio'}];
+ }catch(err){return msg('Falha ao enviar mídia: '+err.message,'editorStatus',true)}
 }
 const r=card?await sb.from('lm_cards').update(row).eq('id',card.id):await sb.from('lm_cards').insert(row);if(r.error)return msg('Falha ao salvar: '+r.error.message,'editorStatus',true);$('editor').close();await refresh();msg('Cartão salvo online.')}
 ['email','password'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')login()}));
@@ -880,3 +891,5 @@ async function loadTeacherPrivateMedia(){
   try{const url=await teacherOriginalUrl(c.id,true);if(!el.isConnected)return;const player=document.createElement(record.kind==='video'?'video':'audio');player.controls=true;player.preload='metadata';player.src=url;el.replaceChildren(player)}catch(err){if(el.isConnected)el.textContent='Mídia indisponível.'}
  }))
 }
+
+$('postMediaFile').addEventListener('change',()=>{const f=$('postMediaFile').files?.[0];teacherMediaFile=null;if(!f)return;if(!['audio/webm','audio/ogg','audio/mp4','audio/mpeg','video/webm','video/mp4'].includes(f.type)||f.size>5*1024*1024){$('postMediaStatus').textContent='Selecione um arquivo de áudio ou vídeo de até 5 MB.';return}teacherMediaFile=f;$('postMediaStatus').textContent='Arquivo pronto: '+f.name});
