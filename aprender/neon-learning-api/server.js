@@ -76,6 +76,13 @@ const server=http.createServer(async(req,res)=>{
   }catch(e){console.error('TensorFlow local:',e.message);send(res,503,{error:'Biblioteca de treinamento indisponível no servidor'})}
   return;
  }
+ if(req.url==='/experiment/doodlenet'&&req.method==='GET'){
+  const who=await adminIdentity(req);
+  if(!who){res.writeHead(303,{'location':'/admin','cache-control':'no-store'});res.end();return}
+  const page=await readFile(fileURLToPath(new URL('./doodlenet-experiment.html',import.meta.url)));
+  res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://raw.githubusercontent.com; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff'});
+  res.end(page);return;
+ }
  if(req.url==='/admin'&&req.method==='GET'){
   const page=await readFile(fileURLToPath(new URL('./admin.html',import.meta.url)));
   res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','content-security-policy':"default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",'x-content-type-options':'nosniff','referrer-policy':'no-referrer'});res.end(page);return;
