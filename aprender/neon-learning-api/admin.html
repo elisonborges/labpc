@@ -248,7 +248,7 @@ $('trainTest').onclick=async()=>{
   el.textContent='Palpite: '+name+' · Similaridade: '+Math.round(score*100)+'% · '+(reliable?'confiança suficiente':'resultado incerto')+' · '+(name===expected?'corresponde à palavra escolhida':'diferente da palavra escolhida')+'. Base: '+data.examples.length+' exemplo(s) aprovado(s). A similaridade não é uma probabilidade.';
  }catch(e){el.textContent='Não foi possível testar: '+e.message}finally{btn.disabled=false}
 };
-$('trainSave').onclick=async()=>{const btn=$('trainSave'),word=$('trainCategory').value;const strokes=trainStrokes.map(line=>{const step=Math.max(1,Math.ceil(line.length/160));return line.filter((_,i)=>i%step===0||i===line.length-1)}).filter(line=>line.length>=2).slice(0,35);if(strokes.flat().length<12){$('trainStatus').textContent='Faça um desenho com mais traços antes de salvar.';return}btn.disabled=true;try{
+$('trainSave').onclick=async()=>{const btn=$('trainSave'),word=$('trainCategory').value;const strokes=trainStrokes.map(line=>{const step=Math.max(1,Math.ceil(line.length/55));return line.filter((_,i)=>i%step===0||i===line.length-1)}).filter(line=>line.length>=2).slice(0,35);if(strokes.flat().length<12){$('trainStatus').textContent='Faça um desenho com mais traços antes de salvar.';return}btn.disabled=true;try{
  // Aviso pedagógico: desenhos semelhantes podem ser úteis; apenas a duplicata exata é bloqueada no servidor.
  const example=trainingGrid(strokes);
  let similar=0;
