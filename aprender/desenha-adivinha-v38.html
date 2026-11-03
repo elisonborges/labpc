@@ -326,8 +326,15 @@ const models={
 "FANTASMA":[[[20,89],[19,43],[30,20],[51,11],[72,20],[82,43],[82,89],[70,77],[60,89],[49,77],[38,89],[28,77],[20,89]],...circle(40,49,5),...circle(62,49,5),...circle(51,67,6)]
 };
 const realSamples={};
-function sampleToPixels(lines){return lines.map(st=>st[0].map((x,i)=>[x*1.65+149,st[1][i]*1.65+29]));}
-function chooseSample(word){const pool=realSamples[word];return pool?.length?pool[Math.floor(Math.random()*pool.length)]:null}
+function sampleToPixels(lines){
+ // Formato real da API: cada traço é uma lista de pontos [x,y].
+ if(!Array.isArray(lines))return [];
+ return lines.filter(st=>Array.isArray(st)).map(st=>st.filter(p=>Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1])).map(([x,y])=>[x*1.65+149,y*1.65+29])).filter(st=>st.length>=2);
+}
+function chooseSample(word){
+ const pool=communityExamples[word]||realSamples[word]||[];
+ return pool.length?pool[Math.floor(Math.random()*pool.length)]:null;
+}
 function circle(x,y,r){return [polygon(x,y,r,28)]}function polygon(x,y,r,n){return Array.from({length:n+1},(_,i)=>[x+Math.cos(i/n*2*Math.PI)*r,y+Math.sin(i/n*2*Math.PI)*r])}
 const $=id=>document.getElementById(id), kid=$('kidCanvas'), bot=$('botCanvas'),kctx=kid.getContext('2d'),bctx=bot.getContext('2d');let currentReal=null,mode='',deck=[],idx=0,points=0,remaining=60,timer=null,animation=null,advance=null,strokes=[],active=null,finished=false,reference={},playerCount=1,scores=[0,0],voiceOn=true,turnToken=0;
 function canvasClear(c){c.clearRect(0,0,720,480);c.fillStyle='#fff';c.fillRect(0,0,720,480)}
