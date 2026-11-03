@@ -1,9 +1,57 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0759a8"><title>Eu Ensino a IA | Universo Aprender · LabPC</title>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#074d9c">
+<title>Eu Ensino a IA | Universo Aprender · AnnA One LabPC</title>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#123b73;background:#f4f8ff}*{box-sizing:border-box}body{margin:0}header{background:linear-gradient(110deg,#092a50,#0759a8);color:#fff;padding:20px max(20px,calc((100vw - 1100px)/2))}header a{color:white;text-decoration:none;font-weight:650}header h1{font-size:clamp(24px,4vw,36px);margin:12px 0 4px}header p{margin:0;color:#d9edff}main{max-width:1100px;margin:22px auto;padding:0 18px}h2{margin:0 0 8px;font-size:22px}.intro{background:white;border:1px solid #deebfb;border-radius:18px;padding:18px;margin-bottom:18px}.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.tabs button,.actions button,.choice button{border:2px solid #c6daf4;background:white;color:#123b73;padding:11px 14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}.tabs button[aria-pressed=true]{background:#0a5bab;color:#fff;border-color:#0a5bab}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border-radius:18px;background:white;border:1px solid #dbe8fa;padding:20px;min-width:0}.panel h3{margin:0 0 9px;font-size:20px}.hint{color:#47668a;font-size:14px}.sample{height:180px;display:flex;justify-content:center;align-items:center;background:#eef5ff;border:2px dashed #adc9e9;border-radius:14px;margin:16px 0;font-weight:900;font-size:86px;user-select:none}.sample svg{width:145px;height:145px}.choice{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}.choice button{min-width:75px}.choice button[aria-pressed=true]{background:#e2edff;border-color:#0759a8}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.actions button{background:#0759a8;color:white;border:0}.actions button.secondary{background:#ecf4ff;color:#174e8e}.feedback{min-height:48px;padding:13px;background:#f2f7ff;border-radius:12px;font-weight:650;margin-top:15px}.stats{margin:14px 0 0;font-weight:700}.foot{font-size:13px;color:#506781;padding:16px 0 26px}button:focus-visible{outline:3px solid #ffbd2e;outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}@media(max-width:760px){.panels{grid-template-columns:1fr}.sample{height:150px}} 
-</style></head><body><header><a href="./">← Universo Aprender</a><h1>🧠 Eu Ensino a IA</h1><p>Ensine exemplos, experimente o reconhecimento e descubra como uma máquina aprende com referências.</p></header>
-<main><div class="intro"><strong>Laboratório de aprendizagem de máquina — versão inicial</strong><p>Escolha uma oficina. Na etapa <b>Ensinar</b>, associe exemplos à resposta correta. Em <b>Experimentar</b>, o sistema tenta classificar novos exemplos usando os que você ensinou.</p><p class="hint">Esta versão é uma simulação de classificação por semelhança, não uma rede neural. Os exemplos ficam somente neste navegador. Nenhuma informação pessoal ou desenho é enviado à internet.</p></div>
-<section class="intro" style="margin-bottom:16px"><h2>✏️ Oficina de Desenhos</h2><p>Ensine a IA com seus próprios desenhos e depois descubra os desenhos que ela apresenta. O professor pode revisar os exemplos capturados.</p><div class="actions"><button type="button" id="openDrawings">🎨 Abrir atividade de desenhos</button></div></section><h2>Próximas oficinas</h2><p class="hint">Estamos preparando novas experiências de aprendizagem com IA. A atividade de Desenhos já está disponível acima.</p><div class="upcoming" aria-label="Oficinas em desenvolvimento"><div>🌈 <strong>Cores</strong><span>Em desenvolvimento</span></div><div>🔷 <strong>Formas</strong><span>Em desenvolvimento</span></div><div>🔢 <strong>Números</strong><span>Em desenvolvimento</span></div><div>🔤 <strong>Letras</strong><span>Em desenvolvimento</span></div><div>🧩 <strong>Padrões</strong><span>Em desenvolvimento</span></div></div>
-<div class="foot">AnnA One · LabPC · Universo Aprender. Modelo educativo demonstrativo, com evolução incremental e funcionamento offline.</div></main>
-<style>.upcoming{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:15px 0 25px}.upcoming>div{background:white;border:1px solid #dbe8fa;border-radius:14px;padding:18px;font-size:21px}.upcoming strong{font-size:17px}.upcoming span{display:block;margin-top:10px;font-size:13px;font-weight:700;color:#6a778b;background:#edf1f6;border-radius:8px;padding:7px 9px}</style><script>document.getElementById('openDrawings').onclick=()=>{location.href='desenha-adivinha-v38.html'};</script></body></html>
+:root{--ink:#103b7b;--blue:#084caa;--purple:#783cf2;--light:#f5f9ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--light);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit}a:focus-visible,.start:focus-visible{outline:3px solid #ffbd2e;outline-offset:3px}
+.top{background:white;box-shadow:0 2px 14px #103b7b16;position:relative;z-index:2}
+.nav{max-width:1470px;margin:auto;min-height:74px;padding:12px 28px;display:flex;align-items:center;gap:24px;justify-content:space-between}
+.branding{display:flex;align-items:center;gap:18px;text-decoration:none;min-width:0}
+.anna-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#0dd6f1,#073fd5);color:white;font-weight:950;font-size:25px}
+.anna{font-weight:900;font-size:23px;line-height:1.1;white-space:nowrap}.anna small{display:block;font-weight:600;font-size:10px}
+.separator{height:42px;width:1px;background:#d1dfff}
+.labpc{font-weight:950;font-size:34px;letter-spacing:-2px;line-height:1;background:linear-gradient(90deg,#063b80 45%,#8728ed);background-clip:text;color:transparent;white-space:nowrap}
+.portal-title{font-size:23px;font-weight:900;line-height:1.05;white-space:nowrap}.portal-title small{display:block;font-size:12px;font-weight:500;margin-top:6px}
+.nav-actions{display:flex;align-items:center;gap:8px}.nav-actions a{white-space:nowrap;text-decoration:none;border:1px solid #cbd9f3;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:750;background:white}.nav-actions a:first-child{background:#074da4;color:white;border-color:#074da4}
+.hero{background:linear-gradient(110deg,#d8f2ff 0%,#f0f8ff 55%,#dfebff 100%);border-bottom:3px solid #d8e7ff}
+.hero-inner{max-width:1140px;margin:auto;padding:37px 26px 36px}
+.eyebrow{display:inline-block;color:#084caa;font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+h1{font-size:clamp(27px,4vw,40px);letter-spacing:-.04em;margin:0 0 9px}
+.hero p{margin:0;max-width:760px;color:#355b85;font-size:16px}
+main{max-width:1140px;width:100%;margin:0 auto;padding:28px 26px 40px;flex:1}
+h2{font-size:23px;margin:0 0 6px;letter-spacing:-.025em}
+.section-desc{margin:0 0 18px;color:#49698b}
+.featured{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);border-radius:19px;overflow:hidden;background:white;border:1px solid #dce7f8;box-shadow:0 7px 25px #133d7210;margin-bottom:36px}
+.feature-art{min-height:240px;background:linear-gradient(135deg,#0b8be2,#6d3de7);display:flex;justify-content:center;align-items:center;font-size:100px}
+.feature-body{padding:29px 31px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.feature-body p{margin:8px 0 20px;color:#49698b;max-width:530px}
+.start{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:linear-gradient(100deg,#074da4,#7136dd);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-size:15px;font-weight:800;min-height:46px;box-shadow:0 3px 10px #174c9020}
+.start:hover{filter:brightness(1.08)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:#fff;border:1px solid #dce7f8;border-radius:17px;padding:20px;min-height:146px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;box-shadow:0 5px 16px #123d720a}
+.card-emoji{font-size:33px;line-height:1.2}.card h3{font-size:18px;margin:1px 0 0}.card p{font-size:14px;color:#5b718d;margin:0;flex:1}
+.status{display:inline-block;background:#eff2f6;color:#62738a;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:750}
+footer{background:#0c2d57;color:#e6efff;padding:22px 26px;font-size:13px}footer .foot{max-width:1140px;margin:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:850px){.nav{flex-wrap:wrap;gap:12px}.branding{gap:10px}.anna{font-size:17px}.labpc{font-size:26px}.portal-title{font-size:17px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.nav{padding:13px 17px}.anna small,.separator,.portal-title small{display:none}.branding{gap:8px}.anna{font-size:16px}.labpc{font-size:24px}.portal-title{font-size:15px}.nav-actions{width:100%;justify-content:flex-start}.hero-inner{padding:26px 18px}main{padding:20px 16px 32px}.featured{grid-template-columns:1fr}.feature-art{min-height:150px;font-size:75px}.feature-body{padding:22px}.cards{grid-template-columns:1fr;gap:11px}.card{min-height:0}}
+</style></head>
+<body>
+<header class="top"><nav class="nav" aria-label="Navegação principal"><a href="./" class="branding" aria-label="Universo Aprender"><span class="anna-mark">A</span><span class="anna">AnnA One<small>Tecnologia e Educação Juntas</small></span><span class="separator"></span><span class="labpc">LabPC</span><span class="portal-title">Universo Aprender<small>Aprender criando e experimentando</small></span></a><div class="nav-actions"><a href="./">← Universo Aprender</a><a href="../">Central LabPC</a></div></nav></header>
+<section class="hero"><div class="hero-inner"><div class="eyebrow">Atividade 11 · Universo Aprender</div><h1>🧠 Eu Ensino a IA</h1><p>Explore como a inteligência artificial aprende com exemplos. Comece ensinando com desenhos e descubra novas oficinas que estamos preparando.</p></div></section>
+<main>
+<section aria-labelledby="disponivel"><h2 id="disponivel">Oficina disponível</h2><p class="section-desc">Ensine a IA com seus desenhos e depois descubra o que ela desenha.</p>
+<article class="featured"><div class="feature-art" aria-hidden="true">🎨</div><div class="feature-body"><span class="eyebrow">Aprender fazendo</span><h2>Desenhos — Eu treino a IA</h2><p>Crie desenhos para ajudar a IA a aprender. Depois, experimente o modo em que a IA desenha e você tenta descobrir o objeto. O professor poderá revisar os exemplos armazenados com autorização.</p><a class="start" href="desenha-adivinha-v38.html">▶ Iniciar atividade <span aria-hidden="true" style="margin-left:9px">›</span></a></div></article>
+</section>
+<section aria-labelledby="proximas"><h2 id="proximas">Próximas oficinas</h2><p class="section-desc">Novas atividades de ensino e experimentação com inteligência artificial.</p><div class="cards">
+<article class="card"><span class="card-emoji" aria-hidden="true">🌈</span><h3>Cores</h3><p>Ensinar e reconhecer cores e tonalidades.</p><span class="status">Em desenvolvimento</span></article>
+<article class="card"><span class="card-emoji" aria-hidden="true">🔷</span><h3>Formas</h3><p>Explorar diferentes formas e suas características.</p><span class="status">Em desenvolvimento</span></article>
+<article class="card"><span class="card-emoji" aria-hidden="true">🔢</span><h3>Números</h3><p>Aprender sobre quantidades e representações.</p><span class="status">Em desenvolvimento</span></article>
+<article class="card"><span class="card-emoji" aria-hidden="true">🔤</span><h3>Letras</h3><p>Experimentar o reconhecimento de letras.</p><span class="status">Em desenvolvimento</span></article>
+<article class="card"><span class="card-emoji" aria-hidden="true">🧩</span><h3>Padrões</h3><p>Ensinar e descobrir sequências e repetições.</p><span class="status">Em desenvolvimento</span></article>
+</div></section></main>
+<footer><div class="foot"><span><strong>AnnA One · LabPC</strong> — Universo Aprender</span><span>© 2026 · Tecnologia e Educação Juntas</span></div></footer>
+</body></html>
