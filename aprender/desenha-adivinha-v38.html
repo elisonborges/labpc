@@ -268,6 +268,49 @@ body.playing #game #trainingIndicator,body.playing #game #offlineStatus{text-ali
  #home .mode-footer{font-size:12px}
  .players-alert-actions .btn{min-width:0!important;flex:1 1 140px}
 }
+
+/* Ajuste da tela inicial: ocupar a altura disponível sem barra de rolagem */
+#home{overflow:hidden!important;gap:clamp(5px,1vh,10px)!important;padding:clamp(7px,1.35vh,14px) clamp(10px,2vw,20px)!important}
+#home .mission-intro{padding:clamp(8px,1.1vh,13px) 15px!important;width:min(100%,780px)!important}
+#home .mission-intro h2{font-size:clamp(22px,3.2vh,29px)!important;margin-bottom:3px!important}
+#home .mission-intro .sub{font-size:clamp(12px,1.9vh,14px)!important;margin:0 0 clamp(5px,.8vh,9px)!important}
+#home .mission-intro .player-setup{gap:7px!important;font-size:clamp(12px,1.9vh,15px)!important}
+#home .mission-intro .player-setup label{padding:clamp(4px,.7vh,7px) 10px!important}
+#home .mode-grid{flex:1 1 0!important;min-height:0!important;grid-template-rows:minmax(0,1fr)!important;gap:12px!important}
+#home .mode{height:100%!important;min-height:0!important;padding:clamp(10px,2vh,19px)!important;overflow:hidden!important}
+#home .mode .emoji{font-size:clamp(24px,4vh,34px)!important;margin:0 0 5px!important}
+#home .mode strong{font-size:clamp(19px,3vh,25px)!important}
+#home .mode p{font-size:clamp(12px,1.9vh,15px)!important;margin:5px 0 8px!important;line-height:1.3!important}
+#home .mode-footer{margin-top:auto}
+#home .mode-cta{padding:clamp(6px,1vh,9px) 11px!important}
+#home>.btnrow{margin:0!important}
+#home #teacherOpen{padding:clamp(6px,1vh,9px) 12px!important}
+@media(max-width:680px){
+ #home{gap:7px!important}
+ #home .mission-intro{padding:8px!important}
+ #home .mission-intro h2{font-size:clamp(20px,3.4vh,25px)!important}
+ #home .mission-intro .sub{font-size:clamp(11px,1.65vh,13px)!important;margin-bottom:6px!important}
+ #home .mission-intro .player-setup{gap:5px!important}
+ #home .mission-intro .player-setup label{padding:4px 7px!important}
+ #home .mode-grid{grid-template-columns:1fr!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;grid-auto-rows:auto!important;gap:7px!important}
+ #home .mode{padding:clamp(8px,1.35vh,12px) 13px!important}
+ #home .mode .emoji{font-size:clamp(20px,3.1vh,27px)!important;margin-bottom:2px!important}
+ #home .mode strong{font-size:clamp(17px,2.65vh,22px)!important}
+ #home .mode p{font-size:clamp(11px,1.75vh,13px)!important;margin:4px 0 5px!important}
+ #home .mode-footer{font-size:11px!important}
+ #home .mode-cta{font-size:12px!important;padding:5px 10px!important}
+}
+@media(max-height:550px){
+ #home .mission-intro{padding:5px 9px!important}
+ #home .mission-intro h2{font-size:20px!important;margin:0!important}
+ #home .mission-intro .sub{font-size:11px!important;margin:0 0 3px!important}
+ #home .mission-intro .player-setup label{padding:3px 6px!important}
+ #home .mode{padding:7px 11px!important}
+ #home .mode .emoji{font-size:21px!important;margin:0!important}
+ #home .mode strong{font-size:17px!important}
+ #home .mode p{font-size:11px!important;margin:2px 0 4px!important}
+ #home .mode-cta{padding:4px 8px!important}
+}
 </style></head><body id="topo"><header class="top"><nav class="nav" aria-label="Navegação principal"><a class="branding" href="https://labpc.annaone.com.br/" aria-label="AnnA One · LabPC"><span class="anna-mark" aria-hidden="true"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Símbolo AnnA One"><defs><linearGradient id="anna-official-gradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2ae0ef"/><stop offset=".5" stop-color="#087cff"/><stop offset="1" stop-color="#0746e8"/></linearGradient></defs><path d="M71 13Q80-1 89 14L151 128Q157 142 142 145H119Q109 145 103 134L80 89L57 134Q51 145 40 145H17Q2 143 9 129Z" fill="url(#anna-official-gradient)"/><path d="M22 112Q55 83 90 100Q71 90 54 108Q40 123 32 139H16Q9 139 11 131Z" fill="#061c72"/><path d="M14 129Q37 93 65 103Q78 107 84 117Q63 107 51 128Q41 145 25 145H15Q5 144 14 129Z" fill="#24c5f7"/></svg></span><span class="anna">AnnA One<small>Tecnologia a serviço da educação</small></span><span class="separator"></span><span class="labpc">LabPC</span><span class="separator"></span><span class="portal-title">Universo Aprender<small>Atividades interativas</small></span></a><div class="actions"><button type="button" id="annaQrActivity" style="border:1px solid #bfd3f0;border-radius:9px;padding:9px 12px;background:#ecf4ff;color:#084caa;font-weight:800;cursor:pointer">▦ QR Code</button><button type="button" id="annaShareActivity" style="border:1px solid #bfd3f0;border-radius:9px;padding:9px 12px;background:#ecf4ff;color:#084caa;font-weight:800;cursor:pointer">🔗 Compartilhar atividade</button><a href="eu-ensino-ia.html">← Outras oficinas · Card 11</a><a href="https://labpc.annaone.com.br/aprender/">Universo Aprender</a><a class="grade" href="https://labpc.annaone.com.br/aprender/">🎓 2º ano</a></div></nav></header>
 <section class="hero"><div class="hero-icons" aria-hidden="true">🎨 ✏️ 🤖</div><span class="year">ATIVIDADE • 2º ANO</span><h1>Desenha <em>&amp; Adivinha</em></h1><p>Use a criatividade e descubra como a IA interpreta desenhos!</p></section>
 <main><section id="home" class="panel center"><div class="mission-intro"><h2>🌟 Escolha sua missão!</h2><p class="sub">Aprenda ensinando ou descubra o desenho da IA.</p><div class="player-setup" role="group" aria-label="Quantidade de jogadores"><strong>Quantos jogadores?</strong><label><input type="radio" name="players" value="1"> 👤 1 jogador</label><label><input type="radio" name="players" value="2"> 👥 2 jogadores</label></div></div><div class="mode-grid"><button class="mode" id="chooseKid"><span class="emoji">✏️</span><strong>Eu treino a IA!</strong><p>Desenhe e ensine novos exemplos.</p><span class="mode-footer"><span>5 desafios</span><span class="mode-cta">▶ Começar</span></span></button><button class="mode" id="chooseBot"><span class="emoji">🤖</span><strong>A IA desenha!</strong><p>Observe e tente adivinhar.</p><span class="mode-footer"><span>20 desafios</span><span class="mode-cta">▶ Começar</span></span></button></div><div class="btnrow" style="margin-top:10px"><button id="teacherOpen" class="btn secondary" type="button">🧑‍🏫 Exemplos aprendidos</button></div></section>
