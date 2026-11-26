@@ -68,10 +68,14 @@ function lmStartTeacherTimer(){
  }
  const button=$('lmTeacherTimerButton');if(button)button.hidden=false;
  void lmReadTeacherTimer();
+ let elapsed=0;
  lmTimerPolling=setInterval(()=>{
   if(!mural||$('muralView').classList.contains('hide'))return;
   lmTickTeacherTimer();
-  if(document.visibilityState==='visible'&&Date.now()%7000<1300)void lmReadTeacherTimer();
+  if(++elapsed>=6){
+   elapsed=0;
+   if(document.visibilityState==='visible')void lmReadTeacherTimer();
+  }
  },1000);
 }
 async function lmOpenTimerDialog(){
