@@ -293,7 +293,7 @@ function stopMuralAutoSync(){
 function startMuralAutoSync(){
  if(muralSyncTimer)clearInterval(muralSyncTimer);
  // Realtime is fast when enabled; polling catches missed events, edits and reconnections.
- muralSyncTimer=setInterval(()=>scheduleMuralSync(),10000);
+ muralSyncTimer=setInterval(()=>{scheduleMuralSync();if(document.visibilityState==='visible')void loadPendingMuralComments()},10000);
 }
 async function refreshMuralManually(){
  const button=$('refreshMuralButton');
@@ -322,7 +322,7 @@ function scheduleMuralSync(){
  void refresh({silent:true});
 }
 document.addEventListener('visibilitychange',()=>{
- if(document.visibilityState==='visible'&&mural)scheduleMuralSync();
+ if(document.visibilityState==='visible'&&mural){scheduleMuralSync();void loadPendingMuralComments()}
 });
 window.addEventListener('focus',()=>{if(mural)scheduleMuralSync()});
 document.addEventListener('close',()=>{if(mural)queueMicrotask(scheduleMuralSync)},true);
@@ -342,6 +342,7 @@ async function openMural(id){
   .on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},scheduleMuralSync)
   .subscribe();
  startMuralAutoSync();
+ void loadPendingMuralComments();
 }
 async function refresh({silent=false}={}){
  if(!mural)return false;
@@ -707,7 +708,7 @@ make(mural.moderation_enabled?'🛡️ Aprovação ligada · Desligar':'🛡️ 
 make(mural.comments_enabled?'💬 Desativar comentários':'💬 Ativar comentários',()=>toggleMuralFlag('comments_enabled'));
 make('🎨 Personalizar mural',openMuralPersonalization);
 make(mural.reactions_enabled?'❤️ Desativar reações':'❤️ Ativar reações',()=>toggleMuralFlag('reactions_enabled'));
-const review=document.createElement('button');review.className='btn';review.textContent='💬 Moderar comentários';review.onclick=reviewComments;el.appendChild(review);
+const review=document.createElement('button');review.className='btn';review.textContent='💬 Revisar comentários';review.onclick=reviewComments;el.appendChild(review);
 const pending=cards.filter(x=>x.origin==='student'&&x.moderation_status==='pending').length;if(pending){const label=document.createElement('strong');label.textContent=' '+pending+' cartão(ões) aguardando aprovação';el.appendChild(label)}
 }
 async function toggleMuralFlag(field){if(!mural||mural.owner_id!==user.id)return;const next=!(mural[field]!==false);if(field==='moderation_enabled'&&mural[field]===undefined)return msg('Recarregue para atualizar o mural.');const r=await sb.from('lm_murals').update({[field]:next}).eq('id',mural.id).eq('owner_id',user.id).select('*').single();if(r.error)return msg(r.error.message,'status',true);Object.assign(mural,r.data);renderTeacherControls();msg('Configuração atualizada.')}
@@ -1156,8 +1157,64 @@ try{const saved=sessionStorage.getItem('labmaker-layout');if(['columns','grid','
 const originalRenderSections=renderSections;
 renderSections=function(){originalRenderSections();changeMuralLayout(muralLayout)};
 
-async function reviewComments(){if(!mural||mural.owner_id!==user.id)return;const ids=cards.map(c=>c.id);if(!ids.length)return alert('Não há cartões neste mural.');const q=await sb.from('lm_comments').select('id,card_id,author_label,body,approved,created_at').in('card_id',ids).order('created_at',{ascending:false}).limit(100);if(q.error)return msg('Erro ao listar comentários: '+q.error.message,'status',true);const pending=(q.data||[]).filter(c=>!c.approved);if(!pending.length)return alert('Não há comentários aguardando aprovação.');for(const c of pending){const action=prompt('Comentário de '+c.author_label+':\n'+c.body+'\n\nDigite A para aprovar, E para excluir, ou C para cancelar.','A');if(!action||action.toUpperCase()==='C')break;if(action.toUpperCase()==='A'){const x=await sb.from('lm_comments').update({approved:true}).eq('id',c.id);if(x.error){alert(x.error.message);break}}else if(action.toUpperCase()==='E'){if(!confirm('Excluir este comentário?'))continue;const x=await sb.from('lm_comments').delete().eq('id',c.id);if(x.error){alert(x.error.message);break}}}msg('Moderação de comentários atualizada.')}
-
+let lmPendingCommentCount=0,lmCommentListRequest=0;
+async function loadPendingMuralComments(renderList=false){
+ if(!mural||!user||mural.owner_id!==user.id)return;
+ const muralId=mural.id,request=++lmCommentListRequest;
+ const dialog=$('lmReviewCommentsDialog'),list=$('lmReviewCommentsList');
+ if(renderList&&dialog.open)list.textContent='Carregando comentários…';
+ const result=await sb.rpc('lm_teacher_pending_comments',{p_mural:muralId});
+ if(!mural||mural.id!==muralId||request!==lmCommentListRequest)return;
+ if(result.error){
+  if(renderList&&dialog.open)list.textContent='Não foi possível carregar os comentários: '+result.error.message;
+  return;
+ }
+ const items=Array.isArray(result.data)?result.data:[];
+ lmPendingCommentCount=items.length;
+ const badge=$('pendingCommentsBadge');
+ if(badge){badge.hidden=!items.length;badge.textContent=items.length>=200?'200+':String(items.length)}
+ const button=$('reviewCommentsButton');
+ if(button)button.setAttribute('aria-label',items.length?'Comentários: '+items.length+' aguardando aprovação':'Comentários: nenhum pendente');
+ if(renderList&&dialog.open){
+  if(!items.length){list.innerHTML='<p class="lm-review-empty">✅ Não há comentários aguardando aprovação.</p>';return}
+  list.innerHTML=items.map(comment=>{
+   const card=cards.find(c=>c.id===comment.card_id);
+   const when=comment.created_at?new Date(comment.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'';
+   return '<article class="lm-review-comment-card" data-pending-comment="'+esc(comment.id)+'">'+
+    '<div class="lm-review-comment-meta"><span>📌 '+esc(comment.section_title||'Seção')+'</span><span>• '+esc(card?.title||comment.card_title||'Publicação')+'</span>'+(when?'<span>🕒 '+esc(when)+'</span>':'')+'</div>'+
+    '<strong>👤 '+esc(comment.author_label||'Participante')+'</strong>'+
+    '<p class="lm-review-comment-body">'+esc(comment.body||'')+'</p>'+
+    '<div class="lm-review-comment-actions"><button type="button" class="btn primary" data-approve-comment="'+esc(comment.id)+'">✓ Aprovar</button>'+
+    '<button type="button" class="btn lm-reject-comment" data-delete-comment="'+esc(comment.id)+'">✕ Excluir</button></div></article>';
+  }).join('');
+  list.querySelectorAll('[data-approve-comment]').forEach(button=>button.onclick=()=>reviewMuralComment(button.dataset.approveComment,'approve'));
+  list.querySelectorAll('[data-delete-comment]').forEach(button=>button.onclick=()=>reviewMuralComment(button.dataset.deleteComment,'delete'));
+ }
+}
+async function reviewComments(){
+ if(!mural||mural.owner_id!==user.id)return;
+ document.querySelectorAll('#muralView .mural-menu').forEach(menu=>menu.open=false);
+ const dialog=$('lmReviewCommentsDialog');
+ if(!dialog.open)dialog.showModal();
+ await loadPendingMuralComments(true);
+}
+async function reviewMuralComment(id,action){
+ if(!mural||mural.owner_id!==user.id||!['approve','delete'].includes(action))return;
+ if(action==='delete'&&!confirm('Excluir este comentário sem publicá-lo?'))return;
+ const card=$('lmReviewCommentsList').querySelector('[data-pending-comment="'+id+'"]');
+ const buttons=card?[...card.querySelectorAll('button')]:[];
+ buttons.forEach(button=>button.disabled=true);
+ try{
+  const result=await sb.rpc('lm_teacher_review_comment',{p_comment:id,p_action:action});
+  if(result.error)throw result.error;
+  if(result.data!==true)throw Error('O comentário já foi revisado. Atualize a lista.');
+  await loadPendingMuralComments(true);
+  msg(action==='approve'?'Comentário aprovado e publicado.':'Comentário excluído.');
+ }catch(error){
+  msg('Erro ao revisar comentário: '+error.message,'status',true);
+  buttons.forEach(button=>button.disabled=false);
+ }
+}
 
 function showMuralProgress(){
  if(!mural)return;
