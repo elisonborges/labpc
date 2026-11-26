@@ -13,7 +13,7 @@ $('auth').classList.add('hide');$('app').classList.remove('hide');$('logout').cl
 classes.sort((a,b)=>(''+a.units?.name+a.grade+a.class_name).localeCompare(''+b.units?.name+b.grade+b.class_name));
 const options=classes.map(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=[x.grade,'Turma '+x.class_name,x.shift,x.units?.name].join(' · ');return o});
 const all=document.createElement('option');all.value='__all__';all.textContent='📁 Todos os meus murais';const free=document.createElement('option');free.value='__free__';free.textContent='🎨 Sem turma';$('classSelect').replaceChildren(all,free,...options);
-const prior=sessionStorage.getItem('labmaker-selected-area');if(prior&&[...$('classSelect').options].some(o=>o.value===prior))$('classSelect').value=prior;
+$('classSelect').value='__all__';
 await selectClass()}
 function backMurals(){mural=null;$('listView').classList.remove('hide');$('muralView').classList.add('hide');if(channel){sb.removeChannel(channel);channel=null}}
 async function selectClass(){
@@ -784,7 +784,7 @@ function openPedagogicalTemplates(){
 }
 async function createPedagogicalMural(presetId){
  if(replicationBusy||!user)return;
- const preset=pedagogicalPresets.find(x=>x.id===presetId),classId=$('classSelect').value==='__free__'?null:$('classSelect').value;
+ const preset=pedagogicalPresets.find(x=>x.id===presetId),classId=['__all__','__free__'].includes($('classSelect').value)?null:$('classSelect').value;
  if(!preset)return;
  const title=prompt('Título do novo mural:',preset.name.replace(/^[^\p{L}]+/u,'').trim());
  if(!title?.trim())return;
