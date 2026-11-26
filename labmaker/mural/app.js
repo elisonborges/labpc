@@ -729,8 +729,10 @@ function renderPresentation(){
  }
  const c=item.card;
  const author=esc(c.author_label||'Equipe');
- stage.innerHTML='<div class="lm-slide-card-content"><span class="muted">'+esc(item.section)+' · '+author+'</span>'+
-  '<h2>'+esc(c.title)+'</h2>'+
+ stage.innerHTML='<header class="lm-slide-publication-header" aria-label="Identificação da publicação">'+
+  '<div class="lm-slide-identity"><span class="lm-slide-identity-label">Turma / Seção</span><strong>'+esc(item.section||'Publicações')+'</strong></div>'+
+  '<div class="lm-slide-identity"><span class="lm-slide-identity-label">Produção de</span><strong>'+author+'</strong></div></header>'+
+  '<div class="lm-slide-card-content"><h2>'+esc(c.title)+'</h2>'+
   (c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':
    '<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+
    (safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''))+
