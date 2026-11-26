@@ -756,6 +756,83 @@ dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('image-drop-
 dropZone.addEventListener('drop',event=>{event.preventDefault();dropZone.classList.remove('image-drop-active');const file=Array.from(event.dataTransfer.files||[]).find(f=>f.type.startsWith('image/'));if(file)processStudentImage(file)});
 dropZone.addEventListener('paste',event=>{const file=Array.from(event.clipboardData?.files||[]).find(f=>f.type.startsWith('image/'));if(file){event.preventDefault();processStudentImage(file)}});
 
+// LABMAKER_WEB_IMAGE_IMPORT_V01 — copiar/colar/arrastar imagens da internet.
+(() => {
+ const dialog=document.getElementById('dialog');
+ const drop=document.getElementById('studentImageDrop');
+ const status=document.getElementById('imageStatus');
+ const group=document.getElementById('studentImageGroup');
+ if(!dialog||!drop||!status||!group)return;
+ group.querySelector('summary').textContent='🖼️ Imagem: dispositivo ou internet';
+ const heading=drop.querySelector('strong');
+ if(heading)heading.textContent='🖼️ Arraste uma imagem ou cole com Ctrl+V';
+ const help=document.createElement('p');
+ help.className='muted';
+ help.textContent='Na busca de imagens, escolha “Copiar imagem” e cole aqui. Também é possível arrastar. Alguns sites bloqueiam a operação.';
+ drop.insertAdjacentElement('afterend',help);
+ const button=document.createElement('button');
+ button.type='button';button.className='btn';button.textContent='📋 Colar imagem copiada';
+ help.insertAdjacentElement('afterend',button);
+ const imageFile=dt=>Array.from(dt?.files||[]).find(f=>/^image\/(jpeg|png|webp)$/i.test(f.type));
+ const imageUrl=dt=>{
+  if(!dt)return null;
+  const raw=dt.getData('text/uri-list')||dt.getData('text/plain')||'';
+  const first=raw.split(/\r?\n/).map(v=>v.trim()).find(v=>v&&!v.startsWith('#'));
+  try{
+   const u=new URL(first);
+   if(u.protocol!=='https:'||u.username||u.password||!/\.(png|jpe?g|webp|gif|avif)$/i.test(u.pathname))return null;
+   return u.href;
+  }catch{return null;}
+ };
+ const addRemoteImage=url=>{
+  if(lmAddAttachment({type:'attachment',kind:'image',value:url})){
+   status.textContent='Link de imagem incluído. Confira a prévia antes de publicar; a exibição depende do site de origem.';
+  }else status.textContent='Imagem duplicada ou limite de anexos atingido.';
+ };
+ const accept=async dt=>{
+  const file=imageFile(dt);
+  if(file){group.open=true;await processStudentImage(file);return true;}
+  const url=imageUrl(dt);
+  if(url){group.open=true;addRemoteImage(url);return true;}
+  return false;
+ };
+ drop.addEventListener('dragover',e=>{
+  if(Array.from(e.dataTransfer?.types||[]).some(t=>['Files','text/uri-list','text/plain'].includes(t))){
+   e.preventDefault();e.dataTransfer.dropEffect='copy';drop.classList.add('image-drop-active');
+  }
+ },true);
+ drop.addEventListener('drop',e=>{
+  e.preventDefault();e.stopImmediatePropagation();drop.classList.remove('image-drop-active');
+  void accept(e.dataTransfer).then(ok=>{if(!ok)status.textContent='Não foi possível ler a imagem. Tente “Copiar imagem” e Ctrl+V.';});
+ },true);
+ dialog.addEventListener('paste',e=>{
+  const file=imageFile(e.clipboardData);
+  if(!file)return;
+  e.preventDefault();e.stopImmediatePropagation();group.open=true;void processStudentImage(file);
+ },true);
+ drop.addEventListener('paste',e=>{
+  const url=imageUrl(e.clipboardData);
+  if(url){e.preventDefault();e.stopImmediatePropagation();group.open=true;addRemoteImage(url);}
+ },true);
+ button.addEventListener('click',async()=>{
+  if(!navigator.clipboard?.read){status.textContent='Use Ctrl+V sobre a área de imagem neste navegador.';drop.focus();return;}
+  try{
+   const items=await navigator.clipboard.read();
+   for(const item of items){
+    const type=item.types.find(t=>/^image\/(png|jpeg|webp)$/i.test(t));
+    if(!type)continue;
+    const blob=await item.getType(type);
+    group.open=true;
+    await processStudentImage(new File([blob],'imagem-copiada.'+type.split('/')[1],{type}));
+    return;
+   }
+   status.textContent='Nenhuma imagem encontrada. Na busca escolha “Copiar imagem”, não “Copiar link”.';
+  }catch{status.textContent='O navegador bloqueou a área de transferência. Tente Ctrl+V.';drop.focus();}
+ });
+})();
+// FIM LABMAKER_WEB_IMAGE_IMPORT_V01
+
+
 
 let activeTextRange=null,baseTypography=null,lastBodyValue='',lmSavedRange=null,lmCaretRange=null;
 function typography(){
