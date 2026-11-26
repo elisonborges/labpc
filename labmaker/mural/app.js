@@ -113,7 +113,7 @@ function applyMuralTheme(){
  if(!mural)return;
  const el=$('muralView'),pattern=mural.background_pattern||'solid',wall=lmWallpapers[pattern]||lmWallpapers.solid;
  const color=/^#[0-9a-f]{6}$/i.test(mural.theme_color)?mural.theme_color:'#edf6ff';
- el.style.backgroundColor=color;el.style.backgroundImage=wall.background;el.style.backgroundSize=wall.size;
+ el.style.backgroundColor=color;el.style.backgroundImage=wall.background;el.style.backgroundSize=wall.size;el.style.setProperty('--lm-wallpaper-image',wall.background);el.style.setProperty('--lm-wallpaper-size',wall.size);
  el.classList.toggle('lm-space-theme',pattern==='space');
 }
 function renderMuralPersonalization(){
