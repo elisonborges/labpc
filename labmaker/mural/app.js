@@ -92,17 +92,18 @@ async function saveMuralDetails(){
  }catch(e){$('editMuralStatus').textContent='Erro ao salvar: '+e.message}finally{save.disabled=false}
 }
 function openNewMuralDialog(){
- $('newMuralForm').reset();$('newMuralYear').value=new Date().getFullYear();
+ $('newMuralForm').reset();$('newMuralModeration').checked=true;$('newMuralYear').value=new Date().getFullYear();
  $('newMuralClass').replaceChildren(new Option('Sem turma — mural independente',''),...classes.map(c=>new Option([c.grade,'Turma '+c.class_name,c.shift,c.units?.name].join(' · '),c.id)));
  $('newMuralStatus').textContent='';$('newMuralDialog').showModal();
 }
 async function createMural(){
  const title=$('newMuralTitle').value.trim(),description=$('newMuralDescription').value.trim(),folder=$('newMuralFolder').value.trim();
  const year=Number($('newMuralYear').value),class_id=$('newMuralClass').value||null;
+ const moderation_enabled=$('newMuralModeration').checked;
  if(!title||title.length>120||folder.length>80||year<2000||year>2100)return $('newMuralStatus').textContent='Confira o título, a pasta e o ano letivo.';
  const button=$('newMuralSubmit');button.disabled=true;$('newMuralStatus').textContent='Criando mural...';
  try{
-  const r=await sb.from('lm_murals').insert({class_id,owner_id:user.id,title,description,folder,school_year:year}).select('id').single();if(r.error)throw r.error;
+  const r=await sb.from('lm_murals').insert({class_id,owner_id:user.id,title,description,folder,school_year:year,moderation_enabled}).select('id').single();if(r.error)throw r.error;
   const initial=await sb.from('lm_sections').insert({mural_id:r.data.id,title:'Publicações',position:0});if(initial.error)throw Error('Mural criado, mas a área de publicação falhou: '+initial.error.message);
   $('newMuralDialog').close();$('classSelect').value='__all__';$('muralArchiveFilter').checked=false;$('muralYearFilter').value='';$('muralFolderFilter').value='';
   await selectClass();await openMural(r.data.id);msg('Mural criado e associado à sua conta.');
