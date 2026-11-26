@@ -684,7 +684,17 @@ function lmDrawAttachmentList(){
   label.textContent=({image:'🖼️ Imagem/desenho',audio:'🎵 Música/áudio',video:'🎬 Vídeo',document:'📄 Documento',link:'🔗 Link'})[item.kind]||'🔗 Anexo';
   if(safe(item.value))label.textContent+=' · '+item.value.slice(0,60);
   const remove=document.createElement('button');remove.type='button';remove.className='btn';remove.textContent='✕';remove.setAttribute('aria-label','Remover anexo');
-  remove.onclick=()=>{lmAttachments.splice(index,1);lmDrawAttachmentList()};
+  remove.onclick=()=>{
+   const lastImage=[...lmAttachments].reverse().find(x=>x.kind==='image'&&validInlineImage(x.value));
+   lmAttachments.splice(index,1);
+   if(item.kind==='image'&&lastImage?.value===item.value){
+    studentOriginalFile=null;studentOriginalPath='';
+   }
+   localImageData=lmAttachments.filter(x=>x.kind==='image'&&validInlineImage(x.value)).at(-1)?.value||'';
+   $('studentImagePreview').hidden=!localImageData;
+   if(localImageData)$('studentImagePreview').src=localImageData;
+   lmDrawAttachmentList();
+  };
   row.append(label,remove);root.append(row);
  });
 }
