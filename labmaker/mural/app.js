@@ -16,7 +16,109 @@ const options=classes.map(x=>{const o=document.createElement('option');o.value=x
 const all=document.createElement('option');all.value='__all__';all.textContent='📁 Todos os meus murais';const free=document.createElement('option');free.value='__free__';free.textContent='🎨 Sem turma';$('classSelect').replaceChildren(all,free,...options);
 $('classSelect').value='__all__';
 await selectClass()}
+// Classroom countdown: server-defined deadline, shared by the teacher and participants.
+let lmTimerData=null,lmTimerMuralId=null,lmTimerOffset=0,lmTimerPolling=null,lmTimerReading=false,lmTimerBusy=false;
+function lmTimerSeconds(){
+ if(!lmTimerData)return 0;
+ const end=lmTimerData.ends_at?Date.parse(lmTimerData.ends_at):NaN;
+ if(Number.isFinite(end))return Math.max(0,Math.ceil((end-Date.now()-lmTimerOffset)/1000));
+ return Math.max(0,Number(lmTimerData.remaining)||0);
+}
+function lmTimerFormat(seconds){
+ const n=Math.max(0,Math.ceil(Number(seconds)||0)),hours=Math.floor(n/3600),mins=Math.floor(n%3600/60),secs=n%60;
+ return (hours?String(hours).padStart(2,'0')+':':'')+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+}
+function lmApplyTimerData(data){
+ if(!data)return;
+ lmTimerOffset=data.server_now?Date.parse(data.server_now)-Date.now():0;
+ lmTimerData=data;lmTimerMuralId=mural?.id||null;
+ lmTickTeacherTimer();
+}
+function lmTickTeacherTimer(){
+ const visible=!!lmTimerData?.visible,seconds=lmTimerSeconds();
+ const running=!!lmTimerData?.ends_at&&seconds>0;
+ const label=lmTimerFormat(seconds);
+ const display=$('lmTeacherTimerDisplay'),status=$('lmTeacherTimerState'),button=$('lmTeacherTimerButton'),visibility=$('lmTimerVisibility');
+ if(display){display.textContent=label;display.classList.toggle('lm-urgent',visible&&seconds<=30)}
+ if(status)status.textContent=running?'▶ Contagem em andamento':seconds===0?'⏰ Tempo encerrado':visible?'⏸ Pausado / pronto':'Cronômetro oculto dos participantes';
+ if(button)button.textContent='⏱ '+(visible?label:'Cronômetro');
+ if(visibility){visibility.textContent=visible?'🙈 Ocultar dos participantes':'👁 Mostrar aos participantes';visibility.dataset.action=visible?'hide':'show'}
+}
+async function lmReadTeacherTimer(){
+ if(!mural||mural.owner_id!==user?.id||lmTimerReading||lmTimerBusy)return;
+ const id=mural.id;lmTimerReading=true;
+ try{
+  const result=await sb.rpc('lm_teacher_timer_control',{p_mural:id,p_action:'status'});
+  if(result.error)throw result.error;
+  if(mural?.id===id)lmApplyTimerData(result.data);
+ }catch(error){
+  if($('lmTimerDialog')?.open)$('lmTimerStatus').textContent='Não foi possível sincronizar: '+error.message;
+ }finally{lmTimerReading=false}
+}
+function lmStopTeacherTimer(){
+ if(lmTimerPolling){clearInterval(lmTimerPolling);lmTimerPolling=null}
+ lmTimerData=null;lmTimerMuralId=null;lmTimerOffset=0;
+ lmTickTeacherTimer();
+}
+function lmStartTeacherTimer(){
+ lmStopTeacherTimer();
+ if(mural?.owner_id!==user?.id){
+  const button=$('lmTeacherTimerButton');if(button)button.hidden=true;
+  return;
+ }
+ const button=$('lmTeacherTimerButton');if(button)button.hidden=false;
+ void lmReadTeacherTimer();
+ lmTimerPolling=setInterval(()=>{
+  if(!mural||$('muralView').classList.contains('hide'))return;
+  lmTickTeacherTimer();
+  if(document.visibilityState==='visible'&&Date.now()%7000<1300)void lmReadTeacherTimer();
+ },1000);
+}
+async function lmOpenTimerDialog(){
+ if(!mural||mural.owner_id!==user?.id)return;
+ const dialog=$('lmTimerDialog');
+ if(!dialog.open)dialog.showModal();
+ await lmReadTeacherTimer();
+ const duration=Math.max(1,Number(lmTimerData?.duration)||300);
+ $('lmTimerUnit').value=duration%60===0?'minutes':'seconds';
+ $('lmTimerValue').value=duration%60===0?String(duration/60):String(duration);
+ $('lmTimerStatus').textContent='O tempo é compartilhado com os participantes quando estiver visível.';
+ lmTickTeacherTimer();
+}
+async function lmTimerAction(action){
+ if(!mural||mural.owner_id!==user?.id||lmTimerBusy)return;
+ if(action==='show')action=$('lmTimerVisibility')?.dataset.action||'show';
+ let seconds=null;
+ if(action==='configure'){
+  const value=Number($('lmTimerValue').value),unit=$('lmTimerUnit').value;
+  seconds=unit==='minutes'?value*60:value;
+  if(!Number.isInteger(seconds)||seconds<1||seconds>36000){
+   $('lmTimerStatus').textContent='Use entre 1 segundo e 600 minutos (até 10 horas).';return;
+  }
+ }
+ lmTimerBusy=true;
+ const buttons=[...document.querySelectorAll('#lmTimerDialog button')];
+ buttons.forEach(button=>button.disabled=true);
+ $('lmTimerStatus').textContent='Salvando cronômetro…';
+ const id=mural.id;
+ try{
+  const result=await sb.rpc('lm_teacher_timer_control',{p_mural:id,p_action:action,p_seconds:seconds});
+  if(result.error)throw result.error;
+  if(mural?.id!==id)return;
+  lmApplyTimerData(result.data);
+  $('lmTimerStatus').textContent=({
+   configure:'Duração aplicada. Clique em Iniciar para começar.',
+   start:'Cronômetro iniciado ou retomado.',
+   pause:'Cronômetro pausado para todos.',
+   reset:'Tempo reiniciado. Clique em Iniciar.',
+   show:'Cronômetro visível para os participantes.',
+   hide:'Cronômetro oculto e pausado.'
+  })[action]||'Cronômetro salvo.';
+ }catch(error){$('lmTimerStatus').textContent='Erro: '+error.message}
+ finally{lmTimerBusy=false;buttons.forEach(button=>button.disabled=false)}
+}
 function backMurals(){
+ lmStopTeacherTimer();
  stopMuralAutoSync();
  mural=null;
  $('listView').classList.remove('hide');$('muralView').classList.add('hide');
@@ -347,6 +449,7 @@ async function openMural(id){
   .on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},scheduleMuralSync)
   .subscribe();
  startMuralAutoSync();
+ lmStartTeacherTimer();
  void loadPendingMuralComments();
 }
 async function refresh({silent=false,force=false}={}){
@@ -717,7 +820,7 @@ async function applyTemplate(templateId){
  }catch(e){msg('Erro ao usar modelo: '+e.message+(created?' Verifique possível mural incompleto na turma.':''),'status',true)}finally{replicationBusy=false}
 }
 
-function renderTeacherControls(){if(!$('muralView')||!mural)return;let el=$('teacherControls');if(!el)return;el.replaceChildren();updateMuralStatusChips();if(mural.owner_id!==user.id){$('muralConfigMenu').style.display='none';return}$('muralConfigMenu').style.display='';
+function renderTeacherControls(){if(!$('muralView')||!mural)return;const timerButton=$('lmTeacherTimerButton');if(timerButton)timerButton.hidden=mural.owner_id!==user?.id;let el=$('teacherControls');if(!el)return;el.replaceChildren();updateMuralStatusChips();if(mural.owner_id!==user.id){$('muralConfigMenu').style.display='none';return}$('muralConfigMenu').style.display='';
 const make=(label,handler)=>{const b=document.createElement('button');b.className='btn';b.textContent=label;b.onclick=handler;el.appendChild(b)};
 make(mural.posting_enabled===false?'🔒 Postagens fechadas · Reabrir':'🔓 Postagens abertas · Bloquear',()=>toggleMuralFlag('posting_enabled'));
 make(mural.moderation_enabled?'🛡️ Aprovação ligada · Desligar':'🛡️ Aprovação desligada · Ligar',()=>toggleMuralFlag('moderation_enabled'));
