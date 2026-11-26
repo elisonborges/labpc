@@ -675,27 +675,31 @@ function slideBackdropColor(hex,opacity=.88){
  return 'rgba('+r+','+g+','+b+','+opacity+')';
 }
 function slideBackgroundFor(item){
- const pattern=mural?.background_pattern||'solid';
- const wall=lmWallpapers[pattern]||lmWallpapers.solid;
+ const wall=lmWallpapers[mural?.background_pattern||'solid']||lmWallpapers.solid;
  const screen=$('slideScreen'),stage=$('slideContent');
- const base=/^#[0-9a-f]{6}$/i.test(mural?.theme_color)?mural.theme_color:'#edf6ff';
- screen.style.backgroundColor=base;
- screen.style.backgroundImage=wall.background;
- screen.style.backgroundSize=wall.size;
- stage.style.backgroundSize=wall.size;
+ // The slideshow controls stay on a neutral background. Wallpaper belongs only to the slide.
+ screen.style.backgroundColor='#0b1f3c';
+ screen.style.backgroundImage='none';
+ screen.style.backgroundSize='';
+ stage.classList.toggle('lm-slide-cover',item.type==='cover');
+ stage.classList.toggle('lm-slide-publication',item.type==='card');
+ stage.classList.toggle('lm-slide-section',item.type==='section');
  stage.style.backgroundPosition='center';
- if(item.type==='card'){
-  const chosen=teacherCardColor(item.card);
-  stage.style.backgroundColor=chosen;
-  stage.style.backgroundImage=wall.background==='none'?'none':'linear-gradient('+slideBackdropColor(chosen,.87)+','+slideBackdropColor(chosen,.87)+'),'+wall.background;
- }else{
-  stage.style.backgroundColor='#ffffff';
-  stage.style.backgroundImage=wall.background==='none'?'none':'linear-gradient(#ffffffe0,#ffffffe0),'+wall.background;
- }
+ stage.style.backgroundRepeat='repeat';
+ stage.style.backgroundSize=wall.size;
+ stage.style.color='#10335d';
+ const chosen=item.type==='card'?teacherCardColor(item.card):(/^#[0-9a-f]{6}$/i.test(mural?.theme_color)?mural.theme_color:'#edf6ff');
+ stage.style.backgroundColor=chosen;
  if(presentationDark){
   stage.style.backgroundColor='#10213b';
   stage.style.backgroundImage='none';
+  stage.style.color='#ffffff';
+  return;
  }
+ // Covers expose the wallpaper clearly; cards keep the chosen background color prominent.
+ const overlay=item.type==='cover'?0.18:item.type==='card'?0.82:0.65;
+ const tint=slideBackdropColor(item.type==='card'?chosen:'#ffffff',overlay);
+ stage.style.backgroundImage=wall.background==='none'?'none':'linear-gradient('+tint+','+tint+'),'+wall.background;
 }
 function renderPresentation(){
  const item=presentationItems[presentationIndex];if(!item)return;
