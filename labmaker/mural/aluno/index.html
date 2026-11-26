@@ -362,7 +362,7 @@ function updateRichPreview(){
  const field=$('body'),preview=$('richPreview'),panel=$('studentFormatPreview');
  const text=field.value||'',style=currentTypography();
  const bodyCSS='font-size:'+style.size+'px;color:'+style.color+';font-weight:'+(style.bold?'700':'400')+';font-style:'+(style.italic?'italic':'normal')+';text-align:'+style.align+';';
- field.style.cssText+= ';'+bodyCSS;
+ field.style.fontSize=style.size+'px';field.style.color=style.color;field.style.fontWeight=style.bold?'700':'400';field.style.fontStyle=style.italic?'italic':'normal';field.style.textAlign=style.align;
  preview.style.cssText=bodyCSS;
  preview.innerHTML=renderRichBody({body:text,elements:richRanges});
  panel.hidden=!text.trim();
