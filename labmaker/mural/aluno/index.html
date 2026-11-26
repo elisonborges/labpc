@@ -655,7 +655,13 @@ function restoreStudentDraft(){
  $('draftStatus').textContent='Rascunho salvo automaticamente neste dispositivo.';
  let draft;try{draft=JSON.parse(localStorage.getItem(studentDraftKey)||'null')}catch(err){return}
  if(!draft||draft.section!==selected||draft.editingId!==(editingId||null)||Date.now()-draft.time>7*24*3600*1000)return;
- if(!confirm('Existe um rascunho salvo neste dispositivo. Deseja recuperá-lo?'))return;
+ if(!confirm('Existe um rascunho salvo neste dispositivo. Deseja recuperá-lo?')){
+  // Cancelar significa descartar a recuperação deste rascunho, não reabri-lo depois.
+  // Preserva o estado limpo da nova publicação ou a edição atual já carregada.
+  try{localStorage.removeItem(studentDraftKey)}catch(err){console.warn('Não foi possível descartar rascunho',err)}
+  $('draftStatus').textContent='Recuperação cancelada. Você pode começar uma nova publicação.';
+  return;
+ }
  $('name').value=draft.name||'';$('cardTitle').value=draft.title||'';$('body').value=draft.body||'';
  shapes=Array.isArray(draft.shapes)?draft.shapes:[];richRanges=Array.isArray(draft.richRanges)?draft.richRanges:[];lmAttachments=Array.isArray(draft.attachments)?draft.attachments.filter(x=>x?.type==='attachment').slice(0,8):lmAttachments;lmDrawAttachmentList();localImageData=draft.image||'';$('studentImagePreview').hidden=!localImageData;if(localImageData)$('studentImagePreview').src=localImageData;
  $('mediaUrl').value=draft.mediaUrl||'';$('cardColor').value=draft.cardColor||'#ffffff';baseTypography=null;lastBodyValue=$('body').value;
