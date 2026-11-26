@@ -565,7 +565,7 @@ function lmSyncText(){
 function updateRichPreview(){
  const editor=$('studentWysiwyg'),body=$('body'),text=body.value||'';
  if(!baseTypography)baseTypography=typography();
- if(editor.textContent!==text){
+ if(!$('dialog').open||editor.textContent!==text){
   // Restores an existing card or draft without layering two text editors.
   editor.innerHTML=text?renderRichBody({body:text,elements:richRanges}):'';
   lmSavedRange=null;
@@ -613,8 +613,6 @@ lmEditor.addEventListener('input',()=>{lmSyncText();captureTextSelection()});
 lmEditor.addEventListener('beforeinput',event=>{
  if(event.inputType==='insertParagraph'||event.inputType==='insertLineBreak'){
   event.preventDefault();lmInsertPlainText('\n');
- }else if(event.inputType==='insertFromPaste'){
-  event.preventDefault();lmInsertPlainText(event.dataTransfer?.getData('text/plain')||'');
  }else if(event.inputType==='insertText'&&lmEditor.textContent.length>=3500&&!editorSelection()?.toString()){
   event.preventDefault();
  }
