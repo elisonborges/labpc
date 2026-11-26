@@ -150,7 +150,14 @@ document.querySelectorAll('[data-teacher-palette]').forEach(btn=>btn.addEventLis
  document.querySelectorAll('[data-teacher-palette]').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));
 }));
 function teacherCardColor(c){const a=(Array.isArray(c.elements)?c.elements:[]).find(x=>x.type==='cardColor');return a&&/^#[0-9a-f]{6}$/i.test(a.value)?a.value:'#ffffff'}
-function teacherFontStyle(c){const a=Array.isArray(c.elements)?c.elements.find(x=>x.type==='typography'):null;if(!a)return '';return 'font-size:'+([14,16,20,24,30,36].includes(Number(a.size))?a.size:16)+'px;color:'+(/^#[0-9a-f]{6}$/i.test(a.color)?a.color:'#09224a')+';font-weight:'+(a.bold?'700':'400')+';font-style:'+(a.italic?'italic':'normal')+';text-align:'+(['left','center','right'].includes(a.align)?a.align:'left')+';'}
+function teacherFontStyle(c){
+ const a=Array.isArray(c.elements)?c.elements.find(x=>x.type==='typography'):null;
+ if(!a)return '';
+ const size=[14,16,20,24,30,36].includes(Number(a.size))?Number(a.size):16;
+ const color=/^#[0-9a-f]{6}$/i.test(a.color)?a.color:'#09224a';
+ const align=['left','center','right'].includes(a.align)?a.align:'left';
+ return 'font-size:'+size+'px;color:'+color+';text-align:'+align+';font-weight:'+(a.bold?'700':'400')+';font-style:'+(a.italic?'italic':'normal')+';text-decoration:'+(a.underline?'underline':'none')+';'+(a.highlight?'background-image:linear-gradient(transparent 60%,#fff09e 60%);':'');
+}
 function teacherInlineImage(v){return typeof v==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<95000}
 function teacherYoutubeEmbed(v){try{const u=new URL(v);let id='';if(u.hostname==='youtu.be')id=u.pathname.split('/')[1];else if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname))id=u.searchParams.get('v')||u.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1];return /^[A-Za-z0-9_-]{11}$/.test(id||'')?'https://www.youtube-nocookie.com/embed/'+id:null}catch{return null}}
 function teacherAttachment(c){const a=Array.isArray(c.elements)?c.elements.find(x=>x.type==='attachment'):null;if(!a||!(safeURL(a.value)||a.kind==='image'&&teacherInlineImage(a.value)))return '';const url=esc(a.value),kind=a.kind;const yt=teacherYoutubeEmbed(a.value);if(yt)return '<iframe src="'+esc(yt)+'" title="YouTube" loading="lazy" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0"></iframe>';if(kind==='image')return '<a href="'+url+'" target="_blank" rel="noopener noreferrer"><img src="'+url+'" alt="Anexo do cartão"></a>';if(kind==='video'&&/\.(mp4|webm|ogg)(\?|$)/i.test(a.value))return '<video controls preload="none" style="width:100%" src="'+url+'"></video>';if(kind==='audio'&&/\.(mp3|wav|ogg|m4a)(\?|$)/i.test(a.value))return '<audio controls preload="none" style="width:100%" src="'+url+'"></audio>';return '<p><a target="_blank" rel="noopener noreferrer" href="'+url+'">🔗 Ver anexo ('+esc(kind||'link')+')</a></p>'}
