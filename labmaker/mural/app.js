@@ -278,11 +278,11 @@ function changeMuralMotion(enabled){
 }
 try{document.documentElement.classList.toggle('lm-no-motion',localStorage.getItem('lm-reduced-motion')==='true')}catch(e){}
 function muralSyncAllowed(){
- // Do not redraw behind an open editor, confirmation dialog or live presentation.
+ const screen=$('slideScreen');
  return !!mural && !$('muralView').classList.contains('hide') &&
   document.visibilityState!=='hidden' &&
-  $('slideScreen')?.classList.contains('hide')!==false &&
-  !Array.from(document.querySelectorAll('dialog[open]')).length;
+  (!screen||screen.classList.contains('hide')) &&
+  !document.querySelector('dialog[open]');
 }
 function stopMuralAutoSync(){
  muralSyncGeneration++;
@@ -292,8 +292,11 @@ function stopMuralAutoSync(){
 }
 function startMuralAutoSync(){
  if(muralSyncTimer)clearInterval(muralSyncTimer);
- // Realtime is fast when enabled; polling catches missed events, edits and reconnections.
- muralSyncTimer=setInterval(()=>{scheduleMuralSync();if(document.visibilityState==='visible')void loadPendingMuralComments()},10000);
+ // Do not depend exclusively on Postgres Realtime being enabled for these tables.
+ muralSyncTimer=setInterval(()=>{
+  if(muralSyncAllowed())void refresh({silent:true});
+  if(mural&&document.visibilityState==='visible')void loadPendingMuralComments();
+ },7000);
 }
 async function refreshMuralManually(){
  const button=$('refreshMuralButton');
@@ -301,24 +304,27 @@ async function refreshMuralManually(){
  button.disabled=true;
  button.textContent='↻ Atualizando…';
  try{
-  // If automatic synchronization is in progress, follow it with a manual refresh.
-  for(let attempt=0;attempt<6&&muralSyncRunning;attempt++){
-   await new Promise(resolve=>setTimeout(resolve,200));
+  // Always fetch the latest database state, even if an automatic check is running.
+  let success=await refresh({force:true});
+  if(!success&&muralSyncRunning){
+   await new Promise(resolve=>setTimeout(resolve,350));
+   success=await refresh({force:true});
   }
-  if(muralSyncRunning)throw Error('Sincronização em andamento. Tente novamente.');
-  const success=await refresh();
-  if(!success)throw Error('Não foi possível carregar todas as publicações.');
+  if(!success)throw Error('Não foi possível concluir a leitura. Tente novamente.');
+  void loadPendingMuralComments();
   button.textContent='✓ Atualizado';
+  msg('Mural atualizado com as publicações e edições mais recentes.');
  }catch(error){
   button.textContent='↻ Atualizar';
-  msg('Atualização não concluída: '+(error.message||'erro desconhecido'),'status',true);
+  msg('Falha ao atualizar mural: '+(error.message||'tente novamente'),'status',true);
  }finally{
   button.disabled=false;
-  setTimeout(()=>{if(button.isConnected&&button.textContent==='✓ Atualizado')button.textContent='↻ Atualizar'},1400);
+  setTimeout(()=>{if(button.isConnected&&button.textContent==='✓ Atualizado')button.textContent='↻ Atualizar'},1500);
  }
 }
 function scheduleMuralSync(){
- if(!muralSyncAllowed()||muralSyncRunning){muralSyncPending=true;return}
+ if(!mural)return;
+ if(!muralSyncAllowed()){muralSyncPending=true;return}
  void refresh({silent:true});
 }
 document.addEventListener('visibilitychange',()=>{
@@ -334,7 +340,7 @@ async function openMural(id){
  $('listView').classList.add('hide');$('muralView').classList.remove('hide');
  $('addSection').disabled=mural.owner_id!==user.id;
  if(channel){await sb.removeChannel(channel);channel=null}
- await refresh();
+ await refresh({force:true});
  if(mural?.id!==id)return;
  applyMuralTheme();renderTeacherControls();
  channel=sb.channel('lm-'+id)
@@ -344,11 +350,9 @@ async function openMural(id){
  startMuralAutoSync();
  void loadPendingMuralComments();
 }
-async function refresh({silent=false}={}){
+async function refresh({silent=false,force=false}={}){
  if(!mural)return false;
  if(muralSyncRunning){
-  if(silent){muralSyncPending=true;return false}
-  // Keep user actions responsive: the currently running request will be followed by another fetch.
   muralSyncPending=true;
   return false;
  }
@@ -356,27 +360,36 @@ async function refresh({silent=false}={}){
  const id=mural.id,generation=muralSyncGeneration;
  try{
   const r=await sb.from('lm_sections').select('*').eq('mural_id',id).order('position');
-  if(r.error){if(!silent)msg(r.error.message,'status',true);return false}
+  if(r.error)throw r.error;
   const nextSections=r.data||[];
   const c=nextSections.length?
-   await sb.from('lm_cards').select('*').in('section_id',nextSections.map(x=>x.id)).order('display_order').order('created_at'):
+   await sb.from('lm_cards').select('*').in('section_id',nextSections.map(section=>section.id)).order('display_order').order('created_at'):
    {data:[],error:null};
-  if(c.error){if(!silent)msg(c.error.message,'status',true);return false}
+  if(c.error)throw c.error;
   if(!mural||mural.id!==id||generation!==muralSyncGeneration)return false;
   const nextCards=c.data||[];
   const signature=JSON.stringify([nextSections,nextCards]);
-  if(silent&&signature===muralSyncSignature)return true;
-  // Never destroy the user's editor or active presentation with an automatic redraw.
-  if(silent&&!muralSyncAllowed()){muralSyncPending=true;return false}
-  sections=nextSections;cards=nextCards;muralSyncSignature=signature;
-  renderSections();renderTeacherControls();
+  if((force||signature!==muralSyncSignature)&&(!silent||muralSyncAllowed())){
+   const board=$('sections');
+   const previousScroll=board?.scrollLeft||0;
+   const oldLayout=document.querySelector('#layoutSelect')?.value;
+   sections=nextSections;cards=nextCards;muralSyncSignature=signature;
+   renderSections();
+   renderTeacherControls();
+   if(board)board.scrollLeft=previousScroll;
+  }else if(signature!==muralSyncSignature){
+   muralSyncPending=true;
+  }
   return true;
+ }catch(error){
+  if(!silent)msg('Erro ao consultar mural: '+(error.message||error),'status',true);
+  else console.warn('LabMaker: sincronização automática indisponível',error);
+  return false;
  }finally{
   muralSyncRunning=false;
   if(muralSyncPending&&muralSyncAllowed()){
    muralSyncPending=false;
-   // A follow-up fetch handles a change arriving while the previous request was running.
-   setTimeout(scheduleMuralSync,250);
+   setTimeout(()=>{if(mural)void refresh({silent:true})},200);
   }
  }
 }
@@ -1234,7 +1247,34 @@ function showMuralProgress(){
  if(!dialog.open)dialog.showModal();
 }
 
-function updateMuralStatusChips(){const el=$('muralStatusChips');if(!el||!mural)return;el.replaceChildren();const values=['Postagens: '+(mural.posting_enabled===false?'fechadas':'abertas'),'Aprovação: '+(mural.moderation_enabled?'ligada':'desligada'),'Comentários: '+(mural.comments_enabled?'ativos':'inativos')];for(const label of values){const chip=document.createElement('span');chip.textContent=label;el.appendChild(chip)}}
+function updateMuralStatusChips(){
+ const el=$('muralStatusChips');if(!el||!mural)return;
+ el.replaceChildren();
+ const owner=mural.owner_id===user?.id;
+ const options=[
+  {field:'posting_enabled',label:'Postagens',on:mural.posting_enabled!==false,onLabel:'abertas',offLabel:'fechadas',onIcon:'🔓',offIcon:'🔒'},
+  {field:'moderation_enabled',label:'Aprovação de cartões',on:mural.moderation_enabled===true,onLabel:'ligada',offLabel:'desligada',onIcon:'🛡️',offIcon:'🛡️'},
+  {field:'comments_enabled',label:'Comentários',on:mural.comments_enabled===true,onLabel:'ativos',offLabel:'inativos',onIcon:'💬',offIcon:'💬'}
+ ];
+ for(const option of options){
+  const control=document.createElement(owner?'button':'span');
+  control.className='lm-mural-setting-chip';
+  control.dataset.setting=option.field;
+  control.dataset.active=String(option.on);
+  control.textContent=option.onIcon+' '+option.label+': '+(option.on?option.onLabel:option.offLabel);
+  if(owner){
+   control.type='button';
+   control.title='Clique para '+(option.on?'desativar':'ativar')+' esta opção';
+   control.setAttribute('aria-pressed',String(option.on));
+   control.onclick=()=>toggleMuralFlag(option.field);
+  }
+  el.appendChild(control);
+ }
+ const note=document.createElement('small');
+ note.className='lm-comments-approval-note';
+ note.textContent='Comentários enviados aguardam aprovação do professor';
+ el.appendChild(note);
+}
 function muralMenuAction(action){document.querySelectorAll('#muralView .mural-menu').forEach(x=>x.open=false);action()}
 document.addEventListener('click',event=>{if(!event.target.closest('#muralView .mural-menu'))document.querySelectorAll('#muralView .mural-menu').forEach(x=>x.open=false)});
 document.addEventListener('toggle',event=>{if(event.target.matches?.('#muralView .mural-menu')&&event.target.open)document.querySelectorAll('#muralView .mural-menu').forEach(x=>{if(x!==event.target)x.open=false})},true);
