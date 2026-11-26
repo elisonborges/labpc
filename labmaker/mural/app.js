@@ -53,6 +53,20 @@ function renderMuralList(){
  for(const [key,fn] of Object.entries(actions))$('murals').querySelectorAll('[data-'+key+']').forEach(b=>b.onclick=()=>{b.closest('.labmaker-card-menu')?.removeAttribute('open');fn(b.getAttribute('data-'+key))});
  $('murals').querySelectorAll('.labmaker-card-menu').forEach(menu=>menu.addEventListener('toggle',()=>{if(menu.open)$('murals').querySelectorAll('.labmaker-card-menu').forEach(other=>{if(other!==menu)other.open=false})}));
 }
+function insertMuralTitleEmoji(emoji){
+ const field=$('editMuralTitle');
+ if(!field)return;
+ const begin=field.selectionStart??field.value.length,end=field.selectionEnd??begin;
+ const newTitle=field.value.slice(0,begin)+emoji+field.value.slice(end);
+ if(newTitle.length>field.maxLength){$('editMuralStatus').textContent='O título atingiu o limite de 120 caracteres.';return}
+ field.setRangeText(emoji,begin,end,'end');
+ field.dispatchEvent(new Event('input',{bubbles:true}));
+ $('editMuralEmojiPicker').open=false;
+ field.focus();
+}
+document.querySelectorAll('[data-mural-title-emoji]').forEach(button=>{
+ button.addEventListener('click',()=>insertMuralTitleEmoji(button.dataset.muralTitleEmoji));
+});
 function openEditMuralDialog(id){
  const m=murals.find(x=>x.id===id);if(!m||m.owner_id!==user.id)return;
  $('editMuralId').value=id;$('editMuralTitle').value=m.title||'';$('editMuralDescription').value=m.description||'';$('editMuralYear').value=m.school_year||new Date(m.created_at).getFullYear();$('editMuralFolder').value=m.folder||'';
