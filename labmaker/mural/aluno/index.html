@@ -79,7 +79,7 @@ $('studentCreateCard').onclick=()=>{
  if(!window.studentPostingOpen)return alert('O professor encerrou as publicações.');
  const sections=window.studentAvailableSections||[];if(!sections.length)return alert('Ainda não há área de publicação neste mural.');
  let section=sections[0];const choose=$('studentSectionChoice');choose.replaceChildren(...sections.map(x=>new Option(x.title,x.id)));$('studentSectionLabel').hidden=groupRoom||sections.length<=1;choose.value=section.id;
- editingId=null;selected=section.id;templateTitle=null;$('save').textContent='Publicar cartão';$('cardTitle').readOnly=false;$('cardTitle').value='';$('body').value='';$('sendStatus').textContent='';shapes=[];richRanges=[];active=-1;setEditMode('organized');$('dialog').showModal();setTimeout(restoreStudentDraft,0);
+ editingId=null;selected=section.id;templateTitle=null;studentExistingMedia=null;localMediaFile=null;studentOriginalFile=null;studentOriginalPath='';localImageData='';posterA4=false;$('mediaUrl').value='';$('localImage').value='';$('studentMediaFile').value='';$('save').textContent='Publicar';$('cardTitle').readOnly=false;$('cardTitle').value='';$('body').value='';$('sendStatus').textContent='';shapes=[];richRanges=[];active=-1;setEditMode('organized');$('dialog').showModal();setTimeout(restoreStudentDraft,0);
 };
 const studentDraftKey='labmaker-draft-v1-'+(groupRoom?'group-':'mural-')+token;
 function saveStudentDraft(){
