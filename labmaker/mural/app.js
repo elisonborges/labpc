@@ -1,5 +1,6 @@
 const sb=supabase.createClient(LM_CONFIG.url,LM_CONFIG.key),$=id=>document.getElementById(id);
 let user,classes=[],murals=[],mural=null,sections=[],cards=[],sectionId,card=null,mode='organized',objects=[],selected=-1,channel;
+let muralSyncTimer=null,muralSyncPending=false,muralSyncRunning=false,muralSyncSignature='',muralSyncGeneration=0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function msg(s,id='status',bad=false){$(id).textContent=s;$(id).className='small '+(bad?'error':'success')}
 function safeURL(s){try{return new URL(s).protocol==='https:'}catch{return false}}
@@ -15,7 +16,12 @@ const options=classes.map(x=>{const o=document.createElement('option');o.value=x
 const all=document.createElement('option');all.value='__all__';all.textContent='📁 Todos os meus murais';const free=document.createElement('option');free.value='__free__';free.textContent='🎨 Sem turma';$('classSelect').replaceChildren(all,free,...options);
 $('classSelect').value='__all__';
 await selectClass()}
-function backMurals(){mural=null;$('listView').classList.remove('hide');$('muralView').classList.add('hide');if(channel){sb.removeChannel(channel);channel=null}}
+function backMurals(){
+ stopMuralAutoSync();
+ mural=null;
+ $('listView').classList.remove('hide');$('muralView').classList.add('hide');
+ if(channel){sb.removeChannel(channel);channel=null}
+}
 async function selectClass(){
  backMurals();const area=$('classSelect').value;try{sessionStorage.setItem('labmaker-selected-area',area)}catch(e){}
  $('muralListTitle').textContent=area==='__all__'?'Meus murais':area==='__free__'?'Murais sem turma':'Murais da turma';
@@ -166,8 +172,85 @@ function changeMuralMotion(enabled){
  document.documentElement.classList.toggle('lm-no-motion',!enabled);
 }
 try{document.documentElement.classList.toggle('lm-no-motion',localStorage.getItem('lm-reduced-motion')==='true')}catch(e){}
-async function openMural(id){mural=murals.find(x=>x.id===id);if(!mural)return; $('muralTitle').textContent=mural.title;updateMuralDescription();$('listView').classList.add('hide');$('muralView').classList.remove('hide');$('addSection').disabled=mural.owner_id!==user.id;await refresh();applyMuralTheme();renderTeacherControls();if(channel)await sb.removeChannel(channel);channel=sb.channel('lm-'+id).on('postgres_changes',{event:'*',schema:'public',table:'lm_cards'},()=>refresh()).on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},()=>refresh()).subscribe()}
-async function refresh(){if(!mural)return;let r=await sb.from('lm_sections').select('*').eq('mural_id',mural.id).order('position');if(r.error)return msg(r.error.message,'status',true);sections=r.data||[];let c=sections.length?await sb.from('lm_cards').select('*').in('section_id',sections.map(s=>s.id)).order('display_order').order('created_at'):{data:[],error:null};if(c.error)return msg(c.error.message,'status',true);cards=c.data||[];renderSections();renderTeacherControls()}
+function muralSyncAllowed(){
+ // Do not redraw behind an open editor, confirmation dialog or live presentation.
+ return !!mural && !$('muralView').classList.contains('hide') &&
+  document.visibilityState!=='hidden' &&
+  $('slideScreen')?.classList.contains('hide')!==false &&
+  !Array.from(document.querySelectorAll('dialog[open]')).length;
+}
+function stopMuralAutoSync(){
+ muralSyncGeneration++;
+ if(muralSyncTimer){clearInterval(muralSyncTimer);muralSyncTimer=null}
+ muralSyncPending=false;
+ muralSyncSignature='';
+}
+function startMuralAutoSync(){
+ if(muralSyncTimer)clearInterval(muralSyncTimer);
+ // Realtime is fast when enabled; polling catches missed events, edits and reconnections.
+ muralSyncTimer=setInterval(()=>scheduleMuralSync(),10000);
+}
+function scheduleMuralSync(){
+ if(!muralSyncAllowed()||muralSyncRunning){muralSyncPending=true;return}
+ void refresh({silent:true});
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&mural)scheduleMuralSync();
+});
+window.addEventListener('focus',()=>{if(mural)scheduleMuralSync()});
+document.addEventListener('close',()=>{if(mural)queueMicrotask(scheduleMuralSync)},true);
+async function openMural(id){
+ stopMuralAutoSync();
+ mural=murals.find(x=>x.id===id);
+ if(!mural)return;
+ $('muralTitle').textContent=mural.title;updateMuralDescription();
+ $('listView').classList.add('hide');$('muralView').classList.remove('hide');
+ $('addSection').disabled=mural.owner_id!==user.id;
+ if(channel){await sb.removeChannel(channel);channel=null}
+ await refresh();
+ if(mural?.id!==id)return;
+ applyMuralTheme();renderTeacherControls();
+ channel=sb.channel('lm-'+id)
+  .on('postgres_changes',{event:'*',schema:'public',table:'lm_cards'},scheduleMuralSync)
+  .on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},scheduleMuralSync)
+  .subscribe();
+ startMuralAutoSync();
+}
+async function refresh({silent=false}={}){
+ if(!mural)return;
+ if(muralSyncRunning){
+  if(silent){muralSyncPending=true;return}
+  // Keep user actions responsive: the currently running request will be followed by another fetch.
+  muralSyncPending=true;
+  return;
+ }
+ muralSyncRunning=true;
+ const id=mural.id,generation=muralSyncGeneration;
+ try{
+  const r=await sb.from('lm_sections').select('*').eq('mural_id',id).order('position');
+  if(r.error){if(!silent)msg(r.error.message,'status',true);return}
+  const nextSections=r.data||[];
+  const c=nextSections.length?
+   await sb.from('lm_cards').select('*').in('section_id',nextSections.map(x=>x.id)).order('display_order').order('created_at'):
+   {data:[],error:null};
+  if(c.error){if(!silent)msg(c.error.message,'status',true);return}
+  if(!mural||mural.id!==id||generation!==muralSyncGeneration)return;
+  const nextCards=c.data||[];
+  const signature=JSON.stringify([nextSections,nextCards]);
+  if(silent&&signature===muralSyncSignature)return;
+  // Never destroy the user's editor or active presentation with an automatic redraw.
+  if(silent&&!muralSyncAllowed()){muralSyncPending=true;return}
+  sections=nextSections;cards=nextCards;muralSyncSignature=signature;
+  renderSections();renderTeacherControls();
+ }finally{
+  muralSyncRunning=false;
+  if(muralSyncPending&&muralSyncAllowed()){
+   muralSyncPending=false;
+   // A follow-up fetch handles a change arriving while the previous request was running.
+   setTimeout(scheduleMuralSync,250);
+  }
+ }
+}
 function objHTML(x,mini=false){const scale=mini?.53:1,xp=Math.max(0,Number(x.x)||0),yp=Math.max(0,Number(x.y)||0),w=Math.max(20,Number(x.w)||90),h=Math.max(20,Number(x.h)||60),color=/^#[a-f0-9]{6}$/i.test(x.color)?x.color:'#ffbd36',type=['text','image','rectangle','circle','triangle'].includes(x.type)?x.type:'text';const bg=['rectangle','circle','triangle'].includes(type)?'background:'+color+';':'';const shape=type==='circle'?'border-radius:50%;':type==='triangle'?'clip-path:polygon(50% 0,0 100%,100% 100%);':'';const content=type==='text'?esc(x.value):type==='image'&&(safeURL(x.value)||teacherInlineImage(x.value))?'<img src="'+esc(x.value)+'" alt="">':'';return '<div class="object" style="left:'+xp*scale+'px;top:'+yp*scale+'px;width:'+w*scale+'px;height:'+h*scale+'px;'+bg+shape+'">'+content+'</div>'}
 function teacherRichBody(c){const body=String(c.body||''),ranges=(Array.isArray(c.elements)?c.elements:[]).filter(x=>x.type==='richRange'&&Number.isInteger(x.start)&&Number.isInteger(x.end)&&x.start>=0&&x.end<=body.length&&x.end>x.start).sort((a,b)=>a.start-b.start);let out='',pos=0;for(const x of ranges){if(x.start<pos)continue;out+=esc(body.slice(pos,x.start));const size=[14,16,20,24,30,36].includes(Number(x.size))?Number(x.size):16,color=/^#[0-9a-f]{6}$/i.test(x.color)?x.color:'#09224a';out+='<span style="font-size:'+size+'px;color:'+color+';font-weight:'+(x.bold?'700':'400')+';font-style:'+(x.italic?'italic':'normal')+';text-decoration:'+(x.underline?'underline':'none')+';'+(x.highlight?'background-color:#ffed82;':'')+'">'+esc(body.slice(x.start,x.end))+'</span>';pos=x.end}return out+esc(body.slice(pos))}
 document.querySelectorAll('[data-teacher-palette]').forEach(btn=>btn.addEventListener('click',()=>{
