@@ -56,7 +56,7 @@ async function saveMuralDetails(){
   const result=await sb.from('lm_murals').update({title,description,folder,school_year}).eq('id',id).eq('owner_id',user.id).select('id').single();
   if(result.error)throw result.error;
   Object.assign(m,{title,description,folder,school_year});
-  if(mural?.id===id){Object.assign(mural,{title,description,folder,school_year});$('muralTitle').textContent=title}
+  if(mural?.id===id){Object.assign(mural,{title,description,folder,school_year});$('muralTitle').textContent=title;updateMuralDescription()}
   $('editMuralDialog').close();updateMuralFilters();renderMuralList();msg('Informações do mural atualizadas.');
  }catch(e){$('editMuralStatus').textContent='Erro ao salvar: '+e.message}finally{save.disabled=false}
 }
@@ -104,6 +104,11 @@ const lmWallpapers={
  nature:{name:'Natureza',emoji:'🌿',background:'radial-gradient(ellipse at 10% 20%,#bde9c5 0 40px,transparent 42px),radial-gradient(ellipse at 82% 72%,#d3f0b4 0 65px,transparent 67px),linear-gradient(125deg,#e9ffdd,#e4f7fa)',size:'340px 280px,400px 350px,cover'},
  space:{name:'Espacial',emoji:'🚀',background:'radial-gradient(circle,#fff9d6 1px,transparent 2px),linear-gradient(125deg,#29385f,#4f4292 65%,#274d80)',size:'35px 35px,cover'}
 };
+function updateMuralDescription(){
+ const el=$('muralDescription');if(!el)return;
+ const description=String(mural?.description||'').trim();
+ el.textContent=description;el.hidden=!description;
+}
 function applyMuralTheme(){
  if(!mural)return;
  const el=$('muralView'),pattern=mural.background_pattern||'solid',wall=lmWallpapers[pattern]||lmWallpapers.solid;
@@ -136,7 +141,7 @@ function changeMuralMotion(enabled){
  document.documentElement.classList.toggle('lm-no-motion',!enabled);
 }
 try{document.documentElement.classList.toggle('lm-no-motion',localStorage.getItem('lm-reduced-motion')==='true')}catch(e){}
-async function openMural(id){mural=murals.find(x=>x.id===id);if(!mural)return; $('muralTitle').textContent=mural.title;$('listView').classList.add('hide');$('muralView').classList.remove('hide');$('addSection').disabled=mural.owner_id!==user.id;await refresh();applyMuralTheme();renderTeacherControls();if(channel)await sb.removeChannel(channel);channel=sb.channel('lm-'+id).on('postgres_changes',{event:'*',schema:'public',table:'lm_cards'},()=>refresh()).on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},()=>refresh()).subscribe()}
+async function openMural(id){mural=murals.find(x=>x.id===id);if(!mural)return; $('muralTitle').textContent=mural.title;updateMuralDescription();$('listView').classList.add('hide');$('muralView').classList.remove('hide');$('addSection').disabled=mural.owner_id!==user.id;await refresh();applyMuralTheme();renderTeacherControls();if(channel)await sb.removeChannel(channel);channel=sb.channel('lm-'+id).on('postgres_changes',{event:'*',schema:'public',table:'lm_cards'},()=>refresh()).on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},()=>refresh()).subscribe()}
 async function refresh(){if(!mural)return;let r=await sb.from('lm_sections').select('*').eq('mural_id',mural.id).order('position');if(r.error)return msg(r.error.message,'status',true);sections=r.data||[];let c=sections.length?await sb.from('lm_cards').select('*').in('section_id',sections.map(s=>s.id)).order('display_order').order('created_at'):{data:[],error:null};if(c.error)return msg(c.error.message,'status',true);cards=c.data||[];renderSections();renderTeacherControls()}
 function objHTML(x,mini=false){const scale=mini?.53:1,xp=Math.max(0,Number(x.x)||0),yp=Math.max(0,Number(x.y)||0),w=Math.max(20,Number(x.w)||90),h=Math.max(20,Number(x.h)||60),color=/^#[a-f0-9]{6}$/i.test(x.color)?x.color:'#ffbd36',type=['text','image','rectangle','circle','triangle'].includes(x.type)?x.type:'text';const bg=['rectangle','circle','triangle'].includes(type)?'background:'+color+';':'';const shape=type==='circle'?'border-radius:50%;':type==='triangle'?'clip-path:polygon(50% 0,0 100%,100% 100%);':'';const content=type==='text'?esc(x.value):type==='image'&&(safeURL(x.value)||teacherInlineImage(x.value))?'<img src="'+esc(x.value)+'" alt="">':'';return '<div class="object" style="left:'+xp*scale+'px;top:'+yp*scale+'px;width:'+w*scale+'px;height:'+h*scale+'px;'+bg+shape+'">'+content+'</div>'}
 function teacherRichBody(c){const body=String(c.body||''),ranges=(Array.isArray(c.elements)?c.elements:[]).filter(x=>x.type==='richRange'&&Number.isInteger(x.start)&&Number.isInteger(x.end)&&x.start>=0&&x.end<=body.length&&x.end>x.start).sort((a,b)=>a.start-b.start);let out='',pos=0;for(const x of ranges){if(x.start<pos)continue;out+=esc(body.slice(pos,x.start));const size=[14,16,20,24,30,36].includes(Number(x.size))?Number(x.size):16,color=/^#[0-9a-f]{6}$/i.test(x.color)?x.color:'#09224a';out+='<span style="font-size:'+size+'px;color:'+color+';font-weight:'+(x.bold?'700':'400')+';font-style:'+(x.italic?'italic':'normal')+'">'+esc(body.slice(x.start,x.end))+'</span>';pos=x.end}return out+esc(body.slice(pos))}
