@@ -305,11 +305,9 @@ async function refreshMuralManually(){
  button.textContent='↻ Atualizando…';
  try{
   // Always fetch the latest database state, even if an automatic check is running.
-  let success=await refresh({force:true});
-  if(!success&&muralSyncRunning){
-   await new Promise(resolve=>setTimeout(resolve,350));
-   success=await refresh({force:true});
-  }
+  for(let attempt=0;attempt<20&&muralSyncRunning;attempt++)await new Promise(resolve=>setTimeout(resolve,150));
+  if(muralSyncRunning)throw Error('Outra sincronização ainda está em andamento.');
+  const success=await refresh({force:true});
   if(!success)throw Error('Não foi possível concluir a leitura. Tente novamente.');
   void loadPendingMuralComments();
   button.textContent='✓ Atualizado';
@@ -724,7 +722,25 @@ make(mural.reactions_enabled?'❤️ Desativar reações':'❤️ Ativar reaçõ
 const review=document.createElement('button');review.className='btn';review.textContent='💬 Revisar comentários';review.onclick=reviewComments;el.appendChild(review);
 const pending=cards.filter(x=>x.origin==='student'&&x.moderation_status==='pending').length;if(pending){const label=document.createElement('strong');label.textContent=' '+pending+' cartão(ões) aguardando aprovação';el.appendChild(label)}
 }
-async function toggleMuralFlag(field){if(!mural||mural.owner_id!==user.id)return;const next=!(mural[field]!==false);if(field==='moderation_enabled'&&mural[field]===undefined)return msg('Recarregue para atualizar o mural.');const r=await sb.from('lm_murals').update({[field]:next}).eq('id',mural.id).eq('owner_id',user.id).select('*').single();if(r.error)return msg(r.error.message,'status',true);Object.assign(mural,r.data);renderTeacherControls();msg('Configuração atualizada.')}
+async function toggleMuralFlag(field){
+ if(!mural||mural.owner_id!==user.id||!['posting_enabled','moderation_enabled','comments_enabled','reactions_enabled'].includes(field))return;
+ const current=field==='posting_enabled'?mural[field]!==false:mural[field]===true;
+ const next=!current;
+ const id=mural.id;
+ const controls=[...document.querySelectorAll('#muralStatusChips button')];
+ controls.forEach(control=>control.disabled=true);
+ try{
+  const result=await sb.from('lm_murals').update({[field]:next}).eq('id',id).eq('owner_id',user.id).select('*').single();
+  if(result.error)throw result.error;
+  if(!mural||mural.id!==id)return;
+  Object.assign(mural,result.data);
+  renderTeacherControls();
+  msg('Configuração atualizada: '+(field==='posting_enabled'?'postagens':field==='moderation_enabled'?'aprovação de cartões':field==='comments_enabled'?'comentários':'reações')+' '+(next?'ativada':'desativada')+'.');
+ }catch(error){
+  msg('Não foi possível alterar a configuração: '+error.message,'status',true);
+  controls.forEach(control=>control.disabled=false);
+ }
+}
 async function reviewStudentCard(id,state){if(!mural||mural.owner_id!==user.id)return;const c=cards.find(x=>x.id===id);if(!c||c.origin!=='student')return;const r=await sb.from('lm_cards').update({moderation_status:state}).eq('id',id).eq('origin','student').select('id').single();if(r.error)return msg('Erro na moderação: '+r.error.message,'status',true);await refresh();msg(state==='approved'?'Cartão aprovado.':'Cartão rejeitado.')}
 
 async function deleteMuralCard(id){if(replicationBusy||!mural)return;const item=cards.find(x=>x.id===id);if(!item||!(item.author_id===user.id&&item.origin!=='student'||mural.owner_id===user.id&&item.origin==='student'))return msg('Sem permissão para excluir este cartão.','status',true);if(!confirm('Excluir permanentemente o cartão "'+item.title+'"? Esta ação não pode ser desfeita.'))return;replicationBusy=true;try{const q=await sb.from('lm_cards').delete().eq('id',id).select('id');if(q.error)throw q.error;if(!q.data?.length)throw Error('O cartão não foi excluído. Verifique suas permissões.');await refresh();msg('Cartão excluído.')}catch(e){msg('Erro ao excluir cartão: '+e.message,'status',true)}finally{replicationBusy=false}}
@@ -1253,7 +1269,7 @@ function updateMuralStatusChips(){
  const owner=mural.owner_id===user?.id;
  const options=[
   {field:'posting_enabled',label:'Postagens',on:mural.posting_enabled!==false,onLabel:'abertas',offLabel:'fechadas',onIcon:'🔓',offIcon:'🔒'},
-  {field:'moderation_enabled',label:'Aprovação de cartões',on:mural.moderation_enabled===true,onLabel:'ligada',offLabel:'desligada',onIcon:'🛡️',offIcon:'🛡️'},
+  {field:'moderation_enabled',label:'Aprovação',on:mural.moderation_enabled===true,onLabel:'ligada',offLabel:'desligada',onIcon:'🛡️',offIcon:'🛡️'},
   {field:'comments_enabled',label:'Comentários',on:mural.comments_enabled===true,onLabel:'ativos',offLabel:'inativos',onIcon:'💬',offIcon:'💬'}
  ];
  for(const option of options){
@@ -1272,7 +1288,7 @@ function updateMuralStatusChips(){
  }
  const note=document.createElement('small');
  note.className='lm-comments-approval-note';
- note.textContent='Comentários enviados aguardam aprovação do professor';
+ note.textContent=mural.comments_enabled?'Comentários enviados aguardam aprovação do professor':'Ative os comentários para receber mensagens dos participantes';
  el.appendChild(note);
 }
 function muralMenuAction(action){document.querySelectorAll('#muralView .mural-menu').forEach(x=>x.open=false);action()}
