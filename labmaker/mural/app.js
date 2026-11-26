@@ -225,7 +225,10 @@ async function copyShareLink(){if(!shareTarget)return;
   if(!shareTarget.student_enabled){$('shareNotice').textContent='Não foi possível ativar o acesso. Verifique as permissões.';return}
  }
  const link=await muralShareLink(shareTarget);try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
-async function generateShareQr(){if(!shareTarget)return;if(!shareTarget.student_enabled){$('shareQrStatus').textContent='Primeiro ative o acesso dos alunos.';return}if(typeof QRCode!=='function'){$('shareQrStatus').textContent='Biblioteca de QR indisponível. Compartilhe pelo link.';return}const node=$('shareQr');node.replaceChildren();new QRCode(node,{text:await muralShareLink(shareTarget),width:220,height:220,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});$('shareQrStatus').textContent='QR gerado no navegador, sem enviar o link a serviços externos.'}
+async function generateShareQr(){if(!shareTarget)return;if(!shareTarget.student_enabled){
+ $('shareQrStatus').textContent='Ativando acesso para compartilhar...';$('shareEnabled').checked=true;await changeSharePermission();
+ if(!shareTarget.student_enabled){$('shareQrStatus').textContent='Não foi possível ativar o acesso. Tente novamente.';return}
+}if(typeof QRCode!=='function'){$('shareQrStatus').textContent='Biblioteca de QR indisponível. Compartilhe pelo link.';return}const node=$('shareQr');node.replaceChildren();new QRCode(node,{text:await muralShareLink(shareTarget),width:220,height:220,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});$('shareQrStatus').textContent='QR gerado no navegador, sem enviar o link a serviços externos.'}
 
 let replicationBusy=false;
 function sectionTitleNext(base){const match=base.match(/^(Mesa|Trio)\s+(\d+)$/i);if(match){const prefix=match[1];let n=Number(match[2])+1;while(sections.some(s=>s.title.toLowerCase()=== (prefix+' '+n).toLowerCase()))n++;return prefix+' '+n}let title=base+' (cópia)',n=2;while(sections.some(s=>s.title===title))title=base+' (cópia '+n+++')';return title}
