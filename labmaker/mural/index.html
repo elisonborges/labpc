@@ -180,6 +180,11 @@ body:has(#auth:not(.hide)) footer .foot p{margin:1px 0}
  .labmaker-add-section-icon{width:40px;height:40px;font-size:32px}
 }
 
+/* Alinhar Adicionar seção ao início dos cartões, compensando o padding da lista. */
+#muralView .labmaker-board-row:has(#sections.layout-columns) > .labmaker-add-section-tile{margin-top:12px}
+#muralView .labmaker-board-row:has(#sections.layout-timeline) > .labmaker-add-section-tile{margin-top:15px}
+#muralView .labmaker-board-row:has(#sections.layout-grid) > .labmaker-add-section-tile{margin-top:0}
+
 /* LabMaker: cartões simples, ações secundárias discretas e edição acessível */
 #murals.labmaker-project-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,285px),1fr));gap:16px}
 #murals .labmaker-mural-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px;min-height:195px;border:1px solid #d5e4f4;border-radius:17px;background:#fff;box-shadow:0 5px 20px #113c6710}
