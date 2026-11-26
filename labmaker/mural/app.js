@@ -295,6 +295,28 @@ function startMuralAutoSync(){
  // Realtime is fast when enabled; polling catches missed events, edits and reconnections.
  muralSyncTimer=setInterval(()=>scheduleMuralSync(),10000);
 }
+async function refreshMuralManually(){
+ const button=$('refreshMuralButton');
+ if(!mural||!button||button.disabled)return;
+ button.disabled=true;
+ button.textContent='↻ Atualizando…';
+ try{
+  // If automatic synchronization is in progress, follow it with a manual refresh.
+  for(let attempt=0;attempt<6&&muralSyncRunning;attempt++){
+   await new Promise(resolve=>setTimeout(resolve,200));
+  }
+  if(muralSyncRunning)throw Error('Sincronização em andamento. Tente novamente.');
+  const success=await refresh();
+  if(!success)throw Error('Não foi possível carregar todas as publicações.');
+  button.textContent='✓ Atualizado';
+ }catch(error){
+  button.textContent='↻ Atualizar';
+  msg('Atualização não concluída: '+(error.message||'erro desconhecido'),'status',true);
+ }finally{
+  button.disabled=false;
+  setTimeout(()=>{if(button.isConnected&&button.textContent==='✓ Atualizado')button.textContent='↻ Atualizar'},1400);
+ }
+}
 function scheduleMuralSync(){
  if(!muralSyncAllowed()||muralSyncRunning){muralSyncPending=true;return}
  void refresh({silent:true});
@@ -322,31 +344,32 @@ async function openMural(id){
  startMuralAutoSync();
 }
 async function refresh({silent=false}={}){
- if(!mural)return;
+ if(!mural)return false;
  if(muralSyncRunning){
-  if(silent){muralSyncPending=true;return}
+  if(silent){muralSyncPending=true;return false}
   // Keep user actions responsive: the currently running request will be followed by another fetch.
   muralSyncPending=true;
-  return;
+  return false;
  }
  muralSyncRunning=true;
  const id=mural.id,generation=muralSyncGeneration;
  try{
   const r=await sb.from('lm_sections').select('*').eq('mural_id',id).order('position');
-  if(r.error){if(!silent)msg(r.error.message,'status',true);return}
+  if(r.error){if(!silent)msg(r.error.message,'status',true);return false}
   const nextSections=r.data||[];
   const c=nextSections.length?
    await sb.from('lm_cards').select('*').in('section_id',nextSections.map(x=>x.id)).order('display_order').order('created_at'):
    {data:[],error:null};
-  if(c.error){if(!silent)msg(c.error.message,'status',true);return}
-  if(!mural||mural.id!==id||generation!==muralSyncGeneration)return;
+  if(c.error){if(!silent)msg(c.error.message,'status',true);return false}
+  if(!mural||mural.id!==id||generation!==muralSyncGeneration)return false;
   const nextCards=c.data||[];
   const signature=JSON.stringify([nextSections,nextCards]);
-  if(silent&&signature===muralSyncSignature)return;
+  if(silent&&signature===muralSyncSignature)return true;
   // Never destroy the user's editor or active presentation with an automatic redraw.
-  if(silent&&!muralSyncAllowed()){muralSyncPending=true;return}
+  if(silent&&!muralSyncAllowed()){muralSyncPending=true;return false}
   sections=nextSections;cards=nextCards;muralSyncSignature=signature;
   renderSections();renderTeacherControls();
+  return true;
  }finally{
   muralSyncRunning=false;
   if(muralSyncPending&&muralSyncAllowed()){
