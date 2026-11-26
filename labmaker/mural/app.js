@@ -773,12 +773,22 @@ function renderPresentation(){
   }).catch(()=>{if(holder.isConnected)holder.textContent='Mídia indisponível.'});
  }
  if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateImage')){
-  const holder=document.createElement('div');holder.className='slide-private-photo';
-  holder.textContent='Carregando imagem…';content.append(holder);
+  const thumbnail=content.querySelector('a img, img[alt="Imagem do cartão"]');
+  const holder=thumbnail?null:document.createElement('div');
+  if(holder){holder.className='slide-private-photo';holder.textContent='Carregando imagem…';content.append(holder)}
   teacherOriginalUrl(c.id).then(url=>{
-   if(!holder.isConnected)return;holder.replaceChildren();
-   const img=document.createElement('img');img.src=url;img.alt='Foto do cartão';holder.append(img);
-  }).catch(()=>{if(holder.isConnected)holder.textContent='Imagem indisponível.'});
+   if(!content.isConnected)return;
+   if(thumbnail){
+    const original=new Image();
+    original.onload=()=>{if(thumbnail.isConnected)thumbnail.src=url};
+    original.src=url;
+   }else if(holder?.isConnected){
+    const img=document.createElement('img');
+    img.alt='Foto do cartão';img.src=url;
+    img.onerror=()=>{if(holder.isConnected)holder.textContent='Não foi possível carregar a foto.'};
+    holder.replaceChildren(img);
+   }
+  }).catch(()=>{if(holder?.isConnected)holder.textContent='Imagem original indisponível.'});
  }
 }
 function moveSlide(step){if($('slideScreen')?.classList.contains('hide')||!presentationItems.length)return;const previous=presentationItems[presentationIndex];presentationIndex=Math.max(0,Math.min(presentationItems.length-1,presentationIndex+step));onPresentationNavigation(previous);renderPresentation()}
@@ -1263,7 +1273,25 @@ async function teacherOriginalUrl(cardId,media=false){
 }
 async function loadPrivateCardPhotos(){
  await Promise.all([...document.querySelectorAll('[data-card-photo]')].map(async el=>{
-  const id=el.dataset.cardPhoto;try{const url=await teacherOriginalUrl(id);if(!el.isConnected)return;el.replaceChildren();const img=document.createElement('img');img.src=url;img.alt='Imagem original do cartão';img.loading='lazy';el.appendChild(img)}catch(err){if(el.isConnected)el.textContent='Imagem indisponível: '+err.message}
+  const card=el.closest('.post');
+  const thumbnail=card?.querySelector('a img, img[alt="Imagem do cartão"]');
+  if(thumbnail)el.hidden=true;
+  try{
+   const url=await teacherOriginalUrl(el.dataset.cardPhoto);
+   if(!el.isConnected)return;
+   if(thumbnail){
+    const original=new Image();
+    original.onload=()=>{if(thumbnail.isConnected)thumbnail.src=url};
+    original.src=url;
+   }else{
+    const image=document.createElement('img');
+    image.alt='Imagem original do cartão';image.loading='lazy';image.src=url;
+    image.onerror=()=>{if(image.isConnected)el.textContent='Não foi possível carregar a imagem.'};
+    el.hidden=false;el.replaceChildren(image);
+   }
+  }catch(err){
+   if(el.isConnected&&!thumbnail){el.hidden=false;el.textContent='Imagem original indisponível.'}
+  }
  }));
 }
 function presentSingleCard(id){
