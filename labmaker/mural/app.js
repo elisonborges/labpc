@@ -37,14 +37,28 @@ function showMuralDashboard(tab){muralDashboardTab=['recent','all','archived'].i
 function renderMuralList(){
  const y=$('muralYearFilter').value,f=$('muralFolderFilter').value,arch=$('muralArchiveFilter').checked;
  const filtered=murals.filter(m=>!!m.archived===arch&&(!y||String(m.school_year||new Date(m.created_at).getFullYear())===y)&&(!f||m.folder===f)).slice(0,muralDashboardTab==='recent'?6:undefined);
- $('murals').innerHTML=filtered.map(m=>'<article class="tile"><h3>'+esc(m.title)+'</h3><p>'+esc(m.description)+'</p><p class="muted">'+esc(String(m.school_year||new Date(m.created_at).getFullYear()))+' · '+esc(m.folder||'Sem pasta')+(m.class_id?' · 🏫 Vinculado à turma':' · 🎨 Independente')+'</p><div class="tile-actions"><button class="btn primary" data-open="'+m.id+'">Abrir mural</button><button class="btn tile-share" data-share="'+m.id+'">Compartilhar</button><div class="tile-secondary">'+(classes.length&&m.owner_id===user.id?'<button class="btn" data-copy-mural="'+m.id+'">Duplicar para turma</button>':'')+(m.owner_id===user.id?'<button class="btn" data-organize-mural="'+m.id+'">📁 Organizar</button><button class="btn" data-archive-mural="'+m.id+'">'+(m.archived?'↩ Restaurar':'📦 Arquivar')+'</button><button class="btn" data-save-template="'+m.id+'">Salvar modelo</button><button class="btn btn-danger" data-delete-mural="'+m.id+'" title="Excluir definitivamente este mural">🗑️ Excluir</button>':'')+'</div></div></article>').join('')||'<div class="labmaker-empty"><div class="labmaker-empty-icon">📂</div><strong>'+(muralDashboardTab==='archived'?'Nenhum mural arquivado':muralDashboardTab==='recent'?'Nenhum projeto recente':'Nenhum mural encontrado')+'</strong><p>Comece um novo projeto ou ajuste os filtros para encontrar seus trabalhos.</p><button class="btn primary" onclick="openNewMuralDialog()">＋ Criar mural</button></div>';
- $('murals').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openMural(b.dataset.open));
- $('murals').querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareMural(b.dataset.share));
- $('murals').querySelectorAll('[data-copy-mural]').forEach(b=>b.onclick=()=>duplicateMuralToClass(b.dataset.copyMural));
- $('murals').querySelectorAll('[data-organize-mural]').forEach(b=>b.onclick=()=>organizeMural(b.dataset.organizeMural));
- $('murals').querySelectorAll('[data-archive-mural]').forEach(b=>b.onclick=()=>archiveMural(b.dataset.archiveMural));
- $('murals').querySelectorAll('[data-save-template]').forEach(b=>b.onclick=()=>saveTemplate(b.dataset.saveTemplate));
- $('murals').querySelectorAll('[data-delete-mural]').forEach(b=>b.onclick=()=>deleteWholeMural(b.dataset.deleteMural));
+ $('murals').innerHTML=filtered.map(m=>'<article class="tile labmaker-mural-card"><div class="labmaker-card-header"><h3>'+esc(m.title)+'</h3>'+(m.owner_id===user.id?'<details class="labmaker-card-menu"><summary aria-label="Mais opções do mural '+esc(m.title)+'" title="Mais opções">⋯</summary><div class="labmaker-card-menu-items"><button type="button" data-edit-mural="'+m.id+'">✎ Editar informações</button><button type="button" data-organize-mural="'+m.id+'">📁 Organizar</button>'+(classes.length?'<button type="button" data-copy-mural="'+m.id+'">⧉ Duplicar para turma</button>':'')+'<button type="button" data-save-template="'+m.id+'">▤ Salvar modelo</button><button type="button" data-archive-mural="'+m.id+'">'+(m.archived?'↩ Restaurar':'📦 Arquivar')+'</button><button type="button" class="danger" data-delete-mural="'+m.id+'">🗑 Excluir</button></div></details>':'')+'</div><p class="labmaker-card-description">'+esc(m.description||'')+'</p><p class="muted labmaker-card-meta">'+esc(String(m.school_year||new Date(m.created_at).getFullYear()))+' · '+esc(m.folder||'Sem pasta')+(m.class_id?' · Turma vinculada':' · Independente')+'</p><div class="tile-actions"><button class="btn primary" type="button" data-open="'+m.id+'">Abrir mural</button><button class="btn tile-share" type="button" data-share="'+m.id+'">↗ Compartilhar</button></div></article>').join('')||'<div class="labmaker-empty"><div class="labmaker-empty-icon">📂</div><strong>'+(muralDashboardTab==='archived'?'Nenhum mural arquivado':muralDashboardTab==='recent'?'Nenhum projeto recente':'Nenhum mural encontrado')+'</strong><p>Comece um novo projeto ou ajuste os filtros para encontrar seus trabalhos.</p><button class="btn primary" onclick="openNewMuralDialog()">＋ Criar mural</button></div>';
+ const actions={'open':openMural,'share':shareMural,'edit-mural':openEditMuralDialog,'copy-mural':duplicateMuralToClass,'organize-mural':organizeMural,'archive-mural':archiveMural,'save-template':saveTemplate,'delete-mural':deleteWholeMural};
+ for(const [key,fn] of Object.entries(actions))$('murals').querySelectorAll('[data-'+key+']').forEach(b=>b.onclick=()=>{b.closest('.labmaker-card-menu')?.removeAttribute('open');fn(b.dataset[key])});
+ $('murals').querySelectorAll('.labmaker-card-menu').forEach(menu=>menu.addEventListener('toggle',()=>{if(menu.open)$('murals').querySelectorAll('.labmaker-card-menu').forEach(other=>{if(other!==menu)other.open=false})}));
+}
+function openEditMuralDialog(id){
+ const m=murals.find(x=>x.id===id);if(!m||m.owner_id!==user.id)return;
+ $('editMuralId').value=id;$('editMuralTitle').value=m.title||'';$('editMuralDescription').value=m.description||'';$('editMuralYear').value=m.school_year||new Date(m.created_at).getFullYear();$('editMuralFolder').value=m.folder||'';
+ $('editMuralStatus').textContent='';$('editMuralDialog').showModal();$('editMuralTitle').focus();
+}
+async function saveMuralDetails(){
+ const id=$('editMuralId').value,m=murals.find(x=>x.id===id);if(!m||m.owner_id!==user.id)return;
+ const title=$('editMuralTitle').value.trim(),description=$('editMuralDescription').value.trim(),folder=$('editMuralFolder').value.trim(),school_year=Number($('editMuralYear').value);
+ if(!title||title.length>120||description.length>1200||folder.length>80||!Number.isInteger(school_year)||school_year<2000||school_year>2100){$('editMuralStatus').textContent='Confira título, descrição, pasta e ano letivo.';return}
+ const save=$('editMuralSave');save.disabled=true;$('editMuralStatus').textContent='Salvando alterações...';
+ try{
+  const result=await sb.from('lm_murals').update({title,description,folder,school_year}).eq('id',id).eq('owner_id',user.id).select('id').single();
+  if(result.error)throw result.error;
+  Object.assign(m,{title,description,folder,school_year});
+  if(mural?.id===id){Object.assign(mural,{title,description,folder,school_year});$('muralTitle').textContent=title}
+  $('editMuralDialog').close();updateMuralFilters();renderMuralList();msg('Informações do mural atualizadas.');
+ }catch(e){$('editMuralStatus').textContent='Erro ao salvar: '+e.message}finally{save.disabled=false}
 }
 function openNewMuralDialog(){
  $('newMuralForm').reset();$('newMuralYear').value=new Date().getFullYear();
