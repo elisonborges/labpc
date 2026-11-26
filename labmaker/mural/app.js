@@ -782,7 +782,7 @@ function openPedagogicalTemplates(){
   button.append(title,desc);button.onclick=()=>createPedagogicalMural(preset.id);
   root.appendChild(button);
  }
- dialog.showModal();
+ $('pedagogicalIncludeExamples').checked=false;$('pedagogicalUseSteps').checked=false;dialog.showModal();
 }
 async function createPedagogicalMural(presetId){
  if(replicationBusy||!user)return;
@@ -790,7 +790,7 @@ async function createPedagogicalMural(presetId){
  if(!preset)return;
  const includeExamples=$('pedagogicalIncludeExamples').checked;
  const useSteps=$('pedagogicalUseSteps').checked;
- const title=prompt('Nome do seu mural:',preset.name.replace(/^[^\\p{L}]+/u,'').trim());
+ const title=prompt('Nome do seu mural:',preset.name.replace(/^[^\p{L}]+/u,'').trim());
  if(!title?.trim())return;
  // Por padrão, um espaço limpo. As etapas e os cartões de exemplo são opcionais.
  const classId=null;
@@ -804,7 +804,7 @@ async function createPedagogicalMural(presetId){
    const sr=await sb.from('lm_sections').insert({mural_id:created,title:name,position:i}).select('id').single();
    if(sr.error)throw sr.error;
    if(includeExamples){
-    const body=useSteps?guide:'Este é um cartão de exemplo. Você pode editar ou excluir antes de compartilhar.\\n\\n'+guide;
+    const body=useSteps?guide:'Este é um cartão de exemplo. Você pode editar ou excluir antes de compartilhar.\n\n'+guide;
     const cr=await sb.from('lm_cards').insert({section_id:sr.data.id,author_id:user.id,title:'Exemplo · '+heading,author_label:'Exemplo do professor',body,elements:[],layout:'organized',origin:'teacher'});
     if(cr.error)throw cr.error;
    }
