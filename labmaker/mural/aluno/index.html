@@ -554,11 +554,45 @@ window.addEventListener('error',ev=>{const st=document.getElementById('status');
  $('openDrawing').onclick=()=>{$('drawingMessage').textContent='';$('drawingDialog').showModal()};
  $('drawingErase').onclick=()=>{erase=!erase;$('drawingErase').textContent=erase?'✏️ Voltar à caneta':'Borracha'};
  $('drawingClear').onclick=()=>{if(confirm('Limpar este desenho?'))reset()};
- $('drawingApply').onclick=()=>{
-  let data='';
-  for(const quality of [.55,.4,.28,.18,.1]){data=canvas.toDataURL('image/jpeg',quality);if(data.length<10500)break}
-  if(data.length>=10500){$('drawingMessage').textContent='Desenho muito detalhado. Simplifique e tente novamente.';return}
-  localImageData=data;mediaType='image';$('mediaUrl').value='';$('studentImagePreview').src=data;$('studentImagePreview').hidden=false;$('imageStatus').textContent='Desenho pronto para publicar.';$('drawingDialog').close();
+ // Create a compact preview for the inline card, without discarding the full drawing.
+ function drawingThumbnail(){
+  const thumb=document.createElement('canvas'),tc=thumb.getContext('2d');
+  if(!tc)throw Error('Não foi possível preparar a miniatura neste navegador.');
+  for(const edge of [500,400,320,260,200,150,120,96,72,48,32,24,16]){
+   const factor=Math.min(1,edge/Math.max(canvas.width,canvas.height));
+   thumb.width=Math.max(1,Math.round(canvas.width*factor));
+   thumb.height=Math.max(1,Math.round(canvas.height*factor));
+   tc.fillStyle='#fff';tc.fillRect(0,0,thumb.width,thumb.height);
+   tc.drawImage(canvas,0,0,thumb.width,thumb.height);
+   for(const quality of [.72,.55,.4,.28,.18,.1,.05]){
+    const data=thumb.toDataURL('image/jpeg',quality);
+    if(data.length<10500)return data;
+   }
+  }
+  // Even unusually complex drawings have a tiny fallback preview.
+  thumb.width=1;thumb.height=1;tc.fillStyle='#fff';tc.fillRect(0,0,1,1);
+  return thumb.toDataURL('image/jpeg',.5);
+ }
+ $('drawingApply').onclick=async()=>{
+  const button=$('drawingApply');button.disabled=true;
+  $('drawingMessage').textContent='Preparando o desenho sem perder os detalhes…';
+  try{
+   // Preserve the original image separately; the small preview is only a fallback.
+   const fullBlob=await new Promise((resolve,reject)=>canvas.toBlob(
+    blob=>blob?resolve(blob):reject(new Error('Não foi possível preparar o desenho.')), 'image/png'
+   ));
+   const preview=drawingThumbnail();
+   studentOriginalFile=new File([fullBlob],'desenho-labmaker.png',{type:'image/png'});
+   studentOriginalPath='';
+   localImageData=preview;mediaType='image';$('mediaUrl').value='';
+   $('studentImagePreview').src=canvas.toDataURL('image/png');
+   $('studentImagePreview').hidden=false;
+   $('imageStatus').textContent='Desenho completo pronto para publicar. A miniatura será usada apenas como reserva.';
+   $('drawingMessage').textContent='';
+   $('drawingDialog').close();
+  }catch(err){
+   $('drawingMessage').textContent=err.message||'Não foi possível preparar o desenho. Seu trabalho continua no quadro.';
+  }finally{button.disabled=false}
  };
 })();
 
