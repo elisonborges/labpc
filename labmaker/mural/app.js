@@ -603,7 +603,7 @@ async function loadGroupLinks(m){
 }
 
 let presentationItems=[],presentationIndex=0,presentationSectionId=null,presentationCardId=null;
-let presentationOnlyCards=false,presentationDark=false,presentationSeconds=0,presentationTimer=null,presentationLimit=0,presentationAutoReset=false;
+let presentationOnlyCards=true,presentationDark=false,presentationSeconds=0,presentationTimer=null,presentationLimit=0,presentationAutoReset=false;
 function presentationCardAllowed(card){
  return card.moderation_status!=='rejected'&&card.moderation_status!=='pending';
 }
@@ -640,15 +640,18 @@ function openPresentationScreen(){
  presentationIndex=0;resetPresentationTimer();
  $('slideScreen').classList.toggle('slide-dark',presentationDark);
  $('slideOnlyCards').checked=presentationOnlyCards;
+ $('slideShowSections').checked=!presentationOnlyCards;
  $('slideContrast').checked=presentationDark;
  $('slideAutoReset').checked=presentationAutoReset;
  $('slideScreen').classList.remove('hide');
  renderPresentation();$('slideScreen').focus();
 }
+function togglePresentationSectionSlides(show){presentationOnlyCards=!show;$('slideOnlyCards').checked=presentationOnlyCards;updatePresentationOptions()}
 function updatePresentationOptions(){
  if($('slideScreen').classList.contains('hide'))return;
  const current=presentationItems[presentationIndex];
  presentationOnlyCards=$('slideOnlyCards').checked;
+ $('slideShowSections').checked=!presentationOnlyCards;
  presentationDark=$('slideContrast').checked;
  $('slideScreen').classList.toggle('slide-dark',presentationDark);
  // Preserve the original scope: toggling options cannot add other turmas.
@@ -666,19 +669,86 @@ function changePresentationLimit(value){presentationLimit=Math.max(0,Math.min(30
 function presentationTeamKey(item){return item?.type==='card'?'section:'+item.card.section_id:item?.type==='section'?'section:'+item.name:null}
 function onPresentationNavigation(previous){if(!presentationAutoReset)return;const next=presentationItems[presentationIndex];const before=presentationTeamKey(previous),after=presentationTeamKey(next);if(after&&after!==before)resetPresentationTimer()}
 function changePresentationAutoReset(checked){presentationAutoReset=!!checked}
+function slideBackdropColor(hex,opacity=.88){
+ const value=/^#[0-9a-f]{6}$/i.test(hex)?hex:'#ffffff';
+ const r=parseInt(value.slice(1,3),16),g=parseInt(value.slice(3,5),16),b=parseInt(value.slice(5,7),16);
+ return 'rgba('+r+','+g+','+b+','+opacity+')';
+}
+function slideBackgroundFor(item){
+ const pattern=mural?.background_pattern||'solid';
+ const wall=lmWallpapers[pattern]||lmWallpapers.solid;
+ const screen=$('slideScreen'),stage=$('slideContent');
+ const base=/^#[0-9a-f]{6}$/i.test(mural?.theme_color)?mural.theme_color:'#edf6ff';
+ screen.style.backgroundColor=base;
+ screen.style.backgroundImage=wall.background;
+ screen.style.backgroundSize=wall.size;
+ stage.style.backgroundSize=wall.size;
+ stage.style.backgroundPosition='center';
+ if(item.type==='card'){
+  const chosen=teacherCardColor(item.card);
+  stage.style.backgroundColor=chosen;
+  stage.style.backgroundImage=wall.background==='none'?'none':'linear-gradient('+slideBackdropColor(chosen,.87)+','+slideBackdropColor(chosen,.87)+'),'+wall.background;
+ }else{
+  stage.style.backgroundColor='#ffffff';
+  stage.style.backgroundImage=wall.background==='none'?'none':'linear-gradient(#ffffffe0,#ffffffe0),'+wall.background;
+ }
+ if(presentationDark){
+  stage.style.backgroundColor='#10213b';
+  stage.style.backgroundImage='none';
+ }
+}
 function renderPresentation(){
  const item=presentationItems[presentationIndex];if(!item)return;
  const stage=$('slideContent');
  const count=presentationItems.length;
  $('slideCount').textContent=(presentationIndex+1)+' / '+count;
  $('slideProgress').style.width=((presentationIndex+1)/count*100)+'%';
- $('slideJump').replaceChildren(...presentationItems.map((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+' · '+(it.type==='cover'?'Capa':it.type==='section'?'Mesa: '+it.name:it.card.title);return o}));
+ $('slideJump').replaceChildren(...presentationItems.map((it,i)=>{
+  const option=document.createElement('option');option.value=i;
+  option.textContent=(i+1)+' · '+(it.type==='cover'?'Capa':it.type==='section'?'Turma: '+it.name:it.card.title);
+  return option;
+ }));
  $('slideJump').value=String(presentationIndex);
- if(item.type==='cover'){stage.style.backgroundColor='';const sec=item.sectionId?sections.find(s=>s.id===item.sectionId):null;stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">LabMaker · Apresentação</p><h1>'+esc(sec?.title||mural.title)+'</h1><p>'+esc(sec?'Trabalhos desta seção':mural.description||'Produções da turma')+'</p><small>'+(sec?'1 seção':sections.length+' seções')+' · '+presentationItems.filter(x=>x.type==='card').length+' cartões</small></div>';return}
- if(item.type==='section'){stage.style.backgroundColor='';stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">Próxima mesa</p><h1>'+esc(item.name)+'</h1><p>'+item.count+' '+(item.count===1?'cartão':'cartões')+' para apresentar</p></div>';return}
+ slideBackgroundFor(item);
+ if(item.type==='cover'){
+  const sec=item.sectionId?sections.find(s=>s.id===item.sectionId):null;
+  const projectDescription=String(mural.description||'').trim();
+  stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">LabMaker · Apresentação</p><h1>'+esc(mural.title)+'</h1>'+
+   (projectDescription?'<p>'+esc(projectDescription)+'</p>':'')+
+   (sec?'<p class="lm-slide-section-label">Turma: '+esc(sec.title)+'</p>':'')+
+   '<small>'+presentationItems.filter(x=>x.type==='card').length+' publicações</small></div>';
+  return;
+ }
+ if(item.type==='section'){
+  stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">Turma</p><h1>'+esc(item.name)+'</h1><p>'+item.count+' '+(item.count===1?'publicação':'publicações')+'</p></div>';
+  return;
+ }
  const c=item.card;
- stage.style.backgroundColor=teacherCardColor(c);
- stage.innerHTML='<span class="muted">'+esc(item.section)+' · '+esc(c.author_label||'Equipe')+'</span><h2>'+esc(c.title)+'</h2>'+(c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''));if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateMedia')){const m=c.elements.find(x=>x.type==='privateMedia');const holder=document.createElement('div');holder.className='slide-private-photo';holder.textContent='Carregando mídia…';stage.append(holder);teacherOriginalUrl(c.id,true).then(url=>{if(!holder.isConnected)return;const player=document.createElement(m.kind==='video'?'video':'audio');player.controls=true;player.src=url;holder.replaceChildren(player)}).catch(()=>{if(holder.isConnected)holder.textContent='Mídia indisponível.'})}if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateImage')){const holder=document.createElement('div');holder.className='slide-private-photo';holder.textContent='Carregando imagem…';stage.append(holder);teacherOriginalUrl(c.id).then(url=>{if(holder.isConnected){holder.replaceChildren();const img=document.createElement('img');img.src=url;img.alt='Foto do cartão';holder.append(img)}}).catch(()=>{if(holder.isConnected)holder.textContent='Não foi possível carregar a imagem original.'})}
+ const author=esc(c.author_label||'Equipe');
+ stage.innerHTML='<div class="lm-slide-card-content"><span class="muted">'+esc(item.section)+' · '+author+'</span>'+
+  '<h2>'+esc(c.title)+'</h2>'+
+  (c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':
+   '<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+
+   (safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''))+
+  '</div>';
+ const content=stage.querySelector('.lm-slide-card-content');
+ if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateMedia')){
+  const m=c.elements.find(x=>x.type==='privateMedia'),holder=document.createElement('div');
+  holder.className='slide-private-photo';holder.textContent='Carregando mídia…';content.append(holder);
+  teacherOriginalUrl(c.id,true).then(url=>{
+   if(!holder.isConnected)return;
+   const player=document.createElement(m.kind==='video'?'video':'audio');
+   player.controls=true;player.src=url;holder.replaceChildren(player);
+  }).catch(()=>{if(holder.isConnected)holder.textContent='Mídia indisponível.'});
+ }
+ if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateImage')){
+  const holder=document.createElement('div');holder.className='slide-private-photo';
+  holder.textContent='Carregando imagem…';content.append(holder);
+  teacherOriginalUrl(c.id).then(url=>{
+   if(!holder.isConnected)return;holder.replaceChildren();
+   const img=document.createElement('img');img.src=url;img.alt='Foto do cartão';holder.append(img);
+  }).catch(()=>{if(holder.isConnected)holder.textContent='Imagem indisponível.'});
+ }
 }
 function moveSlide(step){if($('slideScreen')?.classList.contains('hide')||!presentationItems.length)return;const previous=presentationItems[presentationIndex];presentationIndex=Math.max(0,Math.min(presentationItems.length-1,presentationIndex+step));onPresentationNavigation(previous);renderPresentation()}
 function jumpSlide(value){const i=Number(value);if(Number.isInteger(i)&&i>=0&&i<presentationItems.length){const previous=presentationItems[presentationIndex];presentationIndex=i;onPresentationNavigation(previous);renderPresentation()}}
@@ -1169,7 +1239,7 @@ function presentSingleCard(id){
  const c=cards.find(x=>x.id===id);if(!c)return;
  presentationSectionId=null;presentationCardId=id;
  presentationItems=[{type:'card',section:sections.find(s=>s.id===c.section_id)?.title||'Publicações',card:c}];
- presentationIndex=0;resetPresentationTimer();$('slideOnlyCards').checked=true;$('slideContrast').checked=presentationDark;$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
+ presentationIndex=0;resetPresentationTimer();$('slideOnlyCards').checked=true;$('slideShowSections').checked=false;$('slideContrast').checked=presentationDark;$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
 }
 async function openTeacherOriginalImage(cardId){try{const url=await teacherOriginalUrl(cardId);window.open(url,'_blank','noopener,noreferrer')}catch(err){msg(err.message,'status',true)}}
 
