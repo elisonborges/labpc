@@ -786,28 +786,34 @@ function openPedagogicalTemplates(){
 }
 async function createPedagogicalMural(presetId){
  if(replicationBusy||!user)return;
- const preset=pedagogicalPresets.find(x=>x.id===presetId),classId=['__all__','__free__'].includes($('classSelect').value)?null:$('classSelect').value;
+ const preset=pedagogicalPresets.find(x=>x.id===presetId);
  if(!preset)return;
- const title=prompt('Título do novo mural:',preset.name.replace(/^[^\p{L}]+/u,'').trim());
+ const includeExamples=$('pedagogicalIncludeExamples').checked;
+ const useSteps=$('pedagogicalUseSteps').checked;
+ const title=prompt('Nome do seu mural:',preset.name.replace(/^[^\\p{L}]+/u,'').trim());
  if(!title?.trim())return;
- if(!confirm('Criar um novo mural com o modelo '+preset.name+(classId?' nesta turma?':' nos meus murais livres?')))return;
+ // Por padrão, um espaço limpo. As etapas e os cartões de exemplo são opcionais.
+ const classId=null;
+ const steps=useSteps?preset.sections:[['Publicações',preset.sections[0]?.[1]||'Exemplo',preset.sections[0]?.[2]||'']];
  replicationBusy=true;let created=null;
  try{
-  const mr=await sb.from('lm_murals').insert({class_id:classId,owner_id:user.id,title:title.trim(),description:preset.desc,student_enabled:false}).select('id').single();
+  const mr=await sb.from('lm_murals').insert({class_id:classId,owner_id:user.id,title:title.trim(),description:preset.desc,student_enabled:false,school_year:new Date().getFullYear()}).select('id').single();
   if(mr.error)throw mr.error;created=mr.data.id;
-  for(let i=0;i<preset.sections.length;i++){
-   const [name,heading,guide]=preset.sections[i];
-   const section=await sb.from('lm_sections').insert({mural_id:created,title:name,position:i}).select('id').single();
-   if(section.error)throw section.error;
-   const card=await sb.from('lm_cards').insert({section_id:section.data.id,author_id:user.id,title:heading,author_label:'Orientação do professor',body:guide,elements:[],layout:'organized',origin:'teacher'});
-   if(card.error)throw card.error;
+  for(let i=0;i<steps.length;i++){
+   const [name,heading,guide]=steps[i];
+   const sr=await sb.from('lm_sections').insert({mural_id:created,title:name,position:i}).select('id').single();
+   if(sr.error)throw sr.error;
+   if(includeExamples){
+    const body=useSteps?guide:'Este é um cartão de exemplo. Você pode editar ou excluir antes de compartilhar.\\n\\n'+guide;
+    const cr=await sb.from('lm_cards').insert({section_id:sr.data.id,author_id:user.id,title:'Exemplo · '+heading,author_label:'Exemplo do professor',body,elements:[],layout:'organized',origin:'teacher'});
+    if(cr.error)throw cr.error;
+   }
   }
-  $('pedagogicalDialog').close();await selectClass();
-  await openMural(created);msg('Modelo pedagógico criado. Revise os cartões antes de compartilhar.');
- }catch(e){msg('Não foi possível concluir o modelo: '+e.message+(created?' Um mural parcial pode ter sido criado; revise a turma.':''),'status',true)}
+  $('pedagogicalDialog').close();$('classSelect').value='__all__';await selectClass();await openMural(created);
+  msg(includeExamples?'Mural criado com exemplos opcionais.':'Mural pronto, sem cartões de exemplo.');
+ }catch(e){msg('Não foi possível concluir o mural: '+e.message+(created?' Verifique se um mural parcial foi criado.':''),'status',true)}
  finally{replicationBusy=false}
 }
-
 
 function createClassPoll(){
  if(!mural||mural.owner_id!==user.id)return;
