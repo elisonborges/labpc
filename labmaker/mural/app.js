@@ -214,8 +214,52 @@ async function listShortLinks(){
 }
 async function muralShareLink(m){return m.student_enabled?getShortLink('mural',m.id,shareUrl(m)):shareUrl(m)}
 function shareUrl(m){const url=new URL('./aluno/',location.href);url.searchParams.set('m',m.share_token);return url.toString()}
-function closeSharePanel(){$('shareOverlay').classList.add('hide');$('sharePanel').classList.add('hide');shareTarget=null}
-async function openSharePanel(m){shareTarget=m;const posting=$('sharePostingEnabled');if(posting)posting.checked=!!m.posting_enabled;listShortLinks();$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=m.student_enabled?shareUrl(m):'';$('shareLink').placeholder=m.student_enabled?'':'Ative o acesso dos alunos para gerar o link';if(m.student_enabled){const link=await muralShareLink(m);if(shareTarget?.id===m.id)$('shareLink').value=link;}$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();const groupPanel=$('groupSharingPanel');if(groupPanel){groupPanel.open=false;groupPanel.dataset.mural=m.id;$('groupRooms').replaceChildren()}$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
+let selectedSectionShare=null;
+async function sectionShareLink(m,section){
+ if(!m||!section)return null;
+ if(!m.student_enabled&&!(await activateSectionSharing(m)))return null;
+ let item=await sb.from('lm_group_links').select('token').eq('section_id',section.id).maybeSingle();
+ if(item.error){$('shareNotice').textContent='Erro ao consultar o link da seção: '+item.error.message;return null}
+ let token=item.data?.token;
+ if(!token){
+  const created=await sb.from('lm_group_links').insert({section_id:section.id}).select('token').single();
+  if(created.error){
+   const retry=await sb.from('lm_group_links').select('token').eq('section_id',section.id).maybeSingle();
+   if(retry.error||!retry.data?.token){$('shareNotice').textContent='Falha ao criar link da seção: '+created.error.message;return null}
+   token=retry.data.token;
+  }else token=created.data.token;
+ }
+ const url=new URL('./aluno/',location.href);
+ url.searchParams.set('g',token);
+ return url.toString();
+}
+async function selectWholeMuralShare(){
+ if(!shareTarget)return;
+ selectedSectionShare=null;
+ $('shareScopeNotice').hidden=true;
+ $('shareHeading').textContent='Compartilhar · '+shareTarget.title;
+ $('shareLinkLabel').textContent='Link do mural inteiro';
+ $('shareLink').value=shareTarget.student_enabled?await muralShareLink(shareTarget):'';
+ $('shareQr').replaceChildren();
+ $('shareQrStatus').textContent='O link do mural mostra todas as seções.';
+}
+async function showSectionShare(m,section){
+ selectedSectionShare={id:section.id,title:section.title,muralId:m.id};
+ $('shareHeading').textContent='Compartilhar · '+section.title;
+ $('shareScopeTitle').textContent='Somente a seção: '+section.title;
+ $('shareScopeNotice').hidden=false;
+ $('shareLinkLabel').textContent='Link exclusivo da seção';
+ $('shareLink').value='';
+ $('shareNotice').textContent='Preparando link exclusivo...';
+ const url=await sectionShareLink(m,section);
+ if(!shareTarget||shareTarget.id!==m.id||selectedSectionShare?.id!==section.id)return;
+ $('shareLink').value=url||'';
+ $('shareNotice').textContent=url?'Este link mostra apenas '+section.title+'.':'Não foi possível preparar o link exclusivo.';
+ $('shareQr').replaceChildren();
+ $('shareQrStatus').textContent='O QR Code também será exclusivo desta seção.';
+}
+function closeSharePanel(){selectedSectionShare=null;$('shareOverlay').classList.add('hide');$('sharePanel').classList.add('hide');shareTarget=null}
+async function openSharePanel(m){selectedSectionShare=null;shareTarget=m;$('shareScopeNotice').hidden=true;$('shareLinkLabel').textContent='Link do mural inteiro';const posting=$('sharePostingEnabled');if(posting)posting.checked=!!m.posting_enabled;listShortLinks();$('shareHeading').textContent='Compartilhar · '+m.title;$('shareLink').value=m.student_enabled?shareUrl(m):'';$('shareLink').placeholder=m.student_enabled?'':'Ative o acesso dos alunos para gerar o link';if(m.student_enabled){const link=await muralShareLink(m);if(shareTarget?.id===m.id)$('shareLink').value=link;}$('shareEnabled').checked=m.student_enabled===true;$('shareQr').replaceChildren();const groupPanel=$('groupSharingPanel');if(groupPanel){groupPanel.open=false;groupPanel.dataset.mural=m.id;$('groupRooms').replaceChildren()}$('shareQrStatus').textContent=m.student_enabled?'Clique em Gerar QR para projetar ou imprimir.':'Ative o compartilhamento antes de distribuir o QR.';$('shareOverlay').classList.remove('hide');$('sharePanel').classList.remove('hide')}
 async function shareMural(id){const m=murals.find(x=>x.id===id)||(mural?.id===id?mural:null);if(!m)return;if(m.owner_id!==user.id)return msg('Somente o criador pode compartilhar este mural.','status',true);openSharePanel(m)}
 async function changeSharePermission(){if(!shareTarget)return;const enabled=$('shareEnabled').checked;const r=await sb.from('lm_murals').update({student_enabled:enabled}).eq('id',shareTarget.id).eq('owner_id',user.id).select('id').single();if(r.error){$('shareEnabled').checked=!enabled;return alert('Não foi possível salvar: '+r.error.message)}shareTarget.student_enabled=enabled;const posting=$('sharePostingEnabled');if(posting)posting.checked=!!shareTarget.posting_enabled;$('shareLink').value=enabled?shareUrl(shareTarget):'';$('shareLink').placeholder=enabled?'':'Ative o acesso dos alunos para gerar o link';if(enabled){const targetId=shareTarget.id;muralShareLink(shareTarget).then(link=>{if(shareTarget?.id===targetId&&shareTarget.student_enabled)$('shareLink').value=link}).catch(()=>{})}$('shareQr').replaceChildren();$('shareQrStatus').textContent=enabled?'Acesso sem login ativo.':'Link desativado para alunos.';msg(enabled?'Compartilhamento ativado.':'Compartilhamento desativado.')}
 async function copyShareLink(){if(!shareTarget)return;
@@ -224,11 +268,11 @@ async function copyShareLink(){if(!shareTarget)return;
   $('shareEnabled').checked=true;await changeSharePermission();
   if(!shareTarget.student_enabled){$('shareNotice').textContent='Não foi possível ativar o acesso. Verifique as permissões.';return}
  }
- const link=await muralShareLink(shareTarget);try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
+ const link=selectedSectionShare?await sectionShareLink(shareTarget,selectedSectionShare):await muralShareLink(shareTarget);if(!link)return;try{await navigator.clipboard.writeText(link);$('shareNotice').textContent='Link copiado.'}catch{$('shareLink').select();$('shareNotice').textContent='Selecione e copie o link.'}}
 async function generateShareQr(){if(!shareTarget)return;if(!shareTarget.student_enabled){
  $('shareQrStatus').textContent='Ativando acesso para compartilhar...';$('shareEnabled').checked=true;await changeSharePermission();
  if(!shareTarget.student_enabled){$('shareQrStatus').textContent='Não foi possível ativar o acesso. Tente novamente.';return}
-}if(typeof QRCode!=='function'){$('shareQrStatus').textContent='Biblioteca de QR indisponível. Compartilhe pelo link.';return}const node=$('shareQr');node.replaceChildren();new QRCode(node,{text:await muralShareLink(shareTarget),width:220,height:220,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});$('shareQrStatus').textContent='QR gerado no navegador, sem enviar o link a serviços externos.'}
+}if(typeof QRCode!=='function'){$('shareQrStatus').textContent='Biblioteca de QR indisponível. Compartilhe pelo link.';return}const node=$('shareQr');node.replaceChildren();const targetLink=selectedSectionShare?await sectionShareLink(shareTarget,selectedSectionShare):await muralShareLink(shareTarget);if(!targetLink)return;new QRCode(node,{text:targetLink,width:220,height:220,colorDark:'#082d5a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});$('shareQrStatus').textContent='QR gerado no navegador, sem enviar o link a serviços externos.'}
 
 let replicationBusy=false;
 function sectionTitleNext(base){const match=base.match(/^(Mesa|Trio)\s+(\d+)$/i);if(match){const prefix=match[1];let n=Number(match[2])+1;while(sections.some(s=>s.title.toLowerCase()=== (prefix+' '+n).toLowerCase()))n++;return prefix+' '+n}let title=base+' (cópia)',n=2;while(sections.some(s=>s.title===title))title=base+' (cópia '+n+++')';return title}
@@ -419,14 +463,11 @@ async function activateSectionSharing(m){
 }
 async function shareSingleSection(id){
  if(!mural||mural.owner_id!==user.id)return;
- if(!sections.some(s=>s.id===id))return;
+ const section=sections.find(s=>s.id===id);if(!section)return;
  if(!await activateSectionSharing(mural))return;
  await openSharePanel(mural);
- const details=$('groupSharingPanel');if(!details)return;
- details.open=true;details.dataset.mural=mural.id;
- await loadGroupLinks(mural);
- const row=details.querySelector('[data-group-section="'+id+'"]');
- if(row){row.classList.add('group-room-highlight');row.scrollIntoView({block:'nearest',behavior:'smooth'});}
+ if(shareTarget?.id!==mural.id)return;
+ await showSectionShare(mural,section);
 }
 async function addSectionFromShare(){
  if(!shareTarget||shareTarget.owner_id!==user.id)return;
