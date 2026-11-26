@@ -382,8 +382,10 @@ $('clearTextStyle').onclick=()=>{
  updateRichPreview();$('sendStatus').textContent='Formatação removida.';
 };
 ['boldText','italicText'].forEach(id=>$(id).onclick=()=>{
- const next=$(id).getAttribute('aria-pressed')!=='true';
- if(!applySelectedTextStyle({[id==='boldText'?'bold':'italic']:next})){
+ const key=id==='boldText'?'bold':'italic';
+ const selectedStyle=activeTextRange&&richRanges.find(x=>x.start===activeTextRange.start&&x.end===activeTextRange.end);
+ const next=activeTextRange?!Boolean(selectedStyle?.[key]):$(id).getAttribute('aria-pressed')!=='true';
+ if(!applySelectedTextStyle({[key]:next})){
   $(id).setAttribute('aria-pressed',String(next));
   updateRichPreview();
  }
@@ -392,7 +394,7 @@ $('clearTextStyle').onclick=()=>{
  const patch=id==='fontSize'?{size:Number($(id).value)}:{color:$(id).value};
  if(!applySelectedTextStyle(patch))updateRichPreview();
 });
-$('textAlign').onchange=updateRichPreview;
+$('textAlign').onchange=()=>{activeTextRange=null;updateRichPreview()};
 updateRichPreview();
 document.querySelectorAll('[data-media]').forEach(b=>b.onclick=()=>{mediaType=b.dataset.media;checkMediaLink();document.querySelectorAll('[data-media]').forEach(x=>x.classList.toggle('active',x===b));$('mediaHint').textContent='Cole um endereço HTTPS de '+({image:'imagem',video:'vídeo',audio:'áudio',link:'site',document:'documento'}[mediaType])+'. Vídeos e áudios diretos podem ser reproduzidos no cartão.'});
 let imagePreviewCheck=0;
