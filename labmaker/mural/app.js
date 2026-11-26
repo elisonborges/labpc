@@ -158,7 +158,112 @@ function renderMuralPersonalization(){
  const color=$('lmVisualColor');if(color)color.value=/^#[0-9a-f]{6}$/i.test(mural.theme_color)?mural.theme_color:'#edf6ff';
  const checkbox=$('lmVisualMotion');if(checkbox)checkbox.checked=localStorage.getItem('lm-reduced-motion')!=='true';
 }
-function openMuralPersonalization(){if(!mural||mural.owner_id!==user.id)return;renderMuralPersonalization();$('lmPersonalizeDialog').showModal()}
+
+let lmCoverDraft=null;
+function lmValidCoverData(value){
+ return typeof value==='string'&&value.length<=350000&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(value);
+}
+function lmCoverAppearance(){
+ const image=lmValidCoverData(lmCoverDraft)?lmCoverDraft:(lmCoverDraft===null?mural?.cover_image_data:null);
+ const fit=$('lmCoverFit')?.value||mural?.cover_fit||'cover';
+ const tone=$('lmCoverTone')?.value||mural?.cover_overlay_tone||'dark';
+ const overlay=Number($('lmCoverOverlay')?.value??mural?.cover_overlay??35);
+ const preview=$('lmCoverPreview');
+ if(!preview)return;
+ const wall=lmWallpapers[mural?.background_pattern||'solid']||lmWallpapers.solid;
+ const tint=tone==='light'?'255,255,255':'0,20,45';
+ const amount=Math.max(0,Math.min(80,overlay))/100;
+ if(lmValidCoverData(image)){
+  preview.style.backgroundImage='linear-gradient(rgba('+tint+','+amount+'),rgba('+tint+','+amount+')),url("'+image+'")';
+  preview.style.backgroundSize='cover,'+(fit==='center'?'auto':fit);
+ }else{
+  preview.style.backgroundImage=wall.background;
+  preview.style.backgroundSize=wall.size;
+ }
+ preview.style.backgroundColor=mural?.theme_color||'#edf6ff';
+ $('lmCoverPreviewTitle').textContent=mural?.title||'Projeto';
+ $('lmCoverPreviewDescription').textContent=mural?.description||'';
+ $('lmCoverOverlayValue').textContent=Math.round(overlay)+'%';
+}
+function lmLoadCoverOptions(){
+ lmCoverDraft=null;
+ $('lmCoverFit').value=['cover','contain','center'].includes(mural?.cover_fit)?mural.cover_fit:'cover';
+ $('lmCoverTone').value=mural?.cover_overlay_tone==='light'?'light':'dark';
+ $('lmCoverOverlay').value=Number.isFinite(Number(mural?.cover_overlay))?mural.cover_overlay:35;
+ $('lmCoverFile').value='';
+ $('lmCoverStatus').textContent='';
+ lmCoverAppearance();
+}
+async function lmCoverFileToData(file){
+ if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Escolha uma imagem JPG, PNG ou WebP.');
+ if(file.size>12*1024*1024)throw Error('Escolha uma imagem de até 12 MB.');
+ const img=await createImageBitmap(file);
+ try{
+  const maxEdge=1500,ratio=Math.min(1,maxEdge/Math.max(img.width,img.height));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(img.width*ratio));
+  canvas.height=Math.max(1,Math.round(img.height*ratio));
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw Error('O navegador não conseguiu preparar a imagem.');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  for(const quality of [.85,.75,.65,.53,.42,.3]){
+   const data=canvas.toDataURL('image/jpeg',quality);
+   if(data.length<=330000)return data;
+  }
+  // Gradually reduce dimensions rather than reject a detailed artistic image.
+  for(const factor of [.8,.65,.5,.4]){
+   const smaller=document.createElement('canvas');
+   smaller.width=Math.max(1,Math.round(canvas.width*factor));
+   smaller.height=Math.max(1,Math.round(canvas.height*factor));
+   smaller.getContext('2d').drawImage(canvas,0,0,smaller.width,smaller.height);
+   const data=smaller.toDataURL('image/jpeg',.65);
+   if(data.length<=330000)return data;
+  }
+  throw Error('A imagem não pôde ser otimizada para a capa.');
+ }finally{img.close()}
+}
+$('lmCoverFile').addEventListener('change',async event=>{
+ const file=event.target.files?.[0];if(!file)return;
+ const status=$('lmCoverStatus');status.textContent='Preparando imagem…';
+ try{
+  lmCoverDraft=await lmCoverFileToData(file);
+  lmCoverAppearance();
+  status.textContent='Prévia pronta. Clique em Salvar capa para confirmar.';
+ }catch(err){status.textContent=err.message}
+});
+['lmCoverFit','lmCoverTone','lmCoverOverlay'].forEach(id=>$(id).addEventListener('input',lmCoverAppearance));
+$('lmCoverSave').addEventListener('click',async()=>{
+ if(!mural||mural.owner_id!==user.id)return;
+ const button=$('lmCoverSave'),status=$('lmCoverStatus');
+ button.disabled=true;status.textContent='Salvando capa…';
+ const patch={
+  cover_fit:$('lmCoverFit').value,
+  cover_overlay_tone:$('lmCoverTone').value,
+  cover_overlay:Number($('lmCoverOverlay').value)
+ };
+ if(lmValidCoverData(lmCoverDraft))patch.cover_image_data=lmCoverDraft;
+ try{
+  const result=await sb.from('lm_murals').update(patch).eq('id',mural.id).eq('owner_id',user.id).select('id').single();
+  if(result.error)throw result.error;
+  Object.assign(mural,patch);
+  lmCoverDraft=null;status.textContent='Capa salva para este projeto.';
+ }catch(err){status.textContent='Erro ao salvar: '+err.message}
+ finally{button.disabled=false}
+});
+$('lmCoverRemove').addEventListener('click',async()=>{
+ if(!mural||mural.owner_id!==user.id)return;
+ const button=$('lmCoverRemove'),status=$('lmCoverStatus');
+ button.disabled=true;
+ try{
+  const result=await sb.from('lm_murals').update({cover_image_data:null}).eq('id',mural.id).eq('owner_id',user.id).select('id').single();
+  if(result.error)throw result.error;
+  mural.cover_image_data=null;lmCoverDraft=null;$('lmCoverFile').value='';
+  lmCoverAppearance();status.textContent='Imagem removida. Capa voltou ao papel de parede do mural.';
+ }catch(err){status.textContent='Erro ao remover: '+err.message}
+ finally{button.disabled=false}
+});
+function openMuralPersonalization(){if(!mural||mural.owner_id!==user.id)return;renderMuralPersonalization();lmLoadCoverOptions();$('lmPersonalizeDialog').showModal()}
 async function saveMuralVisual(patch){
  if(!mural||mural.owner_id!==user.id)return;
  const status=$('lmVisualStatus');if(status)status.textContent='Salvando...';
@@ -808,6 +913,13 @@ function slideBackgroundFor(item){
  const overlay=item.type==='cover'?0.18:item.type==='card'?0.82:0.65;
  const tint=slideBackdropColor(item.type==='card'?chosen:'#ffffff',overlay);
  stage.style.backgroundImage=wall.background==='none'?'none':'linear-gradient('+tint+','+tint+'),'+wall.background;
+ if(item.type==='cover'&&lmValidCoverData(mural?.cover_image_data)){
+  const tone=mural.cover_overlay_tone==='light'?'255,255,255':'0,20,45';
+  const strength=Math.max(0,Math.min(80,Number(mural.cover_overlay)||0))/100;
+  stage.style.backgroundImage='linear-gradient(rgba('+tone+','+strength+'),rgba('+tone+','+strength+')),url("'+mural.cover_image_data+'")';
+  stage.style.backgroundSize='cover,'+(['cover','contain','center'].includes(mural.cover_fit)?(mural.cover_fit==='center'?'auto':mural.cover_fit):'cover');
+  stage.style.backgroundRepeat='no-repeat';
+ }
 }
 function renderPresentation(){
  const item=presentationItems[presentationIndex];if(!item)return;
