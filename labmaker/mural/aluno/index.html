@@ -733,16 +733,29 @@ async function viewStudentOriginal(cardId){
 async function loadStudentPrivatePhotos(){
  const slots=[...document.querySelectorAll('[data-student-photo]')];
  await Promise.all(slots.map(async slot=>{
-  const id=slot.dataset.studentPhoto;
+  const card=slot.closest('.post');
+  const fallback=card?.querySelector('.attachment img');
+  // The inline image is already valid visual content. Never add an error below it.
+  if(fallback)slot.hidden=true;
   try{
-   const response=await fetch(LM_CONFIG.url+'/functions/v1/labmaker-student-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'view',token,group:groupRoom,card:id})});
+   const response=await fetch(LM_CONFIG.url+'/functions/v1/labmaker-student-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'view',token,group:groupRoom,card:slot.dataset.studentPhoto})});
    const result=await response.json();
    if(!response.ok||!result.url)throw Error(result.error||'Imagem indisponível');
    if(!slot.isConnected)return;
-   const img=document.createElement('img');img.alt='Foto do cartão';img.loading='lazy';img.src=result.url;
-   img.onerror=()=>{if(img.isConnected)slot.textContent='Não foi possível exibir a foto.'};
-   slot.replaceChildren(img);
-  }catch(err){if(slot.isConnected)slot.textContent='Foto indisponível.'}
+   const img=document.createElement('img');img.alt='Foto do cartão';img.loading='lazy';
+   if(fallback){
+    // Upgrade the visible preview only after the signed original loads successfully.
+    img.onload=()=>{if(fallback.isConnected)fallback.src=result.url};
+    img.onerror=()=>{};
+    img.src=result.url;
+   }else{
+    slot.hidden=false;img.src=result.url;
+    img.onerror=()=>{if(img.isConnected)slot.textContent='Não foi possível exibir a foto.'};
+    slot.replaceChildren(img);
+   }
+  }catch(err){
+   if(slot.isConnected&&!fallback){slot.hidden=false;slot.textContent='Foto indisponível.'}
+  }
  }));
 }
 
