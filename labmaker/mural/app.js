@@ -102,8 +102,8 @@ function teacherFontStyle(c){const a=Array.isArray(c.elements)?c.elements.find(x
 function teacherInlineImage(v){return typeof v==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<95000}
 function teacherYoutubeEmbed(v){try{const u=new URL(v);let id='';if(u.hostname==='youtu.be')id=u.pathname.split('/')[1];else if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname))id=u.searchParams.get('v')||u.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1];return /^[A-Za-z0-9_-]{11}$/.test(id||'')?'https://www.youtube-nocookie.com/embed/'+id:null}catch{return null}}
 function teacherAttachment(c){const a=Array.isArray(c.elements)?c.elements.find(x=>x.type==='attachment'):null;if(!a||!(safeURL(a.value)||a.kind==='image'&&teacherInlineImage(a.value)))return '';const url=esc(a.value),kind=a.kind;const yt=teacherYoutubeEmbed(a.value);if(yt)return '<iframe src="'+esc(yt)+'" title="YouTube" loading="lazy" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0"></iframe>';if(kind==='image')return '<a href="'+url+'" target="_blank" rel="noopener noreferrer"><img src="'+url+'" alt="Anexo do cartão"></a>';if(kind==='video'&&/\.(mp4|webm|ogg)(\?|$)/i.test(a.value))return '<video controls preload="none" style="width:100%" src="'+url+'"></video>';if(kind==='audio'&&/\.(mp3|wav|ogg|m4a)(\?|$)/i.test(a.value))return '<audio controls preload="none" style="width:100%" src="'+url+'"></audio>';return '<p><a target="_blank" rel="noopener noreferrer" href="'+url+'">🔗 Ver anexo ('+esc(kind||'link')+')</a></p>'}
-function renderSections(){$('sections').innerHTML=sections.map(s=>'<div class="section" data-drop-section="'+s.id+'"><div class="section-head" style="flex-wrap:wrap"><h3>'+esc(s.title)+' <button type="button" class="labmaker-section-rename" data-rename-section="'+s.id+'" title="Renomear seção" aria-label="Renomear seção '+esc(s.title)+'">✎</button></h3><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn" data-new="'+s.id+'">＋ Publicar</button><button class="btn labmaker-section-share" data-share-section="'+s.id+'" title="Copiar link ou QR Code desta seção">↗ Compartilhar</button><button class="btn" data-duplicate-section="'+s.id+'" title="Copiar mesa/trio e seus cartões">Duplicar</button><button class="btn" data-section-actions="'+s.id+'">⋯</button><button class="btn" data-lock-section="'+s.id+'">'+(s.locked?'🔓 Desbloquear':'🔒 Bloquear')+'</button><button class="btn btn-danger" data-delete-section="'+s.id+'" title="Excluir mesa/trio e todos os seus cartões">Excluir</button></div></div>'+cards.filter(c=>c.section_id===s.id).map(c=>'<article class="post" data-drag-card="'+c.id+'"><div class="card-attribution"><span>👤 '+esc(c.author_label?.trim()||'Não identificado')+'</span><span>'+(c.origin==='student'?'Aluno · '+(c.moderation_status==='pending'?'Aguardando':c.moderation_status==='rejected'?'Rejeitado':'Aprovado'):'Professor')+'</span>'+(c.created_at?'<time title="Data da publicação">📅 '+new Date(c.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})+'</time>':'')+'</div><strong>'+esc(c.title)+'</strong>'+(c.layout==='organized'?'<p style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</p>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''):'<div style="height:180px;position:relative;background:#f6f9ff;overflow:hidden;margin-top:8px">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>')+(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateMedia')?'<div class="teacher-private-media" data-teacher-media="'+c.id+'">Carregando áudio/vídeo…</div>':'')+(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateImage')?'<div class="card-photo" data-card-photo="'+c.id+'">Carregando imagem…</div><p><button class="btn" type="button" data-original-image="'+c.id+'">🖼️ Ver imagem original</button></p>':'')+'<p><button class="btn" type="button" data-present-card="'+c.id+'">▶ Apresentar cartão</button></p>'+'<p>'+(c.author_id===user.id&&c.origin!=='student'?'<button class="btn" data-edit="'+c.id+'">Editar</button> <button class="btn" data-duplicate-card="'+c.id+'">Duplicar</button> <button class="btn" data-card-menu="'+c.id+'" title="Mais ações">⋯</button> <button class="btn" data-lock-card="'+c.id+'">'+(c.locked?'🔓 Desbloquear':'🔒 Bloquear')+'</button> <button class="btn" data-pick-move="'+c.id+'">⠿ Mover</button> <button class="btn btn-danger" data-delete-card="'+c.id+'">Excluir</button>' : c.origin==='student'&&mural.owner_id===user.id?'<button class="btn" data-review="'+c.id+'" data-state="approved">Aprovar</button> <button class="btn" data-review="'+c.id+'" data-state="rejected">Rejeitar</button> <button class="btn btn-danger" data-delete-card="'+c.id+'">Excluir</button>':'<span class="muted tiny">Somente leitura</span>')+'</p></article>').join('')+'</div>').join('')||'<p class="muted">Crie a primeira mesa para começar.</p>';
-setupCardDragging();setupSectionMovement();applyCardFilters();$('sections').querySelectorAll('[data-present-card]').forEach(b=>b.onclick=()=>presentSingleCard(b.dataset.presentCard));loadPrivateCardPhotos();loadTeacherPrivateMedia();$('sections').querySelectorAll('[data-original-image]').forEach(b=>b.onclick=()=>openTeacherOriginalImage(b.dataset.originalImage));$('sections').querySelectorAll('[data-lock-section]').forEach(b=>b.onclick=()=>toggleSectionLock(b.dataset.lockSection));$('sections').querySelectorAll('[data-lock-card]').forEach(b=>b.onclick=()=>toggleCardLock(b.dataset.lockCard));$('sections').querySelectorAll('[data-pick-move]').forEach(b=>b.onclick=()=>selectMoveDestination(b.dataset.pickMove));$('sections').querySelectorAll('[data-new]').forEach(b=>b.onclick=()=>newCard(b.dataset.new));$('sections').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editCard(b.dataset.edit));$('sections').querySelectorAll('[data-duplicate-section]').forEach(b=>b.onclick=()=>duplicateSection(b.dataset.duplicateSection));$('sections').querySelectorAll('[data-duplicate-card]').forEach(b=>b.onclick=()=>duplicateCard(b.dataset.duplicateCard));$('sections').querySelectorAll('[data-card-menu]').forEach(b=>b.onclick=()=>cardActionsMenu(b.dataset.cardMenu));$('sections').querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>reviewStudentCard(b.dataset.review,b.dataset.state));$('sections').querySelectorAll('[data-delete-card]').forEach(b=>b.onclick=()=>deleteMuralCard(b.dataset.deleteCard));$('sections').querySelectorAll('[data-delete-section]').forEach(b=>b.onclick=()=>deleteMuralSection(b.dataset.deleteSection));$('sections').querySelectorAll('[data-section-actions]').forEach(b=>b.onclick=()=>sectionActions(b.dataset.sectionActions)); $('sections').querySelectorAll('[data-share-section]').forEach(b=>b.onclick=()=>shareSingleSection(b.dataset.shareSection)); $('sections').querySelectorAll('[data-rename-section]').forEach(b=>b.onclick=()=>performSectionAction(b.dataset.renameSection,'1'))}
+function renderSections(){$('sections').innerHTML=sections.map(s=>'<div class="section" data-drop-section="'+s.id+'"><div class="section-head" style="flex-wrap:wrap"><h3>'+esc(s.title)+' <button type="button" class="labmaker-section-rename" data-rename-section="'+s.id+'" title="Renomear seção" aria-label="Renomear seção '+esc(s.title)+'">✎</button></h3><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn" data-new="'+s.id+'">＋ Publicar</button><button class="btn labmaker-section-share" data-share-section="'+s.id+'" title="Copiar link ou QR Code desta seção">↗ Compartilhar</button><button class="btn" data-present-section="'+s.id+'" title="Apresentar apenas as publicações desta turma ou seção">▶ Apresentar</button><button class="btn" data-duplicate-section="'+s.id+'" title="Copiar mesa/trio e seus cartões">Duplicar</button><button class="btn" data-section-actions="'+s.id+'">⋯</button><button class="btn" data-lock-section="'+s.id+'">'+(s.locked?'🔓 Desbloquear':'🔒 Bloquear')+'</button><button class="btn btn-danger" data-delete-section="'+s.id+'" title="Excluir mesa/trio e todos os seus cartões">Excluir</button></div></div>'+cards.filter(c=>c.section_id===s.id).map(c=>'<article class="post" data-drag-card="'+c.id+'"><div class="card-attribution"><span>👤 '+esc(c.author_label?.trim()||'Não identificado')+'</span><span>'+(c.origin==='student'?'Aluno · '+(c.moderation_status==='pending'?'Aguardando':c.moderation_status==='rejected'?'Rejeitado':'Aprovado'):'Professor')+'</span>'+(c.created_at?'<time title="Data da publicação">📅 '+new Date(c.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})+'</time>':'')+'</div><strong>'+esc(c.title)+'</strong>'+(c.layout==='organized'?'<p style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</p>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''):'<div style="height:180px;position:relative;background:#f6f9ff;overflow:hidden;margin-top:8px">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>')+(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateMedia')?'<div class="teacher-private-media" data-teacher-media="'+c.id+'">Carregando áudio/vídeo…</div>':'')+(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateImage')?'<div class="card-photo" data-card-photo="'+c.id+'">Carregando imagem…</div><p><button class="btn" type="button" data-original-image="'+c.id+'">🖼️ Ver imagem original</button></p>':'')+'<p><button class="btn" type="button" data-present-card="'+c.id+'">▶ Apresentar cartão</button></p>'+'<p>'+(c.author_id===user.id&&c.origin!=='student'?'<button class="btn" data-edit="'+c.id+'">Editar</button> <button class="btn" data-duplicate-card="'+c.id+'">Duplicar</button> <button class="btn" data-card-menu="'+c.id+'" title="Mais ações">⋯</button> <button class="btn" data-lock-card="'+c.id+'">'+(c.locked?'🔓 Desbloquear':'🔒 Bloquear')+'</button> <button class="btn" data-pick-move="'+c.id+'">⠿ Mover</button> <button class="btn btn-danger" data-delete-card="'+c.id+'">Excluir</button>' : c.origin==='student'&&mural.owner_id===user.id?'<button class="btn" data-review="'+c.id+'" data-state="approved">Aprovar</button> <button class="btn" data-review="'+c.id+'" data-state="rejected">Rejeitar</button> <button class="btn btn-danger" data-delete-card="'+c.id+'">Excluir</button>':'<span class="muted tiny">Somente leitura</span>')+'</p></article>').join('')+'</div>').join('')||'<p class="muted">Crie a primeira mesa para começar.</p>';
+setupCardDragging();setupSectionMovement();applyCardFilters();$('sections').querySelectorAll('[data-present-card]').forEach(b=>b.onclick=()=>presentSingleCard(b.dataset.presentCard));$('sections').querySelectorAll('[data-present-section]').forEach(b=>b.onclick=()=>presentSection(b.dataset.presentSection));loadPrivateCardPhotos();loadTeacherPrivateMedia();$('sections').querySelectorAll('[data-original-image]').forEach(b=>b.onclick=()=>openTeacherOriginalImage(b.dataset.originalImage));$('sections').querySelectorAll('[data-lock-section]').forEach(b=>b.onclick=()=>toggleSectionLock(b.dataset.lockSection));$('sections').querySelectorAll('[data-lock-card]').forEach(b=>b.onclick=()=>toggleCardLock(b.dataset.lockCard));$('sections').querySelectorAll('[data-pick-move]').forEach(b=>b.onclick=()=>selectMoveDestination(b.dataset.pickMove));$('sections').querySelectorAll('[data-new]').forEach(b=>b.onclick=()=>newCard(b.dataset.new));$('sections').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editCard(b.dataset.edit));$('sections').querySelectorAll('[data-duplicate-section]').forEach(b=>b.onclick=()=>duplicateSection(b.dataset.duplicateSection));$('sections').querySelectorAll('[data-duplicate-card]').forEach(b=>b.onclick=()=>duplicateCard(b.dataset.duplicateCard));$('sections').querySelectorAll('[data-card-menu]').forEach(b=>b.onclick=()=>cardActionsMenu(b.dataset.cardMenu));$('sections').querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>reviewStudentCard(b.dataset.review,b.dataset.state));$('sections').querySelectorAll('[data-delete-card]').forEach(b=>b.onclick=()=>deleteMuralCard(b.dataset.deleteCard));$('sections').querySelectorAll('[data-delete-section]').forEach(b=>b.onclick=()=>deleteMuralSection(b.dataset.deleteSection));$('sections').querySelectorAll('[data-section-actions]').forEach(b=>b.onclick=()=>sectionActions(b.dataset.sectionActions)); $('sections').querySelectorAll('[data-share-section]').forEach(b=>b.onclick=()=>shareSingleSection(b.dataset.shareSection)); $('sections').querySelectorAll('[data-rename-section]').forEach(b=>b.onclick=()=>performSectionAction(b.dataset.renameSection,'1'))}
 async function newSection(){if(!mural||mural.owner_id!==user.id)return;const title=prompt('Nome da nova seção (ex.: Turma 1, Projeto A ou Família):','Nova seção');if(!title?.trim())return;const r=await sb.from('lm_sections').insert({mural_id:mural.id,title:title.trim(),position:sections.length});if(r.error)return msg(r.error.message,'status',true);await refresh();msg('Seção criada. Você pode renomeá-la ou compartilhar seu link exclusivo.');if(shareTarget?.id===mural.id){const panel=$('groupSharingPanel');if(panel){panel.open=true;await loadGroupLinks(shareTarget)}}}
 let teacherLocalImage='',teacherOriginalFile=null;
 function resetTeacherLocalImage(){teacherLocalImage='';teacherOriginalFile=null;$('postLocalImage').value='';$('postLocalPreview').hidden=true;$('postLocalStatus').textContent='Selecione JPG, PNG ou WebP. A imagem será compactada automaticamente.'}
@@ -424,18 +424,36 @@ $('editor').addEventListener('keydown',event=>{if(event.key!=='Enter'||event.shi
 
 let activeSectionMenu=null;
 function sectionActions(id){
- if(!mural||mural.owner_id!==user.id)return msg('Somente o responsável pode organizar as mesas.','status',true);
+ if(!mural||mural.owner_id!==user.id)return msg('Somente o responsável pode organizar as seções.','status',true);
  if(activeSectionMenu===id){closeSectionMenu();return}
  closeSectionMenu();
- const trigger=document.querySelector('[data-section-actions="'+id+'"]');if(!trigger)return;
+ const trigger=document.querySelector('[data-section-actions="'+id+'"]');
+ if(!trigger)return;
  const menu=document.createElement('div');menu.id='sectionPopup';menu.className='section-popup';menu.setAttribute('role','menu');
  const items=[['1','✏️','Renomear seção'],['2','➕','Nova seção acima'],['3','➕','Nova seção abaixo'],['4','⬆️','Mover para cima'],['5','⬇️','Mover para baixo'],['6','📋','Copiar nome'],['7','🗑️','Excluir seção']];
  items.forEach(([n,icon,label])=>{const btn=document.createElement('button');btn.type='button';btn.setAttribute('role','menuitem');btn.className='section-menu-item'+(n==='7'?' danger':'');btn.textContent=icon+'  '+label;btn.onclick=()=>{closeSectionMenu();performSectionAction(id,n)};menu.appendChild(btn)});
- trigger.parentElement.appendChild(menu);activeSectionMenu=id;trigger.setAttribute('aria-expanded','true');menu.querySelector('button').focus();
+ // Append to body to avoid clipping by the horizontally scrollable mural.
+ document.body.appendChild(menu);activeSectionMenu=id;trigger.setAttribute('aria-expanded','true');
+ positionSectionMenu();
+ menu.querySelector('button')?.focus({preventScroll:true});
 }
-function closeSectionMenu(){document.getElementById('sectionPopup')?.remove();document.querySelectorAll('[data-section-actions]').forEach(b=>b.setAttribute('aria-expanded','false'));activeSectionMenu=null}
+function positionSectionMenu(){
+ const menu=document.getElementById('sectionPopup'),trigger=activeSectionMenu&&document.querySelector('[data-section-actions="'+activeSectionMenu+'"]');
+ if(!menu||!trigger)return;
+ const rect=trigger.getBoundingClientRect(),width=menu.offsetWidth||228,height=menu.offsetHeight||300,margin=8;
+ const left=Math.max(margin,Math.min(innerWidth-width-margin,rect.left));
+ const below=innerHeight-rect.bottom;
+ const top=below>=height+margin?rect.bottom+5:Math.max(margin,rect.top-height-5);
+ menu.style.left=left+'px';menu.style.top=top+'px';
+}
+function closeSectionMenu(){
+ document.getElementById('sectionPopup')?.remove();
+ document.querySelectorAll('[data-section-actions]').forEach(b=>b.setAttribute('aria-expanded','false'));activeSectionMenu=null;
+}
 document.addEventListener('click',e=>{if(activeSectionMenu&&!e.target.closest('#sectionPopup')&&!e.target.closest('[data-section-actions]'))closeSectionMenu()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSectionMenu()});
+window.addEventListener('resize',()=>{if(activeSectionMenu)positionSectionMenu()});
+document.addEventListener('scroll',()=>{if(activeSectionMenu)closeSectionMenu()},true);
 async function performSectionAction(id,op){
  if(!mural||mural.owner_id!==user.id)return;
  const section=sections.find(x=>x.id===id);if(!section)return;
@@ -521,16 +539,62 @@ async function loadGroupLinks(m){
  }
 }
 
-let presentationItems=[],presentationIndex=0;
+let presentationItems=[],presentationIndex=0,presentationSectionId=null;
 let presentationOnlyCards=false,presentationDark=false,presentationSeconds=0,presentationTimer=null,presentationLimit=0,presentationAutoReset=false;
+function presentationCardAllowed(card){
+ return card.moderation_status!=='rejected'&&card.moderation_status!=='pending';
+}
+function buildPresentationItems(sectionId=null){
+ const scoped=sectionId?sections.filter(s=>s.id===sectionId):sections;
+ const groups=scoped.map(section=>({section,items:cards.filter(c=>c.section_id===section.id&&presentationCardAllowed(c)).map(c=>({type:'card',section:section.title,card:c}))}));
+ const included=groups.filter(group=>group.items.length);
+ if(!included.length)return [];
+ return [{type:'cover',sectionId},...included.flatMap(group=>presentationOnlyCards?group.items:[{type:'section',id:group.section.id,name:group.section.title,count:group.items.length},...group.items])];
+}
+function presentSection(id){
+ if(!mural)return;
+ const section=sections.find(s=>s.id===id);if(!section)return;
+ const possible=cards.filter(c=>c.section_id===id);
+ const eligible=possible.filter(presentationCardAllowed);
+ if(!eligible.length){
+  msg(possible.length?'A seção "'+section.title+'" não tem publicações aprovadas. Revise as pendentes antes de apresentar.':'A seção "'+section.title+'" ainda não tem publicações. Use Publicar para adicionar o primeiro trabalho.','status',true);
+  return;
+ }
+ presentationSectionId=id;
+ presentationItems=buildPresentationItems(id);
+ openPresentationScreen();
+}
 function startPresentation(){
  if(!mural)return;
- const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));
- if(!accepted.length){msg('Nenhum cartão aprovado para apresentar.','status',true);return}
- presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?(presentationOnlyCards?own:[{type:'section',name:section.title,count:own.length},...own]):[]})];
- presentationIndex=0;resetPresentationTimer();$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideOnlyCards').checked=presentationOnlyCards;$('slideContrast').checked=presentationDark;$('slideAutoReset').checked=presentationAutoReset;$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
+ presentationSectionId=null;
+ presentationItems=buildPresentationItems();
+ if(!presentationItems.length){
+  msg('Este mural ainda não tem publicações disponíveis para apresentar. Adicione um cartão ou aprove as publicações pendentes.','status',true);return;
+ }
+ openPresentationScreen();
 }
-function updatePresentationOptions(){if($('slideScreen').classList.contains('hide'))return;const current=presentationItems[presentationIndex];presentationOnlyCards=$('slideOnlyCards').checked;presentationDark=$('slideContrast').checked;$('slideScreen').classList.toggle('slide-dark',presentationDark);const accepted=sections.flatMap(section=>cards.filter(c=>c.section_id===section.id&&c.moderation_status!=='rejected'&&c.moderation_status!=='pending').map(c=>({type:'card',section:section.title,card:c})));presentationItems=[{type:'cover'},...sections.flatMap(section=>{const own=accepted.filter(x=>x.card.section_id===section.id);return own.length?(presentationOnlyCards?own:[{type:'section',name:section.title,count:own.length},...own]):[]})];presentationIndex=Math.max(0,presentationItems.findIndex(x=>x.type===current?.type&&(x.type==='card'?x.card.id===current.card.id:x.type==='section'?x.name===current.name:true)));renderPresentation()}
+function openPresentationScreen(){
+ presentationIndex=0;resetPresentationTimer();
+ $('slideScreen').classList.toggle('slide-dark',presentationDark);
+ $('slideOnlyCards').checked=presentationOnlyCards;
+ $('slideContrast').checked=presentationDark;
+ $('slideAutoReset').checked=presentationAutoReset;
+ $('slideScreen').classList.remove('hide');
+ renderPresentation();$('slideScreen').focus();
+}
+function updatePresentationOptions(){
+ if($('slideScreen').classList.contains('hide'))return;
+ const current=presentationItems[presentationIndex];
+ presentationOnlyCards=$('slideOnlyCards').checked;
+ presentationDark=$('slideContrast').checked;
+ $('slideScreen').classList.toggle('slide-dark',presentationDark);
+ // Preserve the original scope: toggling options cannot add other turmas.
+ const updated=buildPresentationItems(presentationSectionId);
+ if(!updated.length){closePresentation();return}
+ presentationItems=updated;
+ presentationIndex=Math.max(0,presentationItems.findIndex(x=>x.type===current?.type&&(x.type==='card'?x.card.id===current.card.id:x.type==='section'?x.id===current.id:x.sectionId===current.sectionId)));
+ renderPresentation();
+}
 function formatPresentationTime(){const remaining=presentationLimit*60-presentationSeconds;const notice=$('slideTimeNotice');if(notice){notice.textContent=!presentationLimit?'':remaining<=0?'⏰ Tempo encerrado!':remaining<=30?'⚠️ Faltam '+remaining+' segundos':'';notice.classList.toggle('time-over',presentationLimit>0&&remaining<=0);notice.classList.toggle('time-warning',presentationLimit>0&&remaining>0&&remaining<=30)}const m=Math.floor(presentationSeconds/60),s=presentationSeconds%60;$('slideTimer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
 function pausePresentationTimer(){if(presentationTimer){clearInterval(presentationTimer);presentationTimer=null}$('slideTimerToggle').textContent='▶ Tempo'}
 function togglePresentationTimer(){if(presentationTimer){pausePresentationTimer();return}presentationTimer=setInterval(()=>{if(!$('slideScreen').classList.contains('hide')){presentationSeconds++;formatPresentationTime()}},1000);$('slideTimerToggle').textContent='⏸ Pausar'}
@@ -547,7 +611,7 @@ function renderPresentation(){
  $('slideProgress').style.width=((presentationIndex+1)/count*100)+'%';
  $('slideJump').replaceChildren(...presentationItems.map((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+' · '+(it.type==='cover'?'Capa':it.type==='section'?'Mesa: '+it.name:it.card.title);return o}));
  $('slideJump').value=String(presentationIndex);
- if(item.type==='cover'){stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">LabMaker · Apresentação</p><h1>'+esc(mural.title)+'</h1><p>'+esc(mural.description||'Produções da turma')+'</p><small>'+sections.length+' mesas · '+presentationItems.filter(x=>x.type==='card').length+' cartões</small></div>';return}
+ if(item.type==='cover'){const sec=item.sectionId?sections.find(s=>s.id===item.sectionId):null;stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">LabMaker · Apresentação</p><h1>'+esc(sec?.title||mural.title)+'</h1><p>'+esc(sec?'Trabalhos desta seção':mural.description||'Produções da turma')+'</p><small>'+(sec?'1 seção':sections.length+' seções')+' · '+presentationItems.filter(x=>x.type==='card').length+' cartões</small></div>';return}
  if(item.type==='section'){stage.innerHTML='<div class="slide-intro"><p class="slide-eyebrow">Próxima mesa</p><h1>'+esc(item.name)+'</h1><p>'+item.count+' '+(item.count===1?'cartão':'cartões')+' para apresentar</p></div>';return}
  const c=item.card;
  stage.innerHTML='<span class="muted">'+esc(item.section)+' · '+esc(c.author_label||'Equipe')+'</span><h2>'+esc(c.title)+'</h2>'+(c.layout==='free'?'<div class="slide-free">'+(Array.isArray(c.elements)?c.elements:[]).map(x=>objHTML(x,true)).join('')+'</div>':'<div class="slide-body" style="'+teacherFontStyle(c)+'">'+teacherRichBody(c)+'</div>'+teacherAttachment(c)+(safeURL(c.image_url)?'<img src="'+esc(c.image_url)+'" alt="Imagem do cartão">':''));if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateMedia')){const m=c.elements.find(x=>x.type==='privateMedia');const holder=document.createElement('div');holder.className='slide-private-photo';holder.textContent='Carregando mídia…';stage.append(holder);teacherOriginalUrl(c.id,true).then(url=>{if(!holder.isConnected)return;const player=document.createElement(m.kind==='video'?'video':'audio');player.controls=true;player.src=url;holder.replaceChildren(player)}).catch(()=>{if(holder.isConnected)holder.textContent='Mídia indisponível.'})}if(Array.isArray(c.elements)&&c.elements.some(x=>x.type==='privateImage')){const holder=document.createElement('div');holder.className='slide-private-photo';holder.textContent='Carregando imagem…';stage.append(holder);teacherOriginalUrl(c.id).then(url=>{if(holder.isConnected){holder.replaceChildren();const img=document.createElement('img');img.src=url;img.alt='Foto do cartão';holder.append(img)}}).catch(()=>{if(holder.isConnected)holder.textContent='Não foi possível carregar a imagem original.'})}
@@ -1039,6 +1103,7 @@ async function loadPrivateCardPhotos(){
 }
 function presentSingleCard(id){
  const c=cards.find(x=>x.id===id);if(!c)return;
+ presentationSectionId=null;
  presentationItems=[{type:'card',section:sections.find(s=>s.id===c.section_id)?.title||'Publicações',card:c}];
  presentationIndex=0;resetPresentationTimer();$('slideOnlyCards').checked=true;$('slideContrast').checked=presentationDark;$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
 }
