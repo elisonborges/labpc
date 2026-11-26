@@ -579,10 +579,10 @@ window.addEventListener('error',ev=>{const st=document.getElementById('status');
   try{
    // Preserve the original image separately; the small preview is only a fallback.
    const fullBlob=await new Promise((resolve,reject)=>canvas.toBlob(
-    blob=>blob?resolve(blob):reject(new Error('Não foi possível preparar o desenho.')), 'image/png'
+    blob=>blob?resolve(blob):reject(new Error('Não foi possível preparar o desenho.')), 'image/jpeg', .94
    ));
    const preview=drawingThumbnail();
-   studentOriginalFile=new File([fullBlob],'desenho-labmaker.png',{type:'image/png'});
+   studentOriginalFile=new File([fullBlob],'desenho-labmaker.jpg',{type:'image/jpeg'});
    studentOriginalPath='';
    localImageData=preview;mediaType='image';$('mediaUrl').value='';
    $('studentImagePreview').src=canvas.toDataURL('image/png');
