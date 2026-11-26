@@ -1391,7 +1391,7 @@ function applyCardFilters(){
  const root=$('sections'),search=$('muralSearch'),bySection=$('muralFilterSection'),byStatus=$('muralFilterStatus'),counter=$('muralFilterCount');
  if(!root||!search||!bySection||!byStatus||!counter)return;
  const previous=bySection.value;
- bySection.replaceChildren(new Option('Todas as mesas',''));
+ bySection.replaceChildren(new Option('Todas as turmas/seções',''));
  for(const section of sections)bySection.add(new Option(section.title,section.id));
  bySection.value=sections.some(s=>s.id===previous)?previous:'';
  const query=search.value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),status=byStatus.value;
