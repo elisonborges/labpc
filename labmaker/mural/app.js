@@ -541,7 +541,7 @@ async function loadGroupLinks(m){
  }
 }
 
-let presentationItems=[],presentationIndex=0,presentationSectionId=null;
+let presentationItems=[],presentationIndex=0,presentationSectionId=null,presentationCardId=null;
 let presentationOnlyCards=false,presentationDark=false,presentationSeconds=0,presentationTimer=null,presentationLimit=0,presentationAutoReset=false;
 function presentationCardAllowed(card){
  return card.moderation_status!=='rejected'&&card.moderation_status!=='pending';
@@ -562,13 +562,13 @@ function presentSection(id){
   msg(possible.length?'A seção "'+section.title+'" não tem publicações aprovadas. Revise as pendentes antes de apresentar.':'A seção "'+section.title+'" ainda não tem publicações. Use Publicar para adicionar o primeiro trabalho.','status',true);
   return;
  }
- presentationSectionId=id;
+ presentationSectionId=id;presentationCardId=null;
  presentationItems=buildPresentationItems(id);
  openPresentationScreen();
 }
 function startPresentation(){
  if(!mural)return;
- presentationSectionId=null;
+ presentationSectionId=null;presentationCardId=null;
  presentationItems=buildPresentationItems();
  if(!presentationItems.length){
   msg('Este mural ainda não tem publicações disponíveis para apresentar. Adicione um cartão ou aprove as publicações pendentes.','status',true);return;
@@ -591,7 +591,7 @@ function updatePresentationOptions(){
  presentationDark=$('slideContrast').checked;
  $('slideScreen').classList.toggle('slide-dark',presentationDark);
  // Preserve the original scope: toggling options cannot add other turmas.
- const updated=buildPresentationItems(presentationSectionId);
+ const updated=presentationCardId?presentationItems:buildPresentationItems(presentationSectionId);
  if(!updated.length){closePresentation();return}
  presentationItems=updated;
  presentationIndex=Math.max(0,presentationItems.findIndex(x=>x.type===current?.type&&(x.type==='card'?x.card.id===current.card.id:x.type==='section'?x.id===current.id:x.sectionId===current.sectionId)));
@@ -1105,7 +1105,7 @@ async function loadPrivateCardPhotos(){
 }
 function presentSingleCard(id){
  const c=cards.find(x=>x.id===id);if(!c)return;
- presentationSectionId=null;
+ presentationSectionId=null;presentationCardId=id;
  presentationItems=[{type:'card',section:sections.find(s=>s.id===c.section_id)?.title||'Publicações',card:c}];
  presentationIndex=0;resetPresentationTimer();$('slideOnlyCards').checked=true;$('slideContrast').checked=presentationDark;$('slideScreen').classList.toggle('slide-dark',presentationDark);$('slideScreen').classList.remove('hide');renderPresentation();$('slideScreen').focus();
 }
