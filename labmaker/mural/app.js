@@ -12,15 +12,71 @@ if(p.data.role==='admin'){const r=await sb.from('school_classes').select('id,gra
 $('auth').classList.add('hide');$('app').classList.remove('hide');$('logout').classList.remove('hide');$('teacherName').textContent=p.data.display_name||'Professor';
 classes.sort((a,b)=>(''+a.units?.name+a.grade+a.class_name).localeCompare(''+b.units?.name+b.grade+b.class_name));
 const options=classes.map(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=[x.grade,'Turma '+x.class_name,x.shift,x.units?.name].join(' · ');return o});
-const free=document.createElement('option');free.value='__free__';free.textContent='🎨 Meus murais livres (sem turma)';
-$('classSelect').replaceChildren(free,...options);
+const all=document.createElement('option');all.value='__all__';all.textContent='📁 Todos os meus murais';const free=document.createElement('option');free.value='__free__';free.textContent='🎨 Sem turma';$('classSelect').replaceChildren(all,free,...options);
 const prior=sessionStorage.getItem('labmaker-selected-area');if(prior&&[...$('classSelect').options].some(o=>o.value===prior))$('classSelect').value=prior;
 await selectClass()}
 function backMurals(){mural=null;$('listView').classList.remove('hide');$('muralView').classList.add('hide');if(channel){sb.removeChannel(channel);channel=null}}
-async function selectClass(){backMurals();const isFree=$('classSelect').value==='__free__';try{sessionStorage.setItem('labmaker-selected-area',$('classSelect').value)}catch(e){}$('muralListTitle').textContent=isFree?'Meus murais livres':'Murais da turma';const query=sb.from('lm_murals').select('*');const r=await (isFree?query.is('class_id',null).eq('owner_id',user.id):query.eq('class_id',$('classSelect').value)).order('created_at',{ascending:false});if(r.error)return msg(r.error.message,'status',true);murals=r.data||[];
-$('murals').innerHTML=murals.map(m=>'<article class="tile"><h3>'+esc(m.title)+'</h3><p>'+esc(m.description)+'</p><div class="tile-actions"><button class="btn primary" data-open="'+m.id+'">Abrir mural</button><button class="btn tile-share" data-share="'+m.id+'">Compartilhar com alunos</button><div class="tile-secondary">'+(classes.length?'<button class="btn" data-copy-mural="'+m.id+'">Duplicar para turma</button>':'')+'<button class="btn" data-save-template="'+m.id+'">Salvar modelo</button><button class="btn btn-danger" data-delete-mural="'+m.id+'" title="Excluir definitivamente este mural">🗑️ Excluir</button></div></div></article>').join('')||'<p class="muted">'+(isFree?'Ainda não há murais livres. Clique em + Novo mural para começar.':'Ainda não há murais nesta turma.')+'</p>';
-$('murals').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openMural(b.dataset.open));$('murals').querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareMural(b.dataset.share));$('murals').querySelectorAll('[data-copy-mural]').forEach(b=>b.onclick=()=>duplicateMuralToClass(b.dataset.copyMural));$('murals').querySelectorAll('[data-save-template]').forEach(b=>b.onclick=()=>saveTemplate(b.dataset.saveTemplate));$('murals').querySelectorAll('[data-delete-mural]').forEach(b=>b.onclick=()=>deleteWholeMural(b.dataset.deleteMural))}
-async function createMural(){const title=prompt('Título do novo mural:');if(!title?.trim())return;const description=prompt('Descrição (opcional):')||'';const r=await sb.from('lm_murals').insert({class_id:$('classSelect').value==='__free__'?null:$('classSelect').value,owner_id:user.id,title:title.trim(),description}).select('id').single();if(r.error)return msg('Erro ao criar mural: '+r.error.message,'status',true);const initial=await sb.from('lm_sections').insert({mural_id:r.data.id,title:'Publicações',position:0});if(initial.error)msg('Mural criado, mas não foi possível preparar a área de publicação: '+initial.error.message,'status',true);await selectClass();await openMural(r.data.id)}
+async function selectClass(){
+ backMurals();const area=$('classSelect').value;try{sessionStorage.setItem('labmaker-selected-area',area)}catch(e){}
+ $('muralListTitle').textContent=area==='__all__'?'Meus murais':area==='__free__'?'Murais sem turma':'Murais da turma';
+ let q=sb.from('lm_murals').select('*');q=area==='__all__'?q.eq('owner_id',user.id):area==='__free__'?q.is('class_id',null).eq('owner_id',user.id):q.eq('class_id',area);
+ const r=await q.order('created_at',{ascending:false});if(r.error)return msg('Não foi possível carregar os murais: '+r.error.message,'status',true);
+ murals=r.data||[];updateMuralFilters();renderMuralList();
+}
+function updateMuralFilters(){
+ const current=$('muralYearFilter').value,folders=$('muralFolderFilter').value;
+ const years=[...new Set(murals.map(m=>m.school_year||new Date(m.created_at).getFullYear()).filter(Boolean))].sort((a,b)=>b-a);
+ $('muralYearFilter').replaceChildren(new Option('Todos os anos',''),...years.map(y=>new Option(String(y),String(y))));
+ if(years.includes(Number(current)))$('muralYearFilter').value=current;
+ const names=[...new Set(murals.map(m=>(m.folder||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ $('muralFolderFilter').replaceChildren(new Option('Todas as pastas',''),...names.map(n=>new Option(n,n)));
+ if(names.includes(folders))$('muralFolderFilter').value=folders;
+}
+function renderMuralList(){
+ const y=$('muralYearFilter').value,f=$('muralFolderFilter').value,arch=$('muralArchiveFilter').checked;
+ const filtered=murals.filter(m=>!!m.archived===arch&&(!y||String(m.school_year||new Date(m.created_at).getFullYear())===y)&&(!f||m.folder===f));
+ $('murals').innerHTML=filtered.map(m=>'<article class="tile"><h3>'+esc(m.title)+'</h3><p>'+esc(m.description)+'</p><p class="muted">'+esc(String(m.school_year||new Date(m.created_at).getFullYear()))+' · '+esc(m.folder||'Sem pasta')+(m.class_id?' · 🏫 Vinculado à turma':' · 🎨 Independente')+'</p><div class="tile-actions"><button class="btn primary" data-open="'+m.id+'">Abrir mural</button><button class="btn tile-share" data-share="'+m.id+'">Compartilhar com alunos</button><div class="tile-secondary">'+(classes.length&&m.owner_id===user.id?'<button class="btn" data-copy-mural="'+m.id+'">Duplicar para turma</button>':'')+(m.owner_id===user.id?'<button class="btn" data-organize-mural="'+m.id+'">📁 Organizar</button><button class="btn" data-archive-mural="'+m.id+'">'+(m.archived?'↩ Restaurar':'📦 Arquivar')+'</button><button class="btn" data-save-template="'+m.id+'">Salvar modelo</button><button class="btn btn-danger" data-delete-mural="'+m.id+'" title="Excluir definitivamente este mural">🗑️ Excluir</button>':'')+'</div></div></article>').join('')||'<p class="muted">Nenhum mural nesta visualização. Ajuste os filtros ou clique em + Novo mural.</p>';
+ $('murals').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openMural(b.dataset.open));
+ $('murals').querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareMural(b.dataset.share));
+ $('murals').querySelectorAll('[data-copy-mural]').forEach(b=>b.onclick=()=>duplicateMuralToClass(b.dataset.copyMural));
+ $('murals').querySelectorAll('[data-organize-mural]').forEach(b=>b.onclick=()=>organizeMural(b.dataset.organizeMural));
+ $('murals').querySelectorAll('[data-archive-mural]').forEach(b=>b.onclick=()=>archiveMural(b.dataset.archiveMural));
+ $('murals').querySelectorAll('[data-save-template]').forEach(b=>b.onclick=()=>saveTemplate(b.dataset.saveTemplate));
+ $('murals').querySelectorAll('[data-delete-mural]').forEach(b=>b.onclick=()=>deleteWholeMural(b.dataset.deleteMural));
+}
+function openNewMuralDialog(){
+ $('newMuralForm').reset();$('newMuralYear').value=new Date().getFullYear();
+ $('newMuralClass').replaceChildren(new Option('Sem turma — mural independente',''),...classes.map(c=>new Option([c.grade,'Turma '+c.class_name,c.shift,c.units?.name].join(' · '),c.id)));
+ $('newMuralStatus').textContent='';$('newMuralDialog').showModal();
+}
+async function createMural(){
+ const title=$('newMuralTitle').value.trim(),description=$('newMuralDescription').value.trim(),folder=$('newMuralFolder').value.trim();
+ const year=Number($('newMuralYear').value),class_id=$('newMuralClass').value||null;
+ if(!title||title.length>120||folder.length>80||year<2000||year>2100)return $('newMuralStatus').textContent='Confira o título, a pasta e o ano letivo.';
+ const button=$('newMuralSubmit');button.disabled=true;$('newMuralStatus').textContent='Criando mural...';
+ try{
+  const r=await sb.from('lm_murals').insert({class_id,owner_id:user.id,title,description,folder,school_year:year}).select('id').single();if(r.error)throw r.error;
+  const initial=await sb.from('lm_sections').insert({mural_id:r.data.id,title:'Publicações',position:0});if(initial.error)throw Error('Mural criado, mas a área de publicação falhou: '+initial.error.message);
+  $('newMuralDialog').close();$('classSelect').value='__all__';$('muralArchiveFilter').checked=false;$('muralYearFilter').value='';$('muralFolderFilter').value='';
+  await selectClass();await openMural(r.data.id);msg('Mural criado e associado à sua conta.');
+ }catch(e){$('newMuralStatus').textContent='Erro: '+e.message}finally{button.disabled=false}
+}
+async function organizeMural(id){
+ const m=murals.find(x=>x.id===id);if(!m||m.owner_id!==user.id)return;
+ const folder=prompt('Pasta ou categoria do mural (vazio = sem pasta):',m.folder||'');if(folder===null)return;
+ if(folder.trim().length>80)return msg('A pasta pode ter até 80 caracteres.','status',true);
+ const yearInput=prompt('Ano letivo (2000 a 2100):',String(m.school_year||new Date(m.created_at).getFullYear()));if(yearInput===null)return;
+ const year=Number(yearInput);if(!Number.isInteger(year)||year<2000||year>2100)return msg('Informe um ano letivo válido.','status',true);
+ const r=await sb.from('lm_murals').update({folder:folder.trim(),school_year:year}).eq('id',id).eq('owner_id',user.id).select('id').single();
+ if(r.error)return msg('Erro ao organizar: '+r.error.message,'status',true);await selectClass();msg('Organização atualizada.');
+}
+async function archiveMural(id){
+ const m=murals.find(x=>x.id===id);if(!m||m.owner_id!==user.id)return;
+ const next=!m.archived;
+ const r=await sb.from('lm_murals').update({archived:next}).eq('id',id).eq('owner_id',user.id).select('id').single();
+ if(r.error)return msg('Erro ao arquivar: '+r.error.message,'status',true);
+ await selectClass();msg(next?'Mural arquivado sem excluir trabalhos.':'Mural restaurado.');
+}
 function applyMuralTheme(){if(!mural)return;const el=$('muralView');const color=/^#[0-9a-f]{6}$/i.test(mural.theme_color)?mural.theme_color:'#edf6ff';el.style.backgroundColor=color;el.style.backgroundImage=mural.background_pattern==='dots'?'radial-gradient(#719ac455 1px,transparent 1px)':mural.background_pattern==='grid'?'linear-gradient(#719ac455 1px,transparent 1px),linear-gradient(90deg,#719ac455 1px,transparent 1px)':'none';el.style.backgroundSize=mural.background_pattern==='dots'?'18px 18px':'24px 24px'}
 async function openMural(id){mural=murals.find(x=>x.id===id);if(!mural)return; $('muralTitle').textContent=mural.title;$('listView').classList.add('hide');$('muralView').classList.remove('hide');$('addSection').disabled=mural.owner_id!==user.id;await refresh();applyMuralTheme();renderTeacherControls();if(channel)await sb.removeChannel(channel);channel=sb.channel('lm-'+id).on('postgres_changes',{event:'*',schema:'public',table:'lm_cards'},()=>refresh()).on('postgres_changes',{event:'*',schema:'public',table:'lm_sections'},()=>refresh()).subscribe()}
 async function refresh(){if(!mural)return;let r=await sb.from('lm_sections').select('*').eq('mural_id',mural.id).order('position');if(r.error)return msg(r.error.message,'status',true);sections=r.data||[];let c=sections.length?await sb.from('lm_cards').select('*').in('section_id',sections.map(s=>s.id)).order('display_order').order('created_at'):{data:[],error:null};if(c.error)return msg(c.error.message,'status',true);cards=c.data||[];renderSections();renderTeacherControls()}
