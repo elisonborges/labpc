@@ -295,6 +295,24 @@ function startMuralAutoSync(){
  // Realtime is fast when enabled; polling catches missed events, edits and reconnections.
  muralSyncTimer=setInterval(()=>scheduleMuralSync(),10000);
 }
+async function refreshMuralManually(){
+ const button=$('refreshMuralButton');
+ if(!mural||!button||button.disabled)return;
+ button.disabled=true;
+ const original=button.textContent;
+ button.textContent='↻ Atualizando…';
+ try{
+  await refresh();
+  if(muralSyncPending)await new Promise(resolve=>setTimeout(resolve,300));
+  button.textContent='✓ Atualizado';
+ }catch(error){
+  button.textContent='↻ Tentar novamente';
+  msg('Não foi possível atualizar o mural: '+(error.message||'erro desconhecido'),'status',true);
+ }finally{
+  button.disabled=false;
+  setTimeout(()=>{if(button.isConnected&&button.textContent==='✓ Atualizado')button.textContent=original},1400);
+ }
+}
 function scheduleMuralSync(){
  if(!muralSyncAllowed()||muralSyncRunning){muralSyncPending=true;return}
  void refresh({silent:true});
