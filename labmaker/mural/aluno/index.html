@@ -727,8 +727,9 @@ $('studentTakePhoto').addEventListener('click',async()=>{
  lmStopPhotoCamera();
  if(!blob){status.textContent='Falha ao capturar a foto. Tente novamente.';return}
  const file=new File([blob],'foto-labmaker-'+Date.now()+'.jpg',{type:'image/jpeg'});
+ const count=lmAttachments.length;
  await processStudentImage(file);
- status.textContent=lmAttachments.some(item=>item.kind==='image')?'Foto capturada. Confira a lista de anexos antes de publicar.':$('imageStatus').textContent;
+ status.textContent=lmAttachments.length>count?'Foto adicionada ao cartão. Confira a lista de anexos antes de publicar.':$('imageStatus').textContent;
 });
 $('studentPhotoCapture').addEventListener('change',async event=>{
  const file=event.target.files?.[0];if(!file)return;
