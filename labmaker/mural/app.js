@@ -625,21 +625,50 @@ async function listShortLinks(){
   const address=document.createElement('div');address.textContent='labpc.annaone.com.br/m/?c='+item.code;address.style.cssText='font-size:11px;color:#526c85;margin:5px 0;word-break:break-all';
   const actions=document.createElement('div');actions.className='share-actions';
   const url='https://labpc.annaone.com.br/m/?c='+encodeURIComponent(item.code);
+  const notice=$('shareNotice');
+  const refresh=async(message)=>{
+   shortLinkCache.delete('mural:'+m.id);
+   if(shareTarget?.id!==m.id)return;
+   $('shareLink').value=await muralShareLink(m);
+   $('shareQr').replaceChildren();
+   await listShortLinks();
+   notice.textContent=message;
+  };
   const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent='Copiar';copy.disabled=!item.active;
-  copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);$('shareNotice').textContent='Link copiado.'}catch{$('shareNotice').textContent=url}};
+  copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);notice.textContent='Link copiado.'}catch{notice.textContent=url}};
   actions.append(copy);
-  if(item.active){
-   const off=document.createElement('button');off.type='button';off.className='btn btn-danger';off.textContent='Desativar';
-   off.onclick=async()=>{
-    if(!confirm('Desativar este link curto? Outros links e o endereço original continuarão sujeitos às permissões do LabMaker.'))return;
-    off.disabled=true;
-    const result=await sb.from('anna_short_links').update({active:false}).eq('code',item.code).eq('owner_id',user.id).select('code');
-    if(result.error||!result.data?.length){off.disabled=false;$('shareNotice').textContent='Não foi possível desativar o link.';return}
-    shortLinkCache.delete('mural:'+m.id);
-    $('shareNotice').textContent='Link desativado.';
-    if(shareTarget?.id===m.id){$('shareLink').value=await muralShareLink(m);$('shareQr').replaceChildren();await listShortLinks()}
+  const toggle=document.createElement('button');toggle.type='button';toggle.className=item.active?'btn btn-danger':'btn';
+  toggle.textContent=item.active?'Desativar':'Reativar';
+  toggle.onclick=async()=>{
+   if(item.active&&!confirm('Desativar este link curto? Outros links e o endereço original continuam disponíveis conforme as permissões do mural.'))return;
+   toggle.disabled=true;
+   const result=await sb.from('anna_short_links').update({active:!item.active}).eq('code',item.code).eq('target_type','mural').eq('target_id',m.id).eq('owner_id',user.id).eq('active',item.active).select('code');
+   if(result.error||result.data?.length!==1){toggle.disabled=false;notice.textContent='Não foi possível '+(item.active?'desativar':'reativar')+' o link. Atualize a lista e tente novamente.';return}
+   await refresh(item.active?'Link desativado.':'Link reativado.');
+  };
+  actions.append(toggle);
+  if(!isAutomatic(item)){
+   const edit=document.createElement('button');edit.type='button';edit.className='btn';edit.textContent='Editar código';
+   edit.onclick=async()=>{
+    const entered=prompt('Novo código personalizado (6 a 32 caracteres, começando por letra):',item.code);
+    if(entered===null)return;
+    const next=entered.trim().toLowerCase();
+    if(next===item.code){notice.textContent='O código permanece igual.';return}
+    if(!/^[a-z][a-z0-9-]{5,31}$/.test(next)){notice.textContent='Código inválido. Use 6 a 32 letras minúsculas, números ou hífen, começando por letra.';return}
+    if(!confirm('Criar o novo endereço '+next+' e desativar o antigo '+item.code+'? Quem usa o link antigo precisará receber o novo endereço.'))return;
+    edit.disabled=true;
+    const created=await sb.from('anna_short_links').insert({code:next,target_type:'mural',target_id:m.id,owner_id:user.id}).select('code').single();
+    if(created.error){edit.disabled=false;notice.textContent=created.error.code==='23505'?'Este código já existe. Escolha outro.':'Não foi possível criar o novo código: '+created.error.message;return}
+    if(item.active){
+     const disabled=await sb.from('anna_short_links').update({active:false}).eq('code',item.code).eq('target_type','mural').eq('target_id',m.id).eq('owner_id',user.id).eq('active',true).select('code');
+     if(disabled.error||disabled.data?.length!==1){
+      await refresh('Novo link criado, mas o anterior não pôde ser desativado. Ambos podem estar ativos; confira a lista.');
+      return;
+     }
+    }
+    await refresh('Novo código salvo. O endereço anterior foi '+(item.active?'desativado.':'mantido desativado.'));
    };
-   actions.append(off);
+   actions.append(edit);
   }
   row.append(title,state,address,actions);node.append(row);
  };
